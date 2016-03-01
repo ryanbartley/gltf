@@ -13,6 +13,7 @@
 #include "cinder/Log.h"
 #include "cinder/DataSource.h"
 #include "cinder/Base64.h"
+#include "cinder/Log.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -20,8 +21,8 @@ using namespace ci::gl;
 using namespace std;
 
 namespace gltf {
-
-Gltf::Gltf( const ci::DataSourceRef &gltfFile )
+	
+File::File( const ci::DataSourceRef &gltfFile )
 : mGltfPath( gltfFile->getFilePath().parent_path() )
 {
 	Json::Features features;
@@ -34,9 +35,16 @@ Gltf::Gltf( const ci::DataSourceRef &gltfFile )
 	catch ( const std::runtime_error &e ) {
 		CI_LOG_E( "Error parsing gltf file " << e.what() );
 	}
+	
+	
 }
 
-Accessor Gltf::getAccessorInfo( const std::string& key ) const
+Scene::Scene( const FileRef &file, const std::string &sceneName )
+{
+	
+}
+
+Accessor Scene::getAccessorInfo( const std::string& key ) const
 {
 	auto &accessors = mTree["accessors"];
 	auto &accessor = accessors[key];
@@ -77,7 +85,7 @@ Accessor Gltf::getAccessorInfo( const std::string& key ) const
 	return ret;
 }
 	
-Animation Gltf::getAnimationInfo( const std::string &key ) const
+Animation Scene::getAnimationInfo( const std::string &key ) const
 {
 	auto &animations = mTree["animations"];
 	auto &animation = animations[key];
@@ -120,7 +128,7 @@ Animation Gltf::getAnimationInfo( const std::string &key ) const
 	return ret;
 }
 	
-Asset Gltf::getAssetInfo() const
+Asset Scene::getAssetInfo() const
 {
 	auto &assetInfo = mTree["asset"];
 	Asset ret;
@@ -142,7 +150,7 @@ Asset Gltf::getAssetInfo() const
 	return ret;
 }
 	
-Buffer Gltf::getBufferInfo( const std::string &name ) const
+Buffer Scene::getBufferInfo( const std::string &name ) const
 {
 	auto &buffers = mTree["buffers"];
 	auto &buffer = buffers[name];
@@ -169,7 +177,7 @@ Buffer Gltf::getBufferInfo( const std::string &name ) const
 	return ret;
 }
 
-BufferView Gltf::getBufferViewInfo( const std::string &name ) const
+BufferView Scene::getBufferViewInfo( const std::string &name ) const
 {
 	auto &bufferViews = mTree["bufferViews"];
 	auto &bufferView = bufferViews[name];
@@ -189,7 +197,7 @@ BufferView Gltf::getBufferViewInfo( const std::string &name ) const
 	return ret;
 }
 	
-Camera Gltf::getCameraInfo( const std::string &key ) const
+Camera Scene::getCameraInfo( const std::string &key ) const
 {
 	auto &cameras = mTree["cameras"];
 	auto &camera = cameras[key];
@@ -231,7 +239,7 @@ Camera Gltf::getCameraInfo( const std::string &key ) const
 	return ret;
 }
 	
-Image Gltf::getImageInfo( const std::string &key ) const
+Image Scene::getImageInfo( const std::string &key ) const
 {
 	auto &images = mTree["images"];
 	auto &image = images[key];
@@ -247,7 +255,7 @@ Image Gltf::getImageInfo( const std::string &key ) const
 	return ret;
 }
 	
-Material Gltf::getMaterialInfo( const std::string &key ) const
+Material Scene::getMaterialInfo( const std::string &key ) const
 {
 	auto &materials = mTree["materials"];
 	auto &material = materials[key];
@@ -261,7 +269,7 @@ Material Gltf::getMaterialInfo( const std::string &key ) const
 	return ret;
 }
 	
-Mesh Gltf::getMeshInfo( const std::string &key ) const
+Mesh Scene::getMeshInfo( const std::string &key ) const
 {
 	auto &meshes = mTree["meshes"];
 	auto &mesh = meshes[key];
@@ -294,7 +302,7 @@ Mesh Gltf::getMeshInfo( const std::string &key ) const
 	return ret;
 }
 
-Node Gltf::getNodeInfo( const std::string &key ) const
+Node Scene::getNodeInfo( const std::string &key ) const
 {
 	auto &nodes = mTree["nodes"];
 	auto &node = nodes[key];
@@ -356,7 +364,7 @@ Node Gltf::getNodeInfo( const std::string &key ) const
 	return ret;
 }
 	
-Program Gltf::getProgramInfo( const std::string &key ) const
+Program Scene::getProgramInfo( const std::string &key ) const
 {
 	auto &programs = mTree["programs"];
 	auto &program = programs[key];
@@ -379,7 +387,7 @@ Program Gltf::getProgramInfo( const std::string &key ) const
 	return ret;
 }
 	
-Sampler Gltf::getSamplerInfo( const std::string &key ) const
+Sampler Scene::getSamplerInfo( const std::string &key ) const
 {
 	auto &samplers = mTree["samplers"];
 	auto &sampler = samplers[key];
@@ -401,7 +409,7 @@ Sampler Gltf::getSamplerInfo( const std::string &key ) const
 	return ret;
 }
 	
-Scene Gltf::getSceneInfo( const std::string &key ) const
+Scene Scene::getSceneInfo( const std::string &key ) const
 {
 	auto &scenes = mTree["scenes"];
 	auto &scene = scenes[key];
@@ -419,7 +427,7 @@ Scene Gltf::getSceneInfo( const std::string &key ) const
 	return ret;
 }
 	
-Shader Gltf::getShaderInfo( const std::string &key ) const
+Shader Scene::getShaderInfo( const std::string &key ) const
 {
 	auto &shaders = mTree["shaders"];
 	auto &shader = shaders[key];
@@ -446,7 +454,7 @@ Shader Gltf::getShaderInfo( const std::string &key ) const
 	return ret;
 }
 	
-Skin Gltf::getSkinInfo( const std::string &key ) const
+Skin Scene::getSkinInfo( const std::string &key ) const
 {
 	auto &skins = mTree["skins"];
 	auto &skin = skins[key];
@@ -474,7 +482,7 @@ Skin Gltf::getSkinInfo( const std::string &key ) const
 	return ret;
 }
 
-Technique Gltf::getTechniqueInfo( const std::string &key ) const
+Technique Scene::getTechniqueInfo( const std::string &key ) const
 {
 	auto &techniques = mTree["techniques"];
 	auto &technique = techniques[key];
@@ -587,7 +595,7 @@ Technique Gltf::getTechniqueInfo( const std::string &key ) const
 	return ret;
 }
 	
-Texture Gltf::getTextureInfo( const std::string &key ) const
+Texture Scene::getTextureInfo( const std::string &key ) const
 {
 	auto &textures = mTree["textures"];
 	auto &texture = textures[key];
@@ -612,7 +620,7 @@ Texture Gltf::getTextureInfo( const std::string &key ) const
 	return ret;
 }
 
-CameraOrtho Gltf::getOrthoCameraByName( const std::string &name )
+CameraOrtho Scene::getOrthoCameraByName( const std::string &name )
 {
 	Camera cam = getCameraInfo( name );
 	if( cam.type != "orthographic" ) throw "This should be orthographic but it's not";
@@ -623,7 +631,7 @@ CameraOrtho Gltf::getOrthoCameraByName( const std::string &name )
 	return ret;
 }
 
-CameraPersp Gltf::getPerspCameraByName( const std::string &name )
+CameraPersp Scene::getPerspCameraByName( const std::string &name )
 {
 	Camera cam = getCameraInfo( name );
 	if( cam.type != "orthographic" ) throw "This should be perspective but it's not";
@@ -635,7 +643,7 @@ CameraPersp Gltf::getPerspCameraByName( const std::string &name )
 	return ret;
 }
 	
-ci::geom::Primitive Gltf::convertToPrimitive( GLenum primitive )
+ci::geom::Primitive Scene::convertToPrimitive( GLenum primitive )
 {
 	switch (primitive) {
 		case GL_LINES: return ci::geom::LINES; break;
@@ -647,7 +655,7 @@ ci::geom::Primitive Gltf::convertToPrimitive( GLenum primitive )
 	}
 }
 	
-ci::geom::Attrib Gltf::getAttribEnum( const std::string &attrib )
+ci::geom::Attrib Scene::getAttribEnum( const std::string &attrib )
 {
 	using namespace ci::geom;
 	if( attrib == "POSITION" )			return Attrib::POSITION;
@@ -666,7 +674,7 @@ ci::geom::Attrib Gltf::getAttribEnum( const std::string &attrib )
 	else								return Attrib::NUM_ATTRIBS;
 }
 	
-ci::gl::UniformSemantic Gltf::getUniformEnum( const std::string &uniform )
+ci::gl::UniformSemantic Scene::getUniformEnum( const std::string &uniform )
 {
 	auto & u = uniform;
 	using namespace ci::gl;
@@ -686,7 +694,7 @@ ci::gl::UniformSemantic Gltf::getUniformEnum( const std::string &uniform )
 	else return (UniformSemantic)-1;
 }
 	
-uint8_t Gltf::getNumComponentsForType( const std::string &type )
+uint8_t Scene::getNumComponentsForType( const std::string &type )
 {
 	if( type == "SCALAR" )	  return 1;
 	else if( type == "VEC2" ) return 2;
@@ -698,7 +706,7 @@ uint8_t Gltf::getNumComponentsForType( const std::string &type )
 	else					  return 0;
 }
 
-uint8_t Gltf::getNumBytesForComponentType( GLuint type )
+uint8_t Scene::getNumBytesForComponentType( GLuint type )
 {
 	switch (type) {
 		case 5120: // BYTE
