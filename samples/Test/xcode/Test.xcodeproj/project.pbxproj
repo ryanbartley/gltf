@@ -1,0 +1,1334 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		006D720419952D00008149E2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D720219952D00008149E2 /* AVFoundation.framework */; };
+		006D720519952D00008149E2 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 006D720319952D00008149E2 /* CoreMedia.framework */; };
+		0091D8F90E81B9330029341E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0091D8F80E81B9330029341E /* OpenGL.framework */; };
+		00B784B30FF439BC000DE1D7 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784AF0FF439BC000DE1D7 /* Accelerate.framework */; };
+		00B784B40FF439BC000DE1D7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
+		00B784B50FF439BC000DE1D7 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
+		00B784B60FF439BC000DE1D7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
+		00B9955A1B128DF400A5C623 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995581B128DF400A5C623 /* IOKit.framework */; };
+		00B9955B1B128DF400A5C623 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B995591B128DF400A5C623 /* IOSurface.framework */; };
+		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
+		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D85EA46A8594328A3A0A91B /* TestApp.cpp */; };
+		B38BD1051C096D790088BC4F /* GLTF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* GLTF.cpp */; };
+		B38BD1071C096D790088BC4F /* GLTFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1021C096D790088BC4F /* GLTFLoader.cpp */; };
+		B38BD1081C096D790088BC4F /* GLTFWorkApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1041C096D790088BC4F /* GLTFWorkApp.cpp */; };
+		B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		006D720219952D00008149E2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		006D720319952D00008149E2 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		0091D8F80E81B9330029341E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		00B784AF0FF439BC000DE1D7 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		00B784B10FF439BC000DE1D7 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
+		00B784B20FF439BC000DE1D7 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		00B995581B128DF400A5C623 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		00B995591B128DF400A5C623 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
+		0D611A8C5CE24F22B9F9FCF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		4CABA9F7D5AB4AC5AB4884C5 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../include/Resources.h; sourceTree = "<group>"; };
+		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
+		6D85EA46A8594328A3A0A91B /* TestApp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = TestApp.cpp; path = ../src/TestApp.cpp; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Test.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A89456B4F93841B7AE9DC0D0 /* Test_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; path = Test_Prefix.pch; sourceTree = "<group>"; };
+		B38BD0FE1C096D790088BC4F /* GLTF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLTF.cpp; sourceTree = "<group>"; };
+		B38BD0FF1C096D790088BC4F /* GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTF.h; sourceTree = "<group>"; };
+		B38BD1011C096D790088BC4F /* GltfContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GltfContainer.h; sourceTree = "<group>"; };
+		B38BD1021C096D790088BC4F /* GLTFLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLTFLoader.cpp; sourceTree = "<group>"; };
+		B38BD1031C096D790088BC4F /* GLTFLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFLoader.h; sourceTree = "<group>"; };
+		B38BD1041C096D790088BC4F /* GLTFWorkApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLTFWorkApp.cpp; sourceTree = "<group>"; };
+		B38BD10B1C0A22ED0088BC4F /* box.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = box.dae; sourceTree = "<group>"; };
+		B38BD10D1C0A22ED0088BC4F /* box.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = box.bin; sourceTree = "<group>"; };
+		B38BD10E1C0A22ED0088BC4F /* box.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = box.gltf; sourceTree = "<group>"; };
+		B38BD10F1C0A22ED0088BC4F /* box0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = box0FS.glsl; sourceTree = "<group>"; };
+		B38BD1101C0A22ED0088BC4F /* box0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = box0VS.glsl; sourceTree = "<group>"; };
+		B38BD1121C0A22ED0088BC4F /* box.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = box.glb; sourceTree = "<group>"; };
+		B38BD1141C0A22ED0088BC4F /* box.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = box.gltf; sourceTree = "<group>"; };
+		B38BD1161C0A22ED0088BC4F /* box.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = box.bin; sourceTree = "<group>"; };
+		B38BD1171C0A22ED0088BC4F /* box.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = box.gltf; sourceTree = "<group>"; };
+		B38BD1181C0A22ED0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD11A1C0A22ED0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD11D1C0A22ED0088BC4F /* Cesium_Logo_Flat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cesium_Logo_Flat.png; sourceTree = "<group>"; };
+		B38BD11E1C0A22ED0088BC4F /* CesiumTexturedBoxTest.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = CesiumTexturedBoxTest.dae; sourceTree = "<group>"; };
+		B38BD1201C0A22ED0088BC4F /* Cesium_Logo_Flat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cesium_Logo_Flat.png; sourceTree = "<group>"; };
+		B38BD1211C0A22ED0088BC4F /* CesiumTexturedBoxTest.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = CesiumTexturedBoxTest.bin; sourceTree = "<group>"; };
+		B38BD1221C0A22ED0088BC4F /* CesiumTexturedBoxTest.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumTexturedBoxTest.gltf; sourceTree = "<group>"; };
+		B38BD1231C0A22ED0088BC4F /* CesiumTexturedBoxTest0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumTexturedBoxTest0FS.glsl; sourceTree = "<group>"; };
+		B38BD1241C0A22ED0088BC4F /* CesiumTexturedBoxTest0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumTexturedBoxTest0VS.glsl; sourceTree = "<group>"; };
+		B38BD1261C0A22ED0088BC4F /* CesiumTexturedBoxTest.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = CesiumTexturedBoxTest.glb; sourceTree = "<group>"; };
+		B38BD1281C0A22ED0088BC4F /* CesiumTexturedBoxTest.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumTexturedBoxTest.gltf; sourceTree = "<group>"; };
+		B38BD12A1C0A22ED0088BC4F /* Cesium_Logo_Flat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Cesium_Logo_Flat.png; sourceTree = "<group>"; };
+		B38BD12B1C0A22ED0088BC4F /* CesiumTexturedBoxTest.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = CesiumTexturedBoxTest.bin; sourceTree = "<group>"; };
+		B38BD12C1C0A22ED0088BC4F /* CesiumTexturedBoxTest.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumTexturedBoxTest.gltf; sourceTree = "<group>"; };
+		B38BD12D1C0A22ED0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD12F1C0A22ED0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD1321C0A22ED0088BC4F /* brainsteam.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = brainsteam.dae; sourceTree = "<group>"; };
+		B38BD1341C0A22ED0088BC4F /* brainsteam.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = brainsteam.bin; sourceTree = "<group>"; };
+		B38BD1351C0A22ED0088BC4F /* brainsteam.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brainsteam.gltf; sourceTree = "<group>"; };
+		B38BD1361C0A22ED0088BC4F /* brainsteam0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brainsteam0FS.glsl; sourceTree = "<group>"; };
+		B38BD1371C0A22ED0088BC4F /* brainsteam0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brainsteam0VS.glsl; sourceTree = "<group>"; };
+		B38BD1391C0A22ED0088BC4F /* brainsteam.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = brainsteam.glb; sourceTree = "<group>"; };
+		B38BD13B1C0A22ED0088BC4F /* brainsteam.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brainsteam.gltf; sourceTree = "<group>"; };
+		B38BD13D1C0A22ED0088BC4F /* brainsteam.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = brainsteam.bin; sourceTree = "<group>"; };
+		B38BD13E1C0A22ED0088BC4F /* brainsteam.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = brainsteam.gltf; sourceTree = "<group>"; };
+		B38BD1411C0A22ED0088BC4F /* Cesium_Man.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = Cesium_Man.dae; sourceTree = "<group>"; };
+		B38BD1421C0A22ED0088BC4F /* Cesium_Man.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cesium_Man.jpg; sourceTree = "<group>"; };
+		B38BD1441C0A22ED0088BC4F /* Cesium_Man.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = Cesium_Man.bin; sourceTree = "<group>"; };
+		B38BD1451C0A22ED0088BC4F /* Cesium_Man.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cesium_Man.gltf; sourceTree = "<group>"; };
+		B38BD1461C0A22ED0088BC4F /* Cesium_Man.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cesium_Man.jpg; sourceTree = "<group>"; };
+		B38BD1471C0A22ED0088BC4F /* Cesium_Man0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cesium_Man0FS.glsl; sourceTree = "<group>"; };
+		B38BD1481C0A22ED0088BC4F /* Cesium_Man0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cesium_Man0VS.glsl; sourceTree = "<group>"; };
+		B38BD14A1C0A22EE0088BC4F /* Cesium_Man.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = Cesium_Man.glb; sourceTree = "<group>"; };
+		B38BD14C1C0A22EE0088BC4F /* Cesium_Man.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cesium_Man.gltf; sourceTree = "<group>"; };
+		B38BD14E1C0A22EE0088BC4F /* Cesium_Man.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = Cesium_Man.bin; sourceTree = "<group>"; };
+		B38BD14F1C0A22EE0088BC4F /* Cesium_Man.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Cesium_Man.gltf; sourceTree = "<group>"; };
+		B38BD1501C0A22EE0088BC4F /* Cesium_Man.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = Cesium_Man.jpg; sourceTree = "<group>"; };
+		B38BD1511C0A22EE0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD1531C0A22EE0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD1561C0A22EE0088BC4F /* CesiumMilkTruck.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = CesiumMilkTruck.dae; sourceTree = "<group>"; };
+		B38BD1571C0A22EE0088BC4F /* CesiumMilkTruck.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CesiumMilkTruck.png; sourceTree = "<group>"; };
+		B38BD1591C0A22EE0088BC4F /* CesiumMilkTruck.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = CesiumMilkTruck.bin; sourceTree = "<group>"; };
+		B38BD15A1C0A22EE0088BC4F /* CesiumMilkTruck.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck.gltf; sourceTree = "<group>"; };
+		B38BD15B1C0A22EE0088BC4F /* CesiumMilkTruck.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CesiumMilkTruck.png; sourceTree = "<group>"; };
+		B38BD15C1C0A22EE0088BC4F /* CesiumMilkTruck0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck0FS.glsl; sourceTree = "<group>"; };
+		B38BD15D1C0A22EE0088BC4F /* CesiumMilkTruck0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck0VS.glsl; sourceTree = "<group>"; };
+		B38BD15E1C0A22EE0088BC4F /* CesiumMilkTruck1FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck1FS.glsl; sourceTree = "<group>"; };
+		B38BD15F1C0A22EE0088BC4F /* CesiumMilkTruck1VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck1VS.glsl; sourceTree = "<group>"; };
+		B38BD1611C0A22EE0088BC4F /* CesiumMilkTruck.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = CesiumMilkTruck.glb; sourceTree = "<group>"; };
+		B38BD1631C0A22EE0088BC4F /* CesiumMilkTruck.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck.gltf; sourceTree = "<group>"; };
+		B38BD1651C0A22EE0088BC4F /* CesiumMilkTruck.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = CesiumMilkTruck.bin; sourceTree = "<group>"; };
+		B38BD1661C0A22EE0088BC4F /* CesiumMilkTruck.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CesiumMilkTruck.gltf; sourceTree = "<group>"; };
+		B38BD1671C0A22EE0088BC4F /* CesiumMilkTruck.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CesiumMilkTruck.png; sourceTree = "<group>"; };
+		B38BD1681C0A22EE0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD16A1C0A22EE0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD16D1C0A22EE0088BC4F /* duck.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = duck.dae; sourceTree = "<group>"; };
+		B38BD16E1C0A22EE0088BC4F /* duckCM.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = duckCM.png; sourceTree = "<group>"; };
+		B38BD1701C0A22EE0088BC4F /* duck.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = duck.bin; sourceTree = "<group>"; };
+		B38BD1711C0A22EE0088BC4F /* duck.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = duck.gltf; sourceTree = "<group>"; };
+		B38BD1721C0A22EE0088BC4F /* duck0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = duck0FS.glsl; sourceTree = "<group>"; };
+		B38BD1731C0A22EE0088BC4F /* duck0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = duck0VS.glsl; sourceTree = "<group>"; };
+		B38BD1741C0A22EE0088BC4F /* duckCM.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = duckCM.png; sourceTree = "<group>"; };
+		B38BD1761C0A22EE0088BC4F /* duck.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = duck.glb; sourceTree = "<group>"; };
+		B38BD1781C0A22EE0088BC4F /* duck.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = duck.gltf; sourceTree = "<group>"; };
+		B38BD17A1C0A22EE0088BC4F /* duck.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = duck.bin; sourceTree = "<group>"; };
+		B38BD17B1C0A22EE0088BC4F /* duck.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = duck.gltf; sourceTree = "<group>"; };
+		B38BD17C1C0A22EE0088BC4F /* duckCM.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = duckCM.png; sourceTree = "<group>"; };
+		B38BD17D1C0A22EE0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD17F1C0A22EE0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD1821C0A22EE0088BC4F /* monster.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = monster.dae; sourceTree = "<group>"; };
+		B38BD1831C0A22EE0088BC4F /* monster.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = monster.jpg; sourceTree = "<group>"; };
+		B38BD1851C0A22EE0088BC4F /* monster.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = monster.bin; sourceTree = "<group>"; };
+		B38BD1861C0A22EE0088BC4F /* monster.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monster.gltf; sourceTree = "<group>"; };
+		B38BD1871C0A22EE0088BC4F /* monster.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = monster.jpg; sourceTree = "<group>"; };
+		B38BD1881C0A22EE0088BC4F /* monster0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monster0FS.glsl; sourceTree = "<group>"; };
+		B38BD1891C0A22EE0088BC4F /* monster0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monster0VS.glsl; sourceTree = "<group>"; };
+		B38BD18B1C0A22EE0088BC4F /* monster.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = monster.glb; sourceTree = "<group>"; };
+		B38BD18D1C0A22EE0088BC4F /* monster.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monster.gltf; sourceTree = "<group>"; };
+		B38BD18F1C0A22EE0088BC4F /* monster.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = monster.bin; sourceTree = "<group>"; };
+		B38BD1901C0A22EE0088BC4F /* monster.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = monster.gltf; sourceTree = "<group>"; };
+		B38BD1911C0A22EE0088BC4F /* monster.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = monster.jpg; sourceTree = "<group>"; };
+		B38BD1921C0A22EE0088BC4F /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
+		B38BD1951C0A22EE0088BC4F /* rigged-figure.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = "rigged-figure.dae"; sourceTree = "<group>"; };
+		B38BD1971C0A22EE0088BC4F /* rigged-figure.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = "rigged-figure.bin"; sourceTree = "<group>"; };
+		B38BD1981C0A22EE0088BC4F /* rigged-figure.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "rigged-figure.gltf"; sourceTree = "<group>"; };
+		B38BD1991C0A22EE0088BC4F /* rigged-figure0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "rigged-figure0FS.glsl"; sourceTree = "<group>"; };
+		B38BD19A1C0A22EE0088BC4F /* rigged-figure0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "rigged-figure0VS.glsl"; sourceTree = "<group>"; };
+		B38BD19C1C0A22EE0088BC4F /* rigged-figure.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = "rigged-figure.glb"; sourceTree = "<group>"; };
+		B38BD19E1C0A22EE0088BC4F /* rigged-figure.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "rigged-figure.gltf"; sourceTree = "<group>"; };
+		B38BD1A01C0A22EE0088BC4F /* rigged-figure.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = "rigged-figure.bin"; sourceTree = "<group>"; };
+		B38BD1A11C0A22EE0088BC4F /* rigged-figure.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "rigged-figure.gltf"; sourceTree = "<group>"; };
+		B38BD1A21C0A22EE0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD1A41C0A22EE0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD1A71C0A22EE0088BC4F /* riggedSimple.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = riggedSimple.dae; sourceTree = "<group>"; };
+		B38BD1A91C0A22EE0088BC4F /* riggedSimple.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = riggedSimple.bin; sourceTree = "<group>"; };
+		B38BD1AA1C0A22EE0088BC4F /* riggedSimple.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = riggedSimple.gltf; sourceTree = "<group>"; };
+		B38BD1AB1C0A22EE0088BC4F /* riggedSimple0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = riggedSimple0FS.glsl; sourceTree = "<group>"; };
+		B38BD1AC1C0A22EE0088BC4F /* riggedSimple0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = riggedSimple0VS.glsl; sourceTree = "<group>"; };
+		B38BD1AE1C0A22EE0088BC4F /* riggedSimple.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = riggedSimple.glb; sourceTree = "<group>"; };
+		B38BD1B01C0A22EE0088BC4F /* riggedSimple.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = riggedSimple.gltf; sourceTree = "<group>"; };
+		B38BD1B21C0A22EE0088BC4F /* riggedSimple.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = riggedSimple.gltf; sourceTree = "<group>"; };
+		B38BD1B31C0A22EE0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD1B51C0A22EE0088BC4F /* screenshot.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = screenshot.png; sourceTree = "<group>"; };
+		B38BD1B81C0A22EE0088BC4F /* 001.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 001.jpg; sourceTree = "<group>"; };
+		B38BD1B91C0A22EE0088BC4F /* 002.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 002.jpg; sourceTree = "<group>"; };
+		B38BD1BA1C0A22EE0088BC4F /* 11.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 11.jpg; sourceTree = "<group>"; };
+		B38BD1BB1C0A22EE0088BC4F /* 5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 5.jpg; sourceTree = "<group>"; };
+		B38BD1BC1C0A22EE0088BC4F /* alien.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = alien.tga; sourceTree = "<group>"; };
+		B38BD1BD1C0A22EE0088BC4F /* cockpit-map.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "cockpit-map.jpg"; sourceTree = "<group>"; };
+		B38BD1BE1C0A22EE0088BC4F /* f22.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = f22.jpg; sourceTree = "<group>"; };
+		B38BD1BF1C0A22EE0088BC4F /* full.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = full.jpg; sourceTree = "<group>"; };
+		B38BD1C01C0A22EE0088BC4F /* heli.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = heli.jpg; sourceTree = "<group>"; };
+		B38BD1C11C0A22EE0088BC4F /* lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lights.jpg; sourceTree = "<group>"; };
+		B38BD1C21C0A22EE0088BC4F /* machine.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = machine.jpg; sourceTree = "<group>"; };
+		B38BD1C31C0A22EE0088BC4F /* O21.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = O21.jpg; sourceTree = "<group>"; };
+		B38BD1C41C0A22EE0088BC4F /* prop128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prop128.png; sourceTree = "<group>"; };
+		B38BD1C51C0A22EE0088BC4F /* prop128.tga */ = {isa = PBXFileReference; lastKnownFileType = file; path = prop128.tga; sourceTree = "<group>"; };
+		B38BD1C61C0A22EE0088BC4F /* s_01.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_01.jpg; sourceTree = "<group>"; };
+		B38BD1C71C0A22EE0088BC4F /* s_02.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_02.jpg; sourceTree = "<group>"; };
+		B38BD1C81C0A22EE0088BC4F /* s_03.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_03.jpg; sourceTree = "<group>"; };
+		B38BD1C91C0A22EE0088BC4F /* s_04.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_04.jpg; sourceTree = "<group>"; };
+		B38BD1CA1C0A22EE0088BC4F /* s_05.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_05.jpg; sourceTree = "<group>"; };
+		B38BD1CB1C0A22EE0088BC4F /* s_06.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_06.jpg; sourceTree = "<group>"; };
+		B38BD1CC1C0A22EE0088BC4F /* s_07.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_07.jpg; sourceTree = "<group>"; };
+		B38BD1CD1C0A22EE0088BC4F /* s_08.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_08.jpg; sourceTree = "<group>"; };
+		B38BD1CE1C0A22EE0088BC4F /* scrapsurf03-red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "scrapsurf03-red.jpg"; sourceTree = "<group>"; };
+		B38BD1CF1C0A22EE0088BC4F /* surface01.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = surface01.jpg; sourceTree = "<group>"; };
+		B38BD1D01C0A22EE0088BC4F /* vc.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = vc.dae; sourceTree = "<group>"; };
+		B38BD1D21C0A22EE0088BC4F /* 001.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 001.jpg; sourceTree = "<group>"; };
+		B38BD1D31C0A22EE0088BC4F /* 002.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 002.jpg; sourceTree = "<group>"; };
+		B38BD1D41C0A22EE0088BC4F /* 11.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 11.jpg; sourceTree = "<group>"; };
+		B38BD1D51C0A22EE0088BC4F /* 5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 5.jpg; sourceTree = "<group>"; };
+		B38BD1D61C0A22EE0088BC4F /* cockpit-map.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "cockpit-map.jpg"; sourceTree = "<group>"; };
+		B38BD1D71C0A22EE0088BC4F /* f22.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = f22.jpg; sourceTree = "<group>"; };
+		B38BD1D81C0A22EE0088BC4F /* full.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = full.jpg; sourceTree = "<group>"; };
+		B38BD1D91C0A22EE0088BC4F /* heli.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = heli.jpg; sourceTree = "<group>"; };
+		B38BD1DA1C0A22EE0088BC4F /* lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lights.jpg; sourceTree = "<group>"; };
+		B38BD1DB1C0A22EE0088BC4F /* machine.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = machine.jpg; sourceTree = "<group>"; };
+		B38BD1DC1C0A22EE0088BC4F /* O21.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = O21.jpg; sourceTree = "<group>"; };
+		B38BD1DD1C0A22EE0088BC4F /* prop128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prop128.png; sourceTree = "<group>"; };
+		B38BD1DE1C0A22EE0088BC4F /* s_01.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_01.jpg; sourceTree = "<group>"; };
+		B38BD1DF1C0A22EE0088BC4F /* s_02.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_02.jpg; sourceTree = "<group>"; };
+		B38BD1E01C0A22EE0088BC4F /* s_03.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_03.jpg; sourceTree = "<group>"; };
+		B38BD1E11C0A22EE0088BC4F /* s_04.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_04.jpg; sourceTree = "<group>"; };
+		B38BD1E21C0A22EE0088BC4F /* s_05.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_05.jpg; sourceTree = "<group>"; };
+		B38BD1E31C0A22EE0088BC4F /* s_06.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_06.jpg; sourceTree = "<group>"; };
+		B38BD1E41C0A22EE0088BC4F /* s_07.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_07.jpg; sourceTree = "<group>"; };
+		B38BD1E51C0A22EE0088BC4F /* s_08.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_08.jpg; sourceTree = "<group>"; };
+		B38BD1E61C0A22EE0088BC4F /* scrapsurf03-red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "scrapsurf03-red.jpg"; sourceTree = "<group>"; };
+		B38BD1E71C0A22EE0088BC4F /* surface01.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = surface01.jpg; sourceTree = "<group>"; };
+		B38BD1E81C0A22EE0088BC4F /* vc.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = vc.bin; sourceTree = "<group>"; };
+		B38BD1E91C0A22EE0088BC4F /* vc.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc.gltf; sourceTree = "<group>"; };
+		B38BD1EA1C0A22EE0088BC4F /* vc0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc0FS.glsl; sourceTree = "<group>"; };
+		B38BD1EB1C0A22EE0088BC4F /* vc0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc0VS.glsl; sourceTree = "<group>"; };
+		B38BD1EC1C0A22EE0088BC4F /* vc1FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc1FS.glsl; sourceTree = "<group>"; };
+		B38BD1ED1C0A22EE0088BC4F /* vc1VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc1VS.glsl; sourceTree = "<group>"; };
+		B38BD1EE1C0A22EE0088BC4F /* vc2FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc2FS.glsl; sourceTree = "<group>"; };
+		B38BD1EF1C0A22EE0088BC4F /* vc2VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc2VS.glsl; sourceTree = "<group>"; };
+		B38BD1F01C0A22EE0088BC4F /* vc3FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc3FS.glsl; sourceTree = "<group>"; };
+		B38BD1F11C0A22EE0088BC4F /* vc3VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc3VS.glsl; sourceTree = "<group>"; };
+		B38BD1F21C0A22EE0088BC4F /* vc4FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc4FS.glsl; sourceTree = "<group>"; };
+		B38BD1F31C0A22EE0088BC4F /* vc4VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc4VS.glsl; sourceTree = "<group>"; };
+		B38BD1F41C0A22EE0088BC4F /* vc5FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc5FS.glsl; sourceTree = "<group>"; };
+		B38BD1F51C0A22EE0088BC4F /* vc5VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc5VS.glsl; sourceTree = "<group>"; };
+		B38BD1F61C0A22EE0088BC4F /* vc6FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc6FS.glsl; sourceTree = "<group>"; };
+		B38BD1F71C0A22EE0088BC4F /* vc6VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc6VS.glsl; sourceTree = "<group>"; };
+		B38BD1F81C0A22EE0088BC4F /* vc7FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc7FS.glsl; sourceTree = "<group>"; };
+		B38BD1F91C0A22EE0088BC4F /* vc7VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc7VS.glsl; sourceTree = "<group>"; };
+		B38BD1FB1C0A22EE0088BC4F /* vc.glb */ = {isa = PBXFileReference; lastKnownFileType = file; path = vc.glb; sourceTree = "<group>"; };
+		B38BD1FD1C0A22EE0088BC4F /* vc.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc.gltf; sourceTree = "<group>"; };
+		B38BD1FF1C0A22EE0088BC4F /* 001.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 001.jpg; sourceTree = "<group>"; };
+		B38BD2001C0A22EE0088BC4F /* 002.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 002.jpg; sourceTree = "<group>"; };
+		B38BD2011C0A22EE0088BC4F /* 11.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 11.jpg; sourceTree = "<group>"; };
+		B38BD2021C0A22EE0088BC4F /* 5.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 5.jpg; sourceTree = "<group>"; };
+		B38BD2031C0A22EE0088BC4F /* cockpit-map.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "cockpit-map.jpg"; sourceTree = "<group>"; };
+		B38BD2041C0A22EE0088BC4F /* f22.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = f22.jpg; sourceTree = "<group>"; };
+		B38BD2051C0A22EE0088BC4F /* full.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = full.jpg; sourceTree = "<group>"; };
+		B38BD2061C0A22EE0088BC4F /* heli.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = heli.jpg; sourceTree = "<group>"; };
+		B38BD2071C0A22EE0088BC4F /* lights.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lights.jpg; sourceTree = "<group>"; };
+		B38BD2081C0A22EE0088BC4F /* machine.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = machine.jpg; sourceTree = "<group>"; };
+		B38BD2091C0A22EE0088BC4F /* O21.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = O21.jpg; sourceTree = "<group>"; };
+		B38BD20A1C0A22EE0088BC4F /* prop128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prop128.png; sourceTree = "<group>"; };
+		B38BD20B1C0A22EE0088BC4F /* s_01.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_01.jpg; sourceTree = "<group>"; };
+		B38BD20C1C0A22EE0088BC4F /* s_02.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_02.jpg; sourceTree = "<group>"; };
+		B38BD20D1C0A22EE0088BC4F /* s_03.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_03.jpg; sourceTree = "<group>"; };
+		B38BD20E1C0A22EE0088BC4F /* s_04.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_04.jpg; sourceTree = "<group>"; };
+		B38BD20F1C0A22EE0088BC4F /* s_05.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_05.jpg; sourceTree = "<group>"; };
+		B38BD2101C0A22EE0088BC4F /* s_06.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_06.jpg; sourceTree = "<group>"; };
+		B38BD2111C0A22EE0088BC4F /* s_07.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_07.jpg; sourceTree = "<group>"; };
+		B38BD2121C0A22EE0088BC4F /* s_08.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = s_08.jpg; sourceTree = "<group>"; };
+		B38BD2131C0A22EE0088BC4F /* scrapsurf03-red.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "scrapsurf03-red.jpg"; sourceTree = "<group>"; };
+		B38BD2141C0A22EE0088BC4F /* surface01.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = surface01.jpg; sourceTree = "<group>"; };
+		B38BD2151C0A22EE0088BC4F /* vc.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = vc.bin; sourceTree = "<group>"; };
+		B38BD2161C0A22EE0088BC4F /* vc.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc.gltf; sourceTree = "<group>"; };
+		B38BD2171C0A22EE0088BC4F /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GltfTestContainer.cpp; path = ../src/GltfTestContainer.cpp; sourceTree = "<group>"; };
+		B38BD2E51C0A24580088BC4F /* GltfTestContainer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GltfTestContainer.hpp; path = ../src/GltfTestContainer.hpp; sourceTree = "<group>"; };
+		E21A7D4D799B4C719079CC79 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				006D720419952D00008149E2 /* AVFoundation.framework in Frameworks */,
+				006D720519952D00008149E2 /* CoreMedia.framework in Frameworks */,
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+				0091D8F90E81B9330029341E /* OpenGL.framework in Frameworks */,
+				5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */,
+				00B784B30FF439BC000DE1D7 /* Accelerate.framework in Frameworks */,
+				00B784B40FF439BC000DE1D7 /* AudioToolbox.framework in Frameworks */,
+				00B784B50FF439BC000DE1D7 /* AudioUnit.framework in Frameworks */,
+				00B784B60FF439BC000DE1D7 /* CoreAudio.framework in Frameworks */,
+				00B9955A1B128DF400A5C623 /* IOKit.framework in Frameworks */,
+				00B9955B1B128DF400A5C623 /* IOSurface.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		01B97315FEAEA392516A2CEA /* Blocks */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD0FC1C096D330088BC4F /* GLTF */,
+			);
+			name = Blocks;
+			sourceTree = "<group>";
+		};
+		080E96DDFE201D6D7F000001 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				6D85EA46A8594328A3A0A91B /* TestApp.cpp */,
+				B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */,
+				B38BD2E51C0A24580088BC4F /* GltfTestContainer.hpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				006D720219952D00008149E2 /* AVFoundation.framework */,
+				006D720319952D00008149E2 /* CoreMedia.framework */,
+				00B784AF0FF439BC000DE1D7 /* Accelerate.framework */,
+				00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */,
+				00B784B10FF439BC000DE1D7 /* AudioUnit.framework */,
+				00B784B20FF439BC000DE1D7 /* CoreAudio.framework */,
+				5323E6B10EAFCA74003A9687 /* CoreVideo.framework */,
+				0091D8F80E81B9330029341E /* OpenGL.framework */,
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				00B995581B128DF400A5C623 /* IOKit.framework */,
+				00B995591B128DF400A5C623 /* IOSurface.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* Test.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				01B97315FEAEA392516A2CEA /* Blocks */,
+				29B97315FDCFA39411CA2CEA /* Headers */,
+				080E96DDFE201D6D7F000001 /* Source */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = Test;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				4CABA9F7D5AB4AC5AB4884C5 /* Resources.h */,
+				A89456B4F93841B7AE9DC0D0 /* Test_Prefix.pch */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1091C0A22ED0088BC4F /* box */,
+				B38BD11B1C0A22ED0088BC4F /* boxTextured */,
+				B38BD1301C0A22ED0088BC4F /* brainsteam */,
+				B38BD13F1C0A22ED0088BC4F /* CesiumMan */,
+				B38BD1541C0A22EE0088BC4F /* CesiumMilkTruck */,
+				B38BD16B1C0A22EE0088BC4F /* duck */,
+				B38BD1801C0A22EE0088BC4F /* monster */,
+				B38BD1931C0A22EE0088BC4F /* RiggedFigure */,
+				B38BD1A51C0A22EE0088BC4F /* RiggedSimple */,
+				B38BD1B61C0A22EE0088BC4F /* vc */,
+				E21A7D4D799B4C719079CC79 /* CinderApp.icns */,
+				0D611A8C5CE24F22B9F9FCF7 /* Info.plist */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B38BD0FC1C096D330088BC4F /* GLTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD0FD1C096D790088BC4F /* src */,
+			);
+			name = GLTF;
+			sourceTree = "<group>";
+		};
+		B38BD0FD1C096D790088BC4F /* src */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD0FE1C096D790088BC4F /* GLTF.cpp */,
+				B38BD0FF1C096D790088BC4F /* GLTF.h */,
+				B38BD1011C096D790088BC4F /* GltfContainer.h */,
+				B38BD1021C096D790088BC4F /* GLTFLoader.cpp */,
+				B38BD1031C096D790088BC4F /* GLTFLoader.h */,
+				B38BD1041C096D790088BC4F /* GLTFWorkApp.cpp */,
+			);
+			name = src;
+			path = ../../../src;
+			sourceTree = "<group>";
+		};
+		B38BD1091C0A22ED0088BC4F /* box */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD10A1C0A22ED0088BC4F /* collada */,
+				B38BD10C1C0A22ED0088BC4F /* glTF */,
+				B38BD1111C0A22ED0088BC4F /* glTF-Binary */,
+				B38BD1131C0A22ED0088BC4F /* glTF-Embedded */,
+				B38BD1151C0A22ED0088BC4F /* glTF-MaterialsCommon */,
+				B38BD1181C0A22ED0088BC4F /* README.txt */,
+				B38BD1191C0A22ED0088BC4F /* screenshot */,
+			);
+			name = box;
+			path = ../assets/box;
+			sourceTree = "<group>";
+		};
+		B38BD10A1C0A22ED0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD10B1C0A22ED0088BC4F /* box.dae */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD10C1C0A22ED0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD10D1C0A22ED0088BC4F /* box.bin */,
+				B38BD10E1C0A22ED0088BC4F /* box.gltf */,
+				B38BD10F1C0A22ED0088BC4F /* box0FS.glsl */,
+				B38BD1101C0A22ED0088BC4F /* box0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1111C0A22ED0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1121C0A22ED0088BC4F /* box.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD1131C0A22ED0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1141C0A22ED0088BC4F /* box.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD1151C0A22ED0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1161C0A22ED0088BC4F /* box.bin */,
+				B38BD1171C0A22ED0088BC4F /* box.gltf */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD1191C0A22ED0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD11A1C0A22ED0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD11B1C0A22ED0088BC4F /* boxTextured */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD11C1C0A22ED0088BC4F /* collada */,
+				B38BD11F1C0A22ED0088BC4F /* glTF */,
+				B38BD1251C0A22ED0088BC4F /* glTF-Binary */,
+				B38BD1271C0A22ED0088BC4F /* glTF-Embedded */,
+				B38BD1291C0A22ED0088BC4F /* glTF-MaterialsCommon */,
+				B38BD12D1C0A22ED0088BC4F /* README.txt */,
+				B38BD12E1C0A22ED0088BC4F /* screenshot */,
+			);
+			name = boxTextured;
+			path = ../assets/boxTextured;
+			sourceTree = "<group>";
+		};
+		B38BD11C1C0A22ED0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD11D1C0A22ED0088BC4F /* Cesium_Logo_Flat.png */,
+				B38BD11E1C0A22ED0088BC4F /* CesiumTexturedBoxTest.dae */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD11F1C0A22ED0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1201C0A22ED0088BC4F /* Cesium_Logo_Flat.png */,
+				B38BD1211C0A22ED0088BC4F /* CesiumTexturedBoxTest.bin */,
+				B38BD1221C0A22ED0088BC4F /* CesiumTexturedBoxTest.gltf */,
+				B38BD1231C0A22ED0088BC4F /* CesiumTexturedBoxTest0FS.glsl */,
+				B38BD1241C0A22ED0088BC4F /* CesiumTexturedBoxTest0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1251C0A22ED0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1261C0A22ED0088BC4F /* CesiumTexturedBoxTest.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD1271C0A22ED0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1281C0A22ED0088BC4F /* CesiumTexturedBoxTest.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD1291C0A22ED0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD12A1C0A22ED0088BC4F /* Cesium_Logo_Flat.png */,
+				B38BD12B1C0A22ED0088BC4F /* CesiumTexturedBoxTest.bin */,
+				B38BD12C1C0A22ED0088BC4F /* CesiumTexturedBoxTest.gltf */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD12E1C0A22ED0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD12F1C0A22ED0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD1301C0A22ED0088BC4F /* brainsteam */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1311C0A22ED0088BC4F /* collada */,
+				B38BD1331C0A22ED0088BC4F /* glTF */,
+				B38BD1381C0A22ED0088BC4F /* glTF-Binary */,
+				B38BD13A1C0A22ED0088BC4F /* glTF-Embedded */,
+				B38BD13C1C0A22ED0088BC4F /* glTF-MaterialsCommon */,
+			);
+			name = brainsteam;
+			path = ../assets/brainsteam;
+			sourceTree = "<group>";
+		};
+		B38BD1311C0A22ED0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1321C0A22ED0088BC4F /* brainsteam.dae */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1331C0A22ED0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1341C0A22ED0088BC4F /* brainsteam.bin */,
+				B38BD1351C0A22ED0088BC4F /* brainsteam.gltf */,
+				B38BD1361C0A22ED0088BC4F /* brainsteam0FS.glsl */,
+				B38BD1371C0A22ED0088BC4F /* brainsteam0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1381C0A22ED0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1391C0A22ED0088BC4F /* brainsteam.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD13A1C0A22ED0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD13B1C0A22ED0088BC4F /* brainsteam.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD13C1C0A22ED0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD13D1C0A22ED0088BC4F /* brainsteam.bin */,
+				B38BD13E1C0A22ED0088BC4F /* brainsteam.gltf */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD13F1C0A22ED0088BC4F /* CesiumMan */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1401C0A22ED0088BC4F /* collada */,
+				B38BD1431C0A22ED0088BC4F /* glTF */,
+				B38BD1491C0A22ED0088BC4F /* glTF-Binary */,
+				B38BD14B1C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD14D1C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD1511C0A22EE0088BC4F /* README.txt */,
+				B38BD1521C0A22EE0088BC4F /* screenshot */,
+			);
+			name = CesiumMan;
+			path = ../assets/CesiumMan;
+			sourceTree = "<group>";
+		};
+		B38BD1401C0A22ED0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1411C0A22ED0088BC4F /* Cesium_Man.dae */,
+				B38BD1421C0A22ED0088BC4F /* Cesium_Man.jpg */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1431C0A22ED0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1441C0A22ED0088BC4F /* Cesium_Man.bin */,
+				B38BD1451C0A22ED0088BC4F /* Cesium_Man.gltf */,
+				B38BD1461C0A22ED0088BC4F /* Cesium_Man.jpg */,
+				B38BD1471C0A22ED0088BC4F /* Cesium_Man0FS.glsl */,
+				B38BD1481C0A22ED0088BC4F /* Cesium_Man0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1491C0A22ED0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD14A1C0A22EE0088BC4F /* Cesium_Man.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD14B1C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD14C1C0A22EE0088BC4F /* Cesium_Man.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD14D1C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD14E1C0A22EE0088BC4F /* Cesium_Man.bin */,
+				B38BD14F1C0A22EE0088BC4F /* Cesium_Man.gltf */,
+				B38BD1501C0A22EE0088BC4F /* Cesium_Man.jpg */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD1521C0A22EE0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1531C0A22EE0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD1541C0A22EE0088BC4F /* CesiumMilkTruck */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1551C0A22EE0088BC4F /* collada */,
+				B38BD1581C0A22EE0088BC4F /* glTF */,
+				B38BD1601C0A22EE0088BC4F /* glTF-Binary */,
+				B38BD1621C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD1641C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD1681C0A22EE0088BC4F /* README.txt */,
+				B38BD1691C0A22EE0088BC4F /* screenshot */,
+			);
+			name = CesiumMilkTruck;
+			path = ../assets/CesiumMilkTruck;
+			sourceTree = "<group>";
+		};
+		B38BD1551C0A22EE0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1561C0A22EE0088BC4F /* CesiumMilkTruck.dae */,
+				B38BD1571C0A22EE0088BC4F /* CesiumMilkTruck.png */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1581C0A22EE0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1591C0A22EE0088BC4F /* CesiumMilkTruck.bin */,
+				B38BD15A1C0A22EE0088BC4F /* CesiumMilkTruck.gltf */,
+				B38BD15B1C0A22EE0088BC4F /* CesiumMilkTruck.png */,
+				B38BD15C1C0A22EE0088BC4F /* CesiumMilkTruck0FS.glsl */,
+				B38BD15D1C0A22EE0088BC4F /* CesiumMilkTruck0VS.glsl */,
+				B38BD15E1C0A22EE0088BC4F /* CesiumMilkTruck1FS.glsl */,
+				B38BD15F1C0A22EE0088BC4F /* CesiumMilkTruck1VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1601C0A22EE0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1611C0A22EE0088BC4F /* CesiumMilkTruck.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD1621C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1631C0A22EE0088BC4F /* CesiumMilkTruck.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD1641C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1651C0A22EE0088BC4F /* CesiumMilkTruck.bin */,
+				B38BD1661C0A22EE0088BC4F /* CesiumMilkTruck.gltf */,
+				B38BD1671C0A22EE0088BC4F /* CesiumMilkTruck.png */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD1691C0A22EE0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD16A1C0A22EE0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD16B1C0A22EE0088BC4F /* duck */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD16C1C0A22EE0088BC4F /* collada */,
+				B38BD16F1C0A22EE0088BC4F /* glTF */,
+				B38BD1751C0A22EE0088BC4F /* glTF-Binary */,
+				B38BD1771C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD1791C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD17D1C0A22EE0088BC4F /* README.txt */,
+				B38BD17E1C0A22EE0088BC4F /* screenshot */,
+			);
+			name = duck;
+			path = ../assets/duck;
+			sourceTree = "<group>";
+		};
+		B38BD16C1C0A22EE0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD16D1C0A22EE0088BC4F /* duck.dae */,
+				B38BD16E1C0A22EE0088BC4F /* duckCM.png */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD16F1C0A22EE0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1701C0A22EE0088BC4F /* duck.bin */,
+				B38BD1711C0A22EE0088BC4F /* duck.gltf */,
+				B38BD1721C0A22EE0088BC4F /* duck0FS.glsl */,
+				B38BD1731C0A22EE0088BC4F /* duck0VS.glsl */,
+				B38BD1741C0A22EE0088BC4F /* duckCM.png */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1751C0A22EE0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1761C0A22EE0088BC4F /* duck.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD1771C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1781C0A22EE0088BC4F /* duck.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD1791C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD17A1C0A22EE0088BC4F /* duck.bin */,
+				B38BD17B1C0A22EE0088BC4F /* duck.gltf */,
+				B38BD17C1C0A22EE0088BC4F /* duckCM.png */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD17E1C0A22EE0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD17F1C0A22EE0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD1801C0A22EE0088BC4F /* monster */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1811C0A22EE0088BC4F /* collada */,
+				B38BD1841C0A22EE0088BC4F /* glTF */,
+				B38BD18A1C0A22EE0088BC4F /* glTF-Binary */,
+				B38BD18C1C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD18E1C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD1921C0A22EE0088BC4F /* readme.txt */,
+			);
+			name = monster;
+			path = ../assets/monster;
+			sourceTree = "<group>";
+		};
+		B38BD1811C0A22EE0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1821C0A22EE0088BC4F /* monster.dae */,
+				B38BD1831C0A22EE0088BC4F /* monster.jpg */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1841C0A22EE0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1851C0A22EE0088BC4F /* monster.bin */,
+				B38BD1861C0A22EE0088BC4F /* monster.gltf */,
+				B38BD1871C0A22EE0088BC4F /* monster.jpg */,
+				B38BD1881C0A22EE0088BC4F /* monster0FS.glsl */,
+				B38BD1891C0A22EE0088BC4F /* monster0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD18A1C0A22EE0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD18B1C0A22EE0088BC4F /* monster.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD18C1C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD18D1C0A22EE0088BC4F /* monster.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD18E1C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD18F1C0A22EE0088BC4F /* monster.bin */,
+				B38BD1901C0A22EE0088BC4F /* monster.gltf */,
+				B38BD1911C0A22EE0088BC4F /* monster.jpg */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD1931C0A22EE0088BC4F /* RiggedFigure */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1941C0A22EE0088BC4F /* collada */,
+				B38BD1961C0A22EE0088BC4F /* glTF */,
+				B38BD19B1C0A22EE0088BC4F /* glTF-Binary */,
+				B38BD19D1C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD19F1C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD1A21C0A22EE0088BC4F /* README.txt */,
+				B38BD1A31C0A22EE0088BC4F /* screenshot */,
+			);
+			name = RiggedFigure;
+			path = ../assets/RiggedFigure;
+			sourceTree = "<group>";
+		};
+		B38BD1941C0A22EE0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1951C0A22EE0088BC4F /* rigged-figure.dae */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1961C0A22EE0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1971C0A22EE0088BC4F /* rigged-figure.bin */,
+				B38BD1981C0A22EE0088BC4F /* rigged-figure.gltf */,
+				B38BD1991C0A22EE0088BC4F /* rigged-figure0FS.glsl */,
+				B38BD19A1C0A22EE0088BC4F /* rigged-figure0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD19B1C0A22EE0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD19C1C0A22EE0088BC4F /* rigged-figure.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD19D1C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD19E1C0A22EE0088BC4F /* rigged-figure.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD19F1C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1A01C0A22EE0088BC4F /* rigged-figure.bin */,
+				B38BD1A11C0A22EE0088BC4F /* rigged-figure.gltf */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD1A31C0A22EE0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1A41C0A22EE0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD1A51C0A22EE0088BC4F /* RiggedSimple */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1A61C0A22EE0088BC4F /* collada */,
+				B38BD1A81C0A22EE0088BC4F /* glTF */,
+				B38BD1AD1C0A22EE0088BC4F /* glTF-Binary */,
+				B38BD1AF1C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD1B11C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD1B31C0A22EE0088BC4F /* README.txt */,
+				B38BD1B41C0A22EE0088BC4F /* screenshot */,
+			);
+			name = RiggedSimple;
+			path = ../assets/RiggedSimple;
+			sourceTree = "<group>";
+		};
+		B38BD1A61C0A22EE0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1A71C0A22EE0088BC4F /* riggedSimple.dae */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1A81C0A22EE0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1A91C0A22EE0088BC4F /* riggedSimple.bin */,
+				B38BD1AA1C0A22EE0088BC4F /* riggedSimple.gltf */,
+				B38BD1AB1C0A22EE0088BC4F /* riggedSimple0FS.glsl */,
+				B38BD1AC1C0A22EE0088BC4F /* riggedSimple0VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1AD1C0A22EE0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1AE1C0A22EE0088BC4F /* riggedSimple.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD1AF1C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1B01C0A22EE0088BC4F /* riggedSimple.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD1B11C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1B21C0A22EE0088BC4F /* riggedSimple.gltf */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+		B38BD1B41C0A22EE0088BC4F /* screenshot */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1B51C0A22EE0088BC4F /* screenshot.png */,
+			);
+			path = screenshot;
+			sourceTree = "<group>";
+		};
+		B38BD1B61C0A22EE0088BC4F /* vc */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1B71C0A22EE0088BC4F /* collada */,
+				B38BD1D11C0A22EE0088BC4F /* glTF */,
+				B38BD1FA1C0A22EE0088BC4F /* glTF-Binary */,
+				B38BD1FC1C0A22EE0088BC4F /* glTF-Embedded */,
+				B38BD1FE1C0A22EE0088BC4F /* glTF-MaterialsCommon */,
+				B38BD2171C0A22EE0088BC4F /* README.txt */,
+			);
+			name = vc;
+			path = ../assets/vc;
+			sourceTree = "<group>";
+		};
+		B38BD1B71C0A22EE0088BC4F /* collada */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1B81C0A22EE0088BC4F /* 001.jpg */,
+				B38BD1B91C0A22EE0088BC4F /* 002.jpg */,
+				B38BD1BA1C0A22EE0088BC4F /* 11.jpg */,
+				B38BD1BB1C0A22EE0088BC4F /* 5.jpg */,
+				B38BD1BC1C0A22EE0088BC4F /* alien.tga */,
+				B38BD1BD1C0A22EE0088BC4F /* cockpit-map.jpg */,
+				B38BD1BE1C0A22EE0088BC4F /* f22.jpg */,
+				B38BD1BF1C0A22EE0088BC4F /* full.jpg */,
+				B38BD1C01C0A22EE0088BC4F /* heli.jpg */,
+				B38BD1C11C0A22EE0088BC4F /* lights.jpg */,
+				B38BD1C21C0A22EE0088BC4F /* machine.jpg */,
+				B38BD1C31C0A22EE0088BC4F /* O21.jpg */,
+				B38BD1C41C0A22EE0088BC4F /* prop128.png */,
+				B38BD1C51C0A22EE0088BC4F /* prop128.tga */,
+				B38BD1C61C0A22EE0088BC4F /* s_01.jpg */,
+				B38BD1C71C0A22EE0088BC4F /* s_02.jpg */,
+				B38BD1C81C0A22EE0088BC4F /* s_03.jpg */,
+				B38BD1C91C0A22EE0088BC4F /* s_04.jpg */,
+				B38BD1CA1C0A22EE0088BC4F /* s_05.jpg */,
+				B38BD1CB1C0A22EE0088BC4F /* s_06.jpg */,
+				B38BD1CC1C0A22EE0088BC4F /* s_07.jpg */,
+				B38BD1CD1C0A22EE0088BC4F /* s_08.jpg */,
+				B38BD1CE1C0A22EE0088BC4F /* scrapsurf03-red.jpg */,
+				B38BD1CF1C0A22EE0088BC4F /* surface01.jpg */,
+				B38BD1D01C0A22EE0088BC4F /* vc.dae */,
+			);
+			path = collada;
+			sourceTree = "<group>";
+		};
+		B38BD1D11C0A22EE0088BC4F /* glTF */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1D21C0A22EE0088BC4F /* 001.jpg */,
+				B38BD1D31C0A22EE0088BC4F /* 002.jpg */,
+				B38BD1D41C0A22EE0088BC4F /* 11.jpg */,
+				B38BD1D51C0A22EE0088BC4F /* 5.jpg */,
+				B38BD1D61C0A22EE0088BC4F /* cockpit-map.jpg */,
+				B38BD1D71C0A22EE0088BC4F /* f22.jpg */,
+				B38BD1D81C0A22EE0088BC4F /* full.jpg */,
+				B38BD1D91C0A22EE0088BC4F /* heli.jpg */,
+				B38BD1DA1C0A22EE0088BC4F /* lights.jpg */,
+				B38BD1DB1C0A22EE0088BC4F /* machine.jpg */,
+				B38BD1DC1C0A22EE0088BC4F /* O21.jpg */,
+				B38BD1DD1C0A22EE0088BC4F /* prop128.png */,
+				B38BD1DE1C0A22EE0088BC4F /* s_01.jpg */,
+				B38BD1DF1C0A22EE0088BC4F /* s_02.jpg */,
+				B38BD1E01C0A22EE0088BC4F /* s_03.jpg */,
+				B38BD1E11C0A22EE0088BC4F /* s_04.jpg */,
+				B38BD1E21C0A22EE0088BC4F /* s_05.jpg */,
+				B38BD1E31C0A22EE0088BC4F /* s_06.jpg */,
+				B38BD1E41C0A22EE0088BC4F /* s_07.jpg */,
+				B38BD1E51C0A22EE0088BC4F /* s_08.jpg */,
+				B38BD1E61C0A22EE0088BC4F /* scrapsurf03-red.jpg */,
+				B38BD1E71C0A22EE0088BC4F /* surface01.jpg */,
+				B38BD1E81C0A22EE0088BC4F /* vc.bin */,
+				B38BD1E91C0A22EE0088BC4F /* vc.gltf */,
+				B38BD1EA1C0A22EE0088BC4F /* vc0FS.glsl */,
+				B38BD1EB1C0A22EE0088BC4F /* vc0VS.glsl */,
+				B38BD1EC1C0A22EE0088BC4F /* vc1FS.glsl */,
+				B38BD1ED1C0A22EE0088BC4F /* vc1VS.glsl */,
+				B38BD1EE1C0A22EE0088BC4F /* vc2FS.glsl */,
+				B38BD1EF1C0A22EE0088BC4F /* vc2VS.glsl */,
+				B38BD1F01C0A22EE0088BC4F /* vc3FS.glsl */,
+				B38BD1F11C0A22EE0088BC4F /* vc3VS.glsl */,
+				B38BD1F21C0A22EE0088BC4F /* vc4FS.glsl */,
+				B38BD1F31C0A22EE0088BC4F /* vc4VS.glsl */,
+				B38BD1F41C0A22EE0088BC4F /* vc5FS.glsl */,
+				B38BD1F51C0A22EE0088BC4F /* vc5VS.glsl */,
+				B38BD1F61C0A22EE0088BC4F /* vc6FS.glsl */,
+				B38BD1F71C0A22EE0088BC4F /* vc6VS.glsl */,
+				B38BD1F81C0A22EE0088BC4F /* vc7FS.glsl */,
+				B38BD1F91C0A22EE0088BC4F /* vc7VS.glsl */,
+			);
+			path = glTF;
+			sourceTree = "<group>";
+		};
+		B38BD1FA1C0A22EE0088BC4F /* glTF-Binary */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1FB1C0A22EE0088BC4F /* vc.glb */,
+			);
+			path = "glTF-Binary";
+			sourceTree = "<group>";
+		};
+		B38BD1FC1C0A22EE0088BC4F /* glTF-Embedded */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1FD1C0A22EE0088BC4F /* vc.gltf */,
+			);
+			path = "glTF-Embedded";
+			sourceTree = "<group>";
+		};
+		B38BD1FE1C0A22EE0088BC4F /* glTF-MaterialsCommon */ = {
+			isa = PBXGroup;
+			children = (
+				B38BD1FF1C0A22EE0088BC4F /* 001.jpg */,
+				B38BD2001C0A22EE0088BC4F /* 002.jpg */,
+				B38BD2011C0A22EE0088BC4F /* 11.jpg */,
+				B38BD2021C0A22EE0088BC4F /* 5.jpg */,
+				B38BD2031C0A22EE0088BC4F /* cockpit-map.jpg */,
+				B38BD2041C0A22EE0088BC4F /* f22.jpg */,
+				B38BD2051C0A22EE0088BC4F /* full.jpg */,
+				B38BD2061C0A22EE0088BC4F /* heli.jpg */,
+				B38BD2071C0A22EE0088BC4F /* lights.jpg */,
+				B38BD2081C0A22EE0088BC4F /* machine.jpg */,
+				B38BD2091C0A22EE0088BC4F /* O21.jpg */,
+				B38BD20A1C0A22EE0088BC4F /* prop128.png */,
+				B38BD20B1C0A22EE0088BC4F /* s_01.jpg */,
+				B38BD20C1C0A22EE0088BC4F /* s_02.jpg */,
+				B38BD20D1C0A22EE0088BC4F /* s_03.jpg */,
+				B38BD20E1C0A22EE0088BC4F /* s_04.jpg */,
+				B38BD20F1C0A22EE0088BC4F /* s_05.jpg */,
+				B38BD2101C0A22EE0088BC4F /* s_06.jpg */,
+				B38BD2111C0A22EE0088BC4F /* s_07.jpg */,
+				B38BD2121C0A22EE0088BC4F /* s_08.jpg */,
+				B38BD2131C0A22EE0088BC4F /* scrapsurf03-red.jpg */,
+				B38BD2141C0A22EE0088BC4F /* surface01.jpg */,
+				B38BD2151C0A22EE0088BC4F /* vc.bin */,
+				B38BD2161C0A22EE0088BC4F /* vc.gltf */,
+			);
+			path = "glTF-MaterialsCommon";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D1107260486CEB800E47090 /* Test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Test" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Test;
+			productInstallPath = "$(HOME)/Applications";
+			productName = Test;
+			productReference = 8D1107320486CEB800E47090 /* Test.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Test" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* Test */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D1107260486CEB800E47090 /* Test */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B38BD1051C096D790088BC4F /* GLTF.cpp in Sources */,
+				B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */,
+				B38BD1081C096D790088BC4F /* GLTFWorkApp.cpp in Sources */,
+				A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */,
+				B38BD1071C096D790088BC4F /* GLTFLoader.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Test_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = "\"$(CINDER_PATH)/lib/libcinder_d.a\"";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = Test;
+				SYMROOT = ./build;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_FAST_MATH = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Test_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"NDEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = "\"$(CINDER_PATH)/lib/libcinder.a\"";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.libcinder.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = Test;
+				STRIP_INSTALLED_PRODUCT = YES;
+				SYMROOT = ./build;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CINDER_PATH = ../../../../..;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
+				ENABLE_TESTABILITY = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include";
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CINDER_PATH = ../../../../..;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LIBRARY = "libc++";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+				USER_HEADER_SEARCH_PATHS = "\"$(CINDER_PATH)/include\" ../include";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
