@@ -22,7 +22,12 @@ using namespace std;
 
 namespace gltf {
 	
-File::File( const ci::DataSourceRef &gltfFile )
+FileRef File::create( const ci::DataSourceRef &gltfFile, bool cacheFile )
+{
+	return FileRef( new File( gltfFile, cacheFile ) );
+}
+	
+File::File( const ci::DataSourceRef &gltfFile, bool cacheFile )
 : mGltfPath( gltfFile->getFilePath().parent_path() )
 {
 	Json::Features features;
@@ -36,7 +41,40 @@ File::File( const ci::DataSourceRef &gltfFile )
 		CI_LOG_E( "Error parsing gltf file " << e.what() );
 	}
 	
+	loadAssetInfo();
+	loadExtensions();
 	
+	if( cacheFile ) {
+		load();
+	}
+}
+	
+void File::loadAssetInfo()
+{
+	auto &assetInfo = mTree["asset"];
+	
+	CI_ASSERT( assetInfo["version"].isString() );
+	mAssetInfo.version = assetInfo["version"].asString();
+	
+	if( assetInfo["profile"].isObject() ) {
+		if( assetInfo["profile"]["api"].isString() )
+			mAssetInfo.profile.api = assetInfo["profile"]["api"].asString();
+		if( assetInfo["profile"]["version"].isString() )
+			mAssetInfo.profile.version = assetInfo["profile"]["version"].asString();
+	}
+	
+	mAssetInfo.copyright = assetInfo["copyright"].asString();
+	mAssetInfo.generator = assetInfo["generator"].asString();
+	mAssetInfo.premultipliedAlpha = assetInfo["premultipliedAlpha"].asBool();
+}
+	
+void File::loadExtensions()
+{
+	if( ! mTree["extensionsUsed"].isNull() && mTree["extensionsUsed"].isArray() ) {
+		auto &extensions = mTree["extensionsUsed"];
+		std::transform( begin( extensions ), end( extensions ), std::back_inserter( mExtensions ),
+		[]( const Json::Value &val ){ return val.asString(); } );
+	}
 }
 
 Scene::Scene( const FileRef &file, const std::string &sceneName )
@@ -44,8 +82,9 @@ Scene::Scene( const FileRef &file, const std::string &sceneName )
 	
 }
 
-Accessor Scene::getAccessorInfo( const std::string& key ) const
+Accessor File::getAccessorInfo( const std::string& key ) const
 {
+	
 	auto &accessors = mTree["accessors"];
 	auto &accessor = accessors[key];
 	
@@ -85,7 +124,7 @@ Accessor Scene::getAccessorInfo( const std::string& key ) const
 	return ret;
 }
 	
-Animation Scene::getAnimationInfo( const std::string &key ) const
+Animation File::getAnimationInfo( const std::string &key ) const
 {
 	auto &animations = mTree["animations"];
 	auto &animation = animations[key];
@@ -128,36 +167,19 @@ Animation Scene::getAnimationInfo( const std::string &key ) const
 	return ret;
 }
 	
-Asset Scene::getAssetInfo() const
+const Asset& File::getAssetInfo() const
 {
-	auto &assetInfo = mTree["asset"];
-	Asset ret;
-	
-	CI_ASSERT( assetInfo["version"].isString() );
-	ret.version = assetInfo["version"].asString();
-	
-	if( assetInfo["profile"].isObject() ) {
-		if( assetInfo["profile"]["api"].isString() )
-			ret.profile.api = assetInfo["profile"]["api"].asString();
-		if( assetInfo["profile"]["version"].isString() )
-			ret.profile.version = assetInfo["profile"]["version"].asString();
-	}
-	
-	ret.copyright = assetInfo["copyright"].asString();
-	ret.generator = assetInfo["generator"].asString();
-	ret.premultipliedAlpha = assetInfo["premultipliedAlpha"].asBool();
-	
-	return ret;
+	return mAssetInfo;
 }
 	
-Buffer Scene::getBufferInfo( const std::string &name ) const
+gltf::Buffer File::getBufferInfo( const std::string &name ) const
 {
 	auto &buffers = mTree["buffers"];
 	auto &buffer = buffers[name];
 	
 	CI_ASSERT( buffer["uri"].isString() );
 	
-	Buffer ret;
+	gltf::Buffer ret;
 	auto uri = buffer["uri"].asString();
 	
 	if( auto pos = uri.find("data:application/octet-stream;base64,") != std::string::npos ) {
@@ -177,7 +199,7 @@ Buffer Scene::getBufferInfo( const std::string &name ) const
 	return ret;
 }
 
-BufferView Scene::getBufferViewInfo( const std::string &name ) const
+BufferView File::getBufferViewInfo( const std::string &name ) const
 {
 	auto &bufferViews = mTree["bufferViews"];
 	auto &bufferView = bufferViews[name];
@@ -197,7 +219,7 @@ BufferView Scene::getBufferViewInfo( const std::string &name ) const
 	return ret;
 }
 	
-Camera Scene::getCameraInfo( const std::string &key ) const
+Camera File::getCameraInfo( const std::string &key ) const
 {
 	auto &cameras = mTree["cameras"];
 	auto &camera = cameras[key];
@@ -239,7 +261,7 @@ Camera Scene::getCameraInfo( const std::string &key ) const
 	return ret;
 }
 	
-Image Scene::getImageInfo( const std::string &key ) const
+Image File::getImageInfo( const std::string &key ) const
 {
 	auto &images = mTree["images"];
 	auto &image = images[key];
@@ -255,7 +277,7 @@ Image Scene::getImageInfo( const std::string &key ) const
 	return ret;
 }
 	
-Material Scene::getMaterialInfo( const std::string &key ) const
+Material File::getMaterialInfo( const std::string &key ) const
 {
 	auto &materials = mTree["materials"];
 	auto &material = materials[key];
@@ -269,7 +291,7 @@ Material Scene::getMaterialInfo( const std::string &key ) const
 	return ret;
 }
 	
-Mesh Scene::getMeshInfo( const std::string &key ) const
+Mesh File::getMeshInfo( const std::string &key ) const
 {
 	auto &meshes = mTree["meshes"];
 	auto &mesh = meshes[key];
@@ -302,7 +324,7 @@ Mesh Scene::getMeshInfo( const std::string &key ) const
 	return ret;
 }
 
-Node Scene::getNodeInfo( const std::string &key ) const
+Node File::getNodeInfo( const std::string &key ) const
 {
 	auto &nodes = mTree["nodes"];
 	auto &node = nodes[key];
@@ -364,7 +386,7 @@ Node Scene::getNodeInfo( const std::string &key ) const
 	return ret;
 }
 	
-Program Scene::getProgramInfo( const std::string &key ) const
+Program File::getProgramInfo( const std::string &key ) const
 {
 	auto &programs = mTree["programs"];
 	auto &program = programs[key];
@@ -387,7 +409,7 @@ Program Scene::getProgramInfo( const std::string &key ) const
 	return ret;
 }
 	
-Sampler Scene::getSamplerInfo( const std::string &key ) const
+Sampler File::getSamplerInfo( const std::string &key ) const
 {
 	auto &samplers = mTree["samplers"];
 	auto &sampler = samplers[key];
@@ -409,7 +431,7 @@ Sampler Scene::getSamplerInfo( const std::string &key ) const
 	return ret;
 }
 	
-Scene Scene::getSceneInfo( const std::string &key ) const
+Scene File::getSceneInfo( const std::string &key ) const
 {
 	auto &scenes = mTree["scenes"];
 	auto &scene = scenes[key];
@@ -427,7 +449,7 @@ Scene Scene::getSceneInfo( const std::string &key ) const
 	return ret;
 }
 	
-Shader Scene::getShaderInfo( const std::string &key ) const
+Shader File::getShaderInfo( const std::string &key ) const
 {
 	auto &shaders = mTree["shaders"];
 	auto &shader = shaders[key];
@@ -454,7 +476,7 @@ Shader Scene::getShaderInfo( const std::string &key ) const
 	return ret;
 }
 	
-Skin Scene::getSkinInfo( const std::string &key ) const
+Skin File::getSkinInfo( const std::string &key ) const
 {
 	auto &skins = mTree["skins"];
 	auto &skin = skins[key];
@@ -482,7 +504,7 @@ Skin Scene::getSkinInfo( const std::string &key ) const
 	return ret;
 }
 
-Technique Scene::getTechniqueInfo( const std::string &key ) const
+Technique File::getTechniqueInfo( const std::string &key ) const
 {
 	auto &techniques = mTree["techniques"];
 	auto &technique = techniques[key];
@@ -595,7 +617,7 @@ Technique Scene::getTechniqueInfo( const std::string &key ) const
 	return ret;
 }
 	
-Texture Scene::getTextureInfo( const std::string &key ) const
+Texture File::getTextureInfo( const std::string &key ) const
 {
 	auto &textures = mTree["textures"];
 	auto &texture = textures[key];
@@ -620,7 +642,7 @@ Texture Scene::getTextureInfo( const std::string &key ) const
 	return ret;
 }
 
-CameraOrtho Scene::getOrthoCameraByName( const std::string &name )
+CameraOrtho File::getOrthoCameraByName( const std::string &name )
 {
 	Camera cam = getCameraInfo( name );
 	if( cam.type != "orthographic" ) throw "This should be orthographic but it's not";
@@ -631,7 +653,7 @@ CameraOrtho Scene::getOrthoCameraByName( const std::string &name )
 	return ret;
 }
 
-CameraPersp Scene::getPerspCameraByName( const std::string &name )
+CameraPersp File::getPerspCameraByName( const std::string &name )
 {
 	Camera cam = getCameraInfo( name );
 	if( cam.type != "orthographic" ) throw "This should be perspective but it's not";
@@ -643,7 +665,7 @@ CameraPersp Scene::getPerspCameraByName( const std::string &name )
 	return ret;
 }
 	
-ci::geom::Primitive Scene::convertToPrimitive( GLenum primitive )
+ci::geom::Primitive File::convertToPrimitive( GLenum primitive )
 {
 	switch (primitive) {
 		case GL_LINES: return ci::geom::LINES; break;
@@ -655,7 +677,7 @@ ci::geom::Primitive Scene::convertToPrimitive( GLenum primitive )
 	}
 }
 	
-ci::geom::Attrib Scene::getAttribEnum( const std::string &attrib )
+ci::geom::Attrib File::getAttribEnum( const std::string &attrib )
 {
 	using namespace ci::geom;
 	if( attrib == "POSITION" )			return Attrib::POSITION;
@@ -674,7 +696,7 @@ ci::geom::Attrib Scene::getAttribEnum( const std::string &attrib )
 	else								return Attrib::NUM_ATTRIBS;
 }
 	
-ci::gl::UniformSemantic Scene::getUniformEnum( const std::string &uniform )
+ci::gl::UniformSemantic File::getUniformEnum( const std::string &uniform )
 {
 	auto & u = uniform;
 	using namespace ci::gl;
@@ -694,7 +716,7 @@ ci::gl::UniformSemantic Scene::getUniformEnum( const std::string &uniform )
 	else return (UniformSemantic)-1;
 }
 	
-uint8_t Scene::getNumComponentsForType( const std::string &type )
+uint8_t File::getNumComponentsForType( const std::string &type )
 {
 	if( type == "SCALAR" )	  return 1;
 	else if( type == "VEC2" ) return 2;
@@ -706,7 +728,7 @@ uint8_t Scene::getNumComponentsForType( const std::string &type )
 	else					  return 0;
 }
 
-uint8_t Scene::getNumBytesForComponentType( GLuint type )
+uint8_t File::getNumBytesForComponentType( GLuint type )
 {
 	switch (type) {
 		case 5120: // BYTE
