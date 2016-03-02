@@ -87,7 +87,6 @@ public:
 	static ci::gl::UniformSemantic getUniformEnum( const std::string &uniform );
 	static uint8_t getNumComponentsForType( const std::string &type );
 	static uint8_t getNumBytesForComponentType( GLuint type );
-	ci::BufferRef getBufferFromUri( const std::string &uri, std::string *retUri ) const;
 	
 	ci::CameraPersp		getPerspCameraByName( const std::string &name );
 	ci::CameraOrtho		getOrthoCameraByName( const std::string &name );
