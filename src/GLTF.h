@@ -122,7 +122,7 @@ private:
 
 class Scene {
 public:
-	Scene( const FileRef &file, const std::string &sceneName );
+	Scene( const Json::Value &val );
 	Scene( const ci::DataSourceRef gltfFile );
 	
 	const FileRef& getFile() const;
