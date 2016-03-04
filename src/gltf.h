@@ -54,13 +54,15 @@ public:
 	static FileRef create( const ci::DataSourceRef &gltfFile );
 	~File() = default;
 	
-	bool hasExtension( const std::string &extension ) const;
-	const std::vector<std::string>& getExtensions() const { return mExtensions; }
-	const ci::fs::path& getGltfPath() const { return mGltfPath; }
-	const Json::Value&	getTree() const { return mTree; }
-	const Asset&		getAssetInfo() const;
-	void				setAssetInfo( const Json::Value &val );
+	const ci::fs::path&				getGltfPath() const { return mGltfPath; }
+	const Json::Value&				getTree() const { return mGltfTree; }
 	
+	const Asset&					getAssetInfo() const;
+	void							setAssetInfo( const Json::Value &val );
+	
+	bool							hasExtension( const std::string &extension ) const;
+	const std::vector<std::string>& getExtensions() const { return mExtensions; }
+
 	template<typename T>
 	void				add( const std::string &key, T type );
 	template<typename T>
@@ -115,10 +117,9 @@ public:
 private:
 	File( const ci::DataSourceRef &gltfFile );
 	void load();
-	void loadAssetInfo();
 	void loadExtensions();
 	
-	Json::Value			mTree;
+	Json::Value			mGltfTree;
 	cinder::fs::path	mGltfPath;
 	
 	std::vector<std::string> mExtensions;
@@ -142,6 +143,8 @@ private:
 	std::map<std::string, Skin>			mSkins;
 	std::map<std::string, Technique>	mTechniques;
 	std::map<std::string, Texture>		mTextures;
+	
+	friend std::ostream& operator<<( std::ostream &lhs, const File &rhs );
 };
 
 struct Scene {
@@ -151,7 +154,6 @@ struct Scene {
 };
 	
 struct Accessor {
-
 	std::string			bufferView;	// Required Pointer to bufferView
 	uint32_t			byteOffset; // Required
 	uint32_t			byteStride = 0;
@@ -341,7 +343,6 @@ struct Texture {
 					type = GL_UNSIGNED_BYTE;
 	Json::Value		extras;
 };
-
 	
 namespace gl {
 	
@@ -351,4 +352,25 @@ ci::gl::GlslProgRef	getGlslProgramFromMaterial( const Scene &gltf, const std::st
 ci::gl::TextureRef	getTextureByName( const Scene &gltf, const std::string &name );
 ci::TriMeshRef		getTriMeshFromMeshByName( const Scene &gltf, const std::string &name );
 	
-} } // namespace gl // namespace gltf
+} // namespace gl
+	
+std::ostream& operator<<( std::ostream &lhs, const File &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Accessor &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Animation &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Asset &rhs );
+std::ostream& operator<<( std::ostream &lhs, const BufferView &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Buffer &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Camera &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Image &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Material &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Mesh &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Node &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Program &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Sampler &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Scene &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Shader &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Skin &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Technique &rhs );
+std::ostream& operator<<( std::ostream &lhs, const Texture &rhs );
+
+}  // namespace gltf

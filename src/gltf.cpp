@@ -34,23 +34,23 @@ File::File( const ci::DataSourceRef &gltfFile )
 	features.strictRoot_ = true;
 	Json::Reader reader( features );
 	try {
-		reader.parse( loadString( gltfFile ), mTree );
+		reader.parse( loadString( gltfFile ), mGltfTree );
 	}
 	catch ( const std::runtime_error &e ) {
 		CI_LOG_E( "Error parsing gltf file " << e.what() );
 	}
 	
 	loadExtensions();
-	if( ! mTree["asset"].isNull() )
-		setAssetInfo( mTree["asset"] );
+	if( ! mGltfTree["asset"].isNull() )
+		setAssetInfo( mGltfTree["asset"] );
 	load();
 }
 	
 void File::load()
 {
-	auto gltfTypes = mTree.getMemberNames();
+	auto gltfTypes = mGltfTree.getMemberNames();
 	for( auto &typeName : gltfTypes ) {
-		auto &typeObj = mTree[typeName];
+		auto &typeObj = mGltfTree[typeName];
 		if( typeName == "scene" ) {
 			mDefaultScene = typeObj.asString();
 			continue;
@@ -96,8 +96,8 @@ void File::load()
 	
 void File::loadExtensions()
 {
-	if( ! mTree["extensionsUsed"].isNull() && mTree["extensionsUsed"].isArray() ) {
-		auto &extensions = mTree["extensionsUsed"];
+	if( ! mGltfTree["extensionsUsed"].isNull() && mGltfTree["extensionsUsed"].isArray() ) {
+		auto &extensions = mGltfTree["extensionsUsed"];
 		std::transform( begin( extensions ), end( extensions ), std::back_inserter( mExtensions ),
 		[]( const Json::Value &val ){ return val.asString(); } );
 		std::sort( begin( mExtensions ), end( mExtensions ), std::less<std::string>() );
@@ -1193,6 +1193,99 @@ TriMeshRef getTriMeshFromMeshByName( const File &gltf, const std::string &name )
 	return TriMeshRef();
 }
 	
-} } // namespace gl // namespace gltf
+} // namespace gl
+
+std::ostream& operator<<( std::ostream &lhs, const File &rhs )
+{
+	
+	return lhs;
+}
+	
+std::ostream& operator<<( std::ostream &lhs, const Accessor &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Animation &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Asset &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const BufferView &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Buffer &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Camera &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Image &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Material &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Mesh &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Node &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Program &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Sampler &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Scene &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Shader &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Skin &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Technique &rhs )
+{
+	return lhs;
+}
+
+std::ostream& operator<<( std::ostream &lhs, const Texture &rhs )
+{
+	return lhs;
+}
+
+} // namespace gltf
 
 
