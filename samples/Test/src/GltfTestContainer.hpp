@@ -24,7 +24,7 @@ public:
 	ci::CameraPersp&	getCamera() { return mCam; }
 private:
 	
-	std::shared_ptr<gltf::Gltf> mGltf;
+	std::shared_ptr<gltf::File> mGltf;
 	ci::gl::GlslProgRef			mGlsl;
 	ci::gl::BatchRef			mBatch;
 	ci::TriMeshRef				mTrimesh;

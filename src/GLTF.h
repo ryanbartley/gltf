@@ -52,15 +52,19 @@ struct Asset {
 class File {
 public:
 	static FileRef create( const ci::DataSourceRef &gltfFile, bool cacheFile = false );
-	~File();
+	~File() = default;
 	
 	bool hasExtension( const std::string &extension ) const;
-	const std::vector<std::string>& getExtensions() const;
-	const ci::fs::path& getGltfPath() const;
-	const Json::Value& getTree() const;
+	const std::set<std::string>& getExtensions() const { return mExtensions; }
+	const ci::fs::path& getGltfPath() const { return mGltfPath; }
+	const Json::Value& getTree() const { return mTree; }
 	
-	Accessor			getAccessorInfo( const std::string &key ) const;
+	const Accessor&		getAccessorInfo( const std::string &key ) const;
+	void				setAccessorInfo( const std::string &key, const Json::Value &val );
+	void				setAccessorInfo( const std::string &key, Accessor accessor );
 	Animation			getAnimationInfo( const std::string &key ) const;
+	void				setAnimationInfo( const std::string &key, const Json::Value &val );
+	void				setAnimationInfo( const std::string &key, const Accessor &accessor );
 	const Asset&		getAssetInfo() const;
 	BufferView			getBufferViewInfo( const std::string &key ) const;
 	gltf::Buffer		getBufferInfo( const std::string &key ) const;
@@ -77,7 +81,6 @@ public:
 	Technique			getTechniqueInfo( const std::string &key ) const;
 	Texture				getTextureInfo( const std::string &key ) const;
 	
-
 	//! Returns the converted string as a geom::Attrib. Attribute semantics
 	//! include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX, and
 	//! WEIGHT.  Attribute semantics can be of the form [semantic]_[set_index],
@@ -99,7 +102,7 @@ private:
 	
 	Json::Value			mTree;
 	cinder::fs::path	mGltfPath;
-	std::vector<std::string> mExtensions;
+	std::set<std::string> mExtensions;
 	Asset				mAssetInfo;
 	
 	std::map<std::string, Accessor>		mAccessors;
@@ -120,28 +123,14 @@ private:
 	std::map<std::string, Texture>		mTextures;
 };
 
-class Scene {
-public:
-	Scene( const Json::Value &val );
-	Scene( const ci::DataSourceRef gltfFile );
-	
-	const FileRef& getFile() const;
-	const std::string& getSceneName() const;
-	
-	class Iter {
-		
-	};
-	
-	Iter begin();
-	Iter end();
-	
-private:
-	FileRef				mFile;
-	std::string			mSceneName;
-	std::vector<Node>	mNodes;
+struct Scene {
+	std::vector<std::string>	nodes;
+	std::string					name;
+	Json::Value					extras;
 };
 	
 struct Accessor {
+
 	std::string			bufferView;	// Required Pointer to bufferView
 	uint32_t			byteOffset; // Required
 	uint32_t			byteStride = 0;
@@ -154,6 +143,7 @@ struct Accessor {
 };
 
 struct Animation {
+
 	struct Channel {
 		std::string sampler, targetId, targetPath;
 		Json::Value channelExtras, targetExtras;
@@ -170,6 +160,7 @@ struct Animation {
 };
 
 struct Buffer {
+
 	ci::BufferRef	data;
 	uint32_t		byteLength = 0;
 	std::string		uri; // path
@@ -179,29 +170,34 @@ struct Buffer {
 };
 
 struct BufferView {
-	std::string		name;
+
 	std::string		buffer; // Pointer to buffer
 	uint32_t		byteLength = 0;
 	uint32_t		byteOffset;
 	uint32_t		target;
+	std::string		name;
 	Json::Value		extras;
 };
 
 struct Camera {
+
+	enum class Type { PERSPECTIVE, ORTHOGRAPHIC };
+
 	std::string		name;
-	std::string		type;
+	Type			type;
 	float			zfar = 0.0f,
-	znear = 0.0f,
-	// only for perspective
-	yfov = 0.0f,
-	aspectRatio = 0.0f,
-	// only for orthographic
-	xmag = 0.0f,
-	ymag = 0.0f;
-	Json::Value		extras, orthoExtras, perspExtras;
+					znear = 0.0f,
+					// only for perspective
+					yfov = 0.0f,
+					aspectRatio = 0.0f,
+					// only for orthographic
+					xmag = 0.0f,
+					ymag = 0.0f;
+	Json::Value		extras, camSpecificExtras;
 };
 
 struct Image {
+
 	std::string			name;
 	std::string			uri; // path
 	ci::ImageSourceRef	imageSource;
@@ -288,7 +284,7 @@ struct Technique {
 	struct State {
 		struct Functions {
 			std::array<float, 4>	blendColor = { 0.0f, 0.0f, 0.0f, 0.0f };
-			std::array<float, 2>	blendEquationSeparate = { 32774, 32774 };
+			std::array<uint32_t, 2>	blendEquationSeparate = { 32774, 32774 };
 			std::array<int32_t, 4>	blendFuncSeparate = { 1, 1, 0, 0 };
 			std::array<bool, 4>		colorMask = { true, true, true, true };
 			std::array<float, 2>	depthRange = { 0.0f, 1.0f };
