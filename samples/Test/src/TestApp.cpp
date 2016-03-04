@@ -24,20 +24,16 @@ class TestApp : public App {
 
 void TestApp::setup()
 {
-	mGltf.setup( "duck/glTF/duck.gltf", "LOD3spShape-lib", "texture_file2", "" );
-	mCamUi.setCamera( &mGltf.getCamera() );
-	gl::enableDepthRead();
-	gl::enableDepthWrite();
+	auto file = gltf::File::create( loadAsset( ci::fs::path( "box" ) / "glTF" / "box.gltf" ) );
+	file->getAccessorInfo( "" );
 }
 
 void TestApp::mouseDown( MouseEvent event )
 {
-	mCamUi.mouseDown( event );
 }
 
 void TestApp::mouseDrag( MouseEvent event )
 {
-	mCamUi.mouseDrag( event );
 }
 
 void TestApp::update()
@@ -46,7 +42,6 @@ void TestApp::update()
 
 void TestApp::draw()
 {
-	mGltf.draw();
 }
 
 CINDER_APP( TestApp, RendererGl )

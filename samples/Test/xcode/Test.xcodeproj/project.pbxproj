@@ -19,7 +19,7 @@
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D85EA46A8594328A3A0A91B /* TestApp.cpp */; };
-		B38BD1051C096D790088BC4F /* GLTF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* GLTF.cpp */; };
+		B38BD1051C096D790088BC4F /* gltf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* gltf.cpp */; };
 		B38BD1071C096D790088BC4F /* GLTFLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1021C096D790088BC4F /* GLTFLoader.cpp */; };
 		B38BD1081C096D790088BC4F /* GLTFWorkApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1041C096D790088BC4F /* GLTFWorkApp.cpp */; };
 		B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */; };
@@ -44,8 +44,8 @@
 		6D85EA46A8594328A3A0A91B /* TestApp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = TestApp.cpp; path = ../src/TestApp.cpp; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A89456B4F93841B7AE9DC0D0 /* Test_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; path = Test_Prefix.pch; sourceTree = "<group>"; };
-		B38BD0FE1C096D790088BC4F /* GLTF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLTF.cpp; sourceTree = "<group>"; };
-		B38BD0FF1C096D790088BC4F /* GLTF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTF.h; sourceTree = "<group>"; };
+		B38BD0FE1C096D790088BC4F /* gltf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gltf.cpp; sourceTree = "<group>"; };
+		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1011C096D790088BC4F /* GltfContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GltfContainer.h; sourceTree = "<group>"; };
 		B38BD1021C096D790088BC4F /* GLTFLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLTFLoader.cpp; sourceTree = "<group>"; };
 		B38BD1031C096D790088BC4F /* GLTFLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLTFLoader.h; sourceTree = "<group>"; };
@@ -395,8 +395,8 @@
 		B38BD0FD1C096D790088BC4F /* src */ = {
 			isa = PBXGroup;
 			children = (
-				B38BD0FE1C096D790088BC4F /* GLTF.cpp */,
-				B38BD0FF1C096D790088BC4F /* GLTF.h */,
+				B38BD0FE1C096D790088BC4F /* gltf.cpp */,
+				B38BD0FF1C096D790088BC4F /* gltf.h */,
 				B38BD1011C096D790088BC4F /* GltfContainer.h */,
 				B38BD1021C096D790088BC4F /* GLTFLoader.cpp */,
 				B38BD1031C096D790088BC4F /* GLTFLoader.h */,
@@ -1208,7 +1208,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B38BD1051C096D790088BC4F /* GLTF.cpp in Sources */,
+				B38BD1051C096D790088BC4F /* gltf.cpp in Sources */,
 				B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */,
 				B38BD1081C096D790088BC4F /* GLTFWorkApp.cpp in Sources */,
 				A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */,
