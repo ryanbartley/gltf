@@ -146,6 +146,8 @@ private:
 	
 	friend std::ostream& operator<<( std::ostream &lhs, const File &rhs );
 };
+	
+
 
 struct Scene {
 	std::vector<std::string>	nodes;

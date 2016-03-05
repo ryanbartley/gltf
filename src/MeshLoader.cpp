@@ -6,7 +6,7 @@
 //
 //
 
-#include "GLTFLoader.h"
+#include "MeshLoader.h"
 
 using namespace ci;
 //using namespace ci::app;

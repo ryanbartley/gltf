@@ -100,7 +100,7 @@ void File::loadExtensions()
 		auto &extensions = mGltfTree["extensionsUsed"];
 		std::transform( begin( extensions ), end( extensions ), std::back_inserter( mExtensions ),
 		[]( const Json::Value &val ){ return val.asString(); } );
-		std::sort( begin( mExtensions ), end( mExtensions ), std::less<std::string>() );
+		std::sort( begin( mExtensions ), end( mExtensions ) );
 	}
 }
 
@@ -220,7 +220,6 @@ const Asset& File::getAssetInfo() const
 	
 void File::setAssetInfo( const Json::Value &assetInfo )
 {
-	cout << assetInfo.toStyledString() << endl;
 	CI_ASSERT( ! assetInfo["version"].isNull() );
 	mAssetInfo.version = assetInfo["version"].asString();
 	
@@ -255,7 +254,9 @@ void File::addBufferInfo( const std::string &key, const Json::Value &bufferInfo 
 	gltf::Buffer ret;
 	auto uri = bufferInfo["uri"].asString();
 	
-	if( auto pos = uri.find("data:application/octet-stream;base64,") != std::string::npos ) {
+	auto pos = uri.find_first_of(',');
+	if( pos != std::string::npos ) {
+		ret.uri = uri.substr( 0, pos );
 		auto data = uri.substr( pos + 1, uri.size() );
 		auto buffer = fromBase64( data );
 		ret.data = BufferRef( new ci::Buffer( std::move( buffer ) ) );
@@ -422,7 +423,7 @@ void File::addMeshInfo( const std::string &key, const Json::Value &meshInfo )
 		Mesh::Primitive meshPrim;
 		meshPrim.material = primitive["material"].asString();
 		meshPrim.indices = primitive["indices"].asString();
-		meshPrim.primitive = primitive["primitives"].asUInt();
+		meshPrim.primitive = primitive["mode"].asUInt();
 		meshPrim.extras = primitive["extras"];
 		
 		auto &attributes = primitive["attributes"];
@@ -657,7 +658,7 @@ void File::add( const std::string &key, Skin skin )
 void File::addSkinInfo( const std::string &key, const Json::Value &skinInfo )
 {
 	CI_ASSERT( skinInfo["inverseBindMatrices"].isString() );
-	CI_ASSERT( ! skinInfo["jointName"].isNull() );
+	CI_ASSERT( ! skinInfo["jointNames"].isNull() );
 	
 	Skin ret;
 	
@@ -815,8 +816,8 @@ void File::add( const std::string &key, Texture texture )
 
 void File::addTextureInfo( const std::string &key, const Json::Value &textureInfo )
 {
-	CI_ASSERT( ! textureInfo["sampler"].isString() );
-	CI_ASSERT( ! textureInfo["source"].isString() );
+	CI_ASSERT( textureInfo["sampler"].isString() );
+	CI_ASSERT( textureInfo["source"].isString() );
 	
 	Texture ret;
 	ret.source = textureInfo["source"].asString();
