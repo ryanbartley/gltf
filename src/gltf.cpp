@@ -21,6 +21,14 @@ using namespace std;
 
 namespace gltf {
 	
+struct BinaryHeader {
+	std::array<uint8_t, 4>	magic;
+	uint32_t				version;
+	uint32_t				length;
+	uint32_t				sceneLength;
+	uint32_t				sceneFormat;
+};
+	
 FileRef File::create( const ci::DataSourceRef &gltfFile )
 {
 	return FileRef( new File( gltfFile ) );
@@ -29,21 +37,46 @@ FileRef File::create( const ci::DataSourceRef &gltfFile )
 File::File( const ci::DataSourceRef &gltfFile )
 : mGltfPath( gltfFile->getFilePath().parent_path() )
 {
+	std::string gltfJson;
+	verifyFile( gltfFile, gltfJson );
+	
 	Json::Features features;
 	features.allowComments_ = true;
 	features.strictRoot_ = true;
+	
 	Json::Reader reader( features );
 	try {
-		reader.parse( loadString( gltfFile ), mGltfTree );
+		reader.parse( gltfJson, mGltfTree );
 	}
 	catch ( const std::runtime_error &e ) {
 		CI_LOG_E( "Error parsing gltf file " << e.what() );
 	}
-	
+	cout << mGltfTree.toStyledString() << endl;
 	loadExtensions();
 	if( ! mGltfTree["asset"].isNull() )
 		setAssetInfo( mGltfTree["asset"] );
 	load();
+}
+	
+void File::verifyFile( const ci::DataSourceRef &data, std::string &gltfJson )
+{
+	auto pathExtension = data->getFilePath().extension().string();
+	auto binary = pathExtension == ".glb";
+	if( binary ) {
+		auto buffer = data->getBuffer();
+		auto header = reinterpret_cast<BinaryHeader*>( buffer->getData() );
+		
+		auto sceneStart = reinterpret_cast<uint8_t*>( header + 1 );
+		gltfJson.append( sceneStart, sceneStart + header->sceneLength );
+		
+		auto binaryStart = sceneStart + header->sceneLength;
+		auto binarySize = header->length - header->sceneLength - sizeof( BinaryHeader );
+		
+		mBuffer = ci::Buffer::create( binarySize );
+		memcpy( mBuffer->getData(), binaryStart, binarySize );
+	}
+	else
+		gltfJson = loadString( data );
 }
 	
 void File::load()
@@ -55,6 +88,8 @@ void File::load()
 			mDefaultScene = typeObj.asString();
 			continue;
 		}
+		else if( typeName == "extensionsUsed" )
+			continue;
 		auto typeKeys = typeObj.getMemberNames();
 		for( auto &typeKey : typeKeys ) {
 			auto &obj = typeObj[typeKey];
@@ -262,7 +297,10 @@ void File::addBufferInfo( const std::string &key, const Json::Value &bufferInfo 
 		ret.data = BufferRef( new ci::Buffer( std::move( buffer ) ) );
 	}
 	else {
-		ret.data = loadFile( mGltfPath / uri )->getBuffer();
+		if( key == "binary_glTF" )
+			ret.data = mBuffer;
+		else
+			ret.data = loadFile( mGltfPath / uri )->getBuffer();
 	}
 	
 	ret.type = bufferInfo["type"].asString();
@@ -374,7 +412,22 @@ void File::addImageInfo( const std::string &key, const Json::Value &imageInfo )
 	ret.uri = imageInfo["uri"].asString();
 	ret.name = imageInfo["name"].asString();
 	
-	ret.imageSource = loadImage( loadFile( mGltfPath / ret.uri ) );
+	// in embedded use this to look at type
+//	auto beginning = uri.find('/');
+//	auto end = uri.find( ';' );
+//	auto typeStr = uri.substr( beginning + 1, end );
+	
+	auto hasExtInfo = imageInfo["extensions"].size() > 9;
+	if( hasExtension( "KHR_binary_glTF" ) && hasExtInfo ) {
+		cout << imageInfo.toStyledString() << endl;
+		CI_ASSERT( hasExtInfo );
+//		auto binaryExt = imageInfo["extensions"]["KHR_binary_glTF"];
+//		auto bufferView = binaryExt["bufferView"].asString();
+//		auto size = ivec2( binaryExt["width"].asUInt(), binaryExt["height"].asUInt() );
+//		auto mimetype = binaryExt["mimeType"].asString();
+	}
+	else
+		ret.imageSource = loadImage( loadFile( mGltfPath / ret.uri ) );
 	
 	add( key, move( ret ) );
 }
@@ -627,10 +680,25 @@ void File::addShaderInfo( const std::string &key, const Json::Value &shaderInfo 
 	Shader ret;
 	
 	auto uri = shaderInfo["uri"].asString();
-	if( auto pos = uri.find("data:text/plain;base64,") != std::string::npos ) {
-		auto data = uri.substr( pos + 1, uri.size() );
-		auto buffer = fromBase64( data );
-		ret.source = std::string( static_cast<char*>(buffer.getData()), buffer.getSize() );
+	
+	// either it's embeded, binary, or separate
+	
+	auto pos = uri.find(",");
+	if( pos != std::string::npos ) {
+		if( pos + 1 == uri.size() && hasExtension( "KHR_binary_glTF" ) ) {
+			auto binaryExt = shaderInfo["extensions"]["KHR_binary_glTF"];
+			auto bufferView = binaryExt["bufferView"].asString();
+			auto &bufferViewInfo = mGltfTree["bufferViews"][bufferView];
+			auto offset = bufferViewInfo["byteOffset"].asUInt();
+			auto length = bufferViewInfo["byteLength"].asUInt();
+			ret.source.append( reinterpret_cast<char*>( mBuffer->getData() ) + offset, length );
+			ret.uri = uri;
+		}
+		else {
+			auto data = uri.substr( pos + 1, uri.size() );
+			auto buffer = fromBase64( data );
+			ret.source = std::string( static_cast<char*>(buffer.getData()), buffer.getSize() );
+		}
 	}
 	else {
 		ret.source = loadString( loadFile( mGltfPath / uri ) );

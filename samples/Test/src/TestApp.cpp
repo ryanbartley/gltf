@@ -27,7 +27,7 @@ class TestApp : public App {
 
 void TestApp::setup()
 {
-	auto file = gltf::File::create( loadAsset( ci::fs::path( "brainsteam" ) / "glTF" / "brainsteam.gltf" ) );
+	auto file = gltf::File::create( loadAsset( ci::fs::path( "box" ) / "glTF-Binary" / "box.glb" ) );
 	gltf::MeshLoader mesh( file, "Figure_2_geometry-meshsplit_0" );
 	mBatch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color().lambert() ) );
 	

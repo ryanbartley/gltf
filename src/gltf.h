@@ -118,6 +118,7 @@ private:
 	File( const ci::DataSourceRef &gltfFile );
 	void load();
 	void loadExtensions();
+	void verifyFile( const ci::DataSourceRef &data, std::string &gltfJson );
 	
 	Json::Value			mGltfTree;
 	cinder::fs::path	mGltfPath;
@@ -143,6 +144,8 @@ private:
 	std::map<std::string, Skin>			mSkins;
 	std::map<std::string, Technique>	mTechniques;
 	std::map<std::string, Texture>		mTextures;
+	
+	ci::BufferRef	mBuffer;
 	
 	friend std::ostream& operator<<( std::ostream &lhs, const File &rhs );
 };
