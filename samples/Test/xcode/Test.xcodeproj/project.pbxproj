@@ -19,6 +19,7 @@
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D85EA46A8594328A3A0A91B /* TestApp.cpp */; };
+		B34FEFE81C8B424900EDB8C4 /* Skeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */; };
 		B38BD1051C096D790088BC4F /* gltf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* gltf.cpp */; };
 		B38BD1071C096D790088BC4F /* MeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1021C096D790088BC4F /* MeshLoader.cpp */; };
 		B38BD1081C096D790088BC4F /* GLTFWorkApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1041C096D790088BC4F /* GLTFWorkApp.cpp */; };
@@ -322,6 +323,8 @@
 		B34FEECB1C8A56CB00EDB8C4 /* vc.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = vc.bin; sourceTree = "<group>"; };
 		B34FEECC1C8A56CB00EDB8C4 /* vc.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vc.gltf; sourceTree = "<group>"; };
 		B34FEECD1C8A56CB00EDB8C4 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skeleton.cpp; sourceTree = "<group>"; };
+		B34FEFE71C8B424900EDB8C4 /* Skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skeleton.h; sourceTree = "<group>"; };
 		B38BD0FE1C096D790088BC4F /* gltf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gltf.cpp; sourceTree = "<group>"; };
 		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1011C096D790088BC4F /* GltfContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GltfContainer.h; sourceTree = "<group>"; };
@@ -1656,6 +1659,8 @@
 				B38BD1021C096D790088BC4F /* MeshLoader.cpp */,
 				B38BD1031C096D790088BC4F /* MeshLoader.h */,
 				B38BD1041C096D790088BC4F /* GLTFWorkApp.cpp */,
+				B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */,
+				B34FEFE71C8B424900EDB8C4 /* Skeleton.h */,
 			);
 			name = src;
 			path = ../../../src;
@@ -1723,6 +1728,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B34FEFE81C8B424900EDB8C4 /* Skeleton.cpp in Sources */,
 				B38BD1051C096D790088BC4F /* gltf.cpp in Sources */,
 				B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */,
 				B38BD1081C096D790088BC4F /* GLTFWorkApp.cpp in Sources */,

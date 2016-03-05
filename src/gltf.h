@@ -188,7 +188,6 @@ struct Animation {
 };
 
 struct Buffer {
-
 	ci::BufferRef	data;
 	uint32_t		byteLength = 0;
 	std::string		uri; // path
@@ -198,7 +197,6 @@ struct Buffer {
 };
 
 struct BufferView {
-
 	std::string		buffer; // Pointer to buffer
 	uint32_t		byteLength = 0;
 	uint32_t		byteOffset;
@@ -208,7 +206,6 @@ struct BufferView {
 };
 
 struct Camera {
-
 	enum class Type { PERSPECTIVE, ORTHOGRAPHIC };
 
 	std::string		name;
@@ -225,7 +222,6 @@ struct Camera {
 };
 
 struct Image {
-
 	std::string			name;
 	std::string			uri; // path
 	ci::ImageSourceRef	imageSource;

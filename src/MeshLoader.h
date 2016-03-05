@@ -28,7 +28,18 @@ public:
 	
 	virtual Source*		clone() const { return new MeshLoader( *this ); }
 	
+	struct MeshInstance {
+		MeshInstance( Material material, uint32_t first, uint32_t count )
+		: material( std::move( material ) ), first( first ), count( count ) {}
+		Material material;
+		uint32_t first;
+		uint32_t count;
+	};
+	
+	const std::vector<MeshInstance>& getMeshInstances() { return mMeshInstances; }
+	
 private:
+	void scanMesh( Mesh &mesh );
 	
 	template<typename T>
 	void copyIndices( std::vector<uint32_t> &indices, const T* data, uint32_t count ) const;
@@ -39,7 +50,8 @@ private:
 	size_t				mNumVertices, mNumIndices;
 	ci::geom::Primitive mPrimitive;
 	std::map<ci::geom::Attrib, const Accessor*> mAttribAccessors;
-	std::vector<const Accessor*> mIndexAccessors;
+	std::vector<const Accessor*>	mIndexAccessors;
+	std::vector<MeshInstance>		mMeshInstances;
 	
 };
 	
@@ -50,6 +62,7 @@ inline MeshLoader::MeshLoader( const FileRef &gltfFile, const std::string &meshI
 	bool primitiveSet = false;
 	bool verticesSet = false;
 	const auto &mesh = gltfFile->getMeshInfo( mMeshId );
+	
 	for( const auto &prim : mesh.primitives ) {
 		// Primitive Mode should be the same throughout.
 		if( ! primitiveSet ) {
@@ -70,16 +83,21 @@ inline MeshLoader::MeshLoader( const FileRef &gltfFile, const std::string &meshI
 			else
 				CI_ASSERT( mNumVertices == vertAccessor.count );
 			
+			auto material = gltfFile->getMaterialInfo( prim.material );
+			if( ! prim.indices.empty() ) {
+				const auto &index = gltfFile->getAccessorInfo( prim.indices );
+				mIndexAccessors.emplace_back( &index );
+				mMeshInstances.emplace_back( std::move( material ), mNumIndices, index.count );
+				mNumIndices += index.count;
+			}
+			else {
+				
+			}
+			
 			auto emplaced = mAttribAccessors.emplace( attribAccessors.attrib, &vertAccessor );
 			if( ! emplaced.second )
 				CI_ASSERT( emplaced.first->second == &vertAccessor );
 			mAvailableAttribs.insert( attribAccessors.attrib );
-		}
-		
-		if( ! prim.indices.empty() ) {
-			const auto &index = gltfFile->getAccessorInfo( prim.indices );
-			mIndexAccessors.emplace_back( &index );
-			mNumIndices += index.count;
 		}
 	}
 }
