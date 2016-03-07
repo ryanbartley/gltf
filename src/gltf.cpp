@@ -82,6 +82,7 @@ void File::verifyFile( const ci::DataSourceRef &data, std::string &gltfJson )
 void File::load()
 {
 	auto gltfTypes = mGltfTree.getMemberNames();
+	auto hasMaterialsCommon = hasExtension( "KHR_materials_common" );
 	for( auto &typeName : gltfTypes ) {
 		auto &typeObj = mGltfTree[typeName];
 		if( typeName == "scene" ) {
@@ -90,6 +91,15 @@ void File::load()
 		}
 		else if( typeName == "extensionsUsed" )
 			continue;
+		else if( typeName == "extensions" ) {
+			if( hasMaterialsCommon ) {
+				auto &lights = typeObj["KHR_materials_common"]["lights"];
+				auto lightKeys = lights.getMemberNames();
+				for ( auto &lightKey : lightKeys ) {
+					addLightInfo( lightKey, lights[lightKey] );
+				}
+			}
+		}
 		auto typeKeys = typeObj.getMemberNames();
 		for( auto &typeKey : typeKeys ) {
 			auto &obj = typeObj[typeKey];
@@ -450,6 +460,57 @@ void File::addImageInfo( const std::string &key, const Json::Value &imageInfo )
 	add( key, move( ret ) );
 }
 	
+const Light& File::getLightInfo( const std::string &key ) const
+{
+	auto found = mLights.find( key );
+	return found->second;
+}
+	
+template<>
+void File::add( const std::string &key, Light light )
+{
+	mLights[key] = move( light );
+}
+	
+void File::addLightInfo( const std::string &key, const Json::Value &val )
+{
+	CI_ASSERT( val["type"].isString() );
+	
+	Light ret;
+	auto type = val["type"].asString();
+	if( type == "ambient" )
+		ret.type = Light::Type::AMBIENT;
+	else if( type == "directional" )
+		ret.type = Light::Type::DIRECTIONAL;
+	else if( type == "point" )
+		ret.type = Light::Type::POINT;
+	else if( type == "spot" )
+		ret.type = Light::Type::SPOT;
+	else
+		CI_ASSERT_MSG( false, "Light only supports the above types" );
+	
+	auto &lightTypeInfo = val[type];
+	int i = 0;
+	for( auto &colorVal : lightTypeInfo["color"] ) {
+		ret.color[i++] = colorVal.asFloat();
+	}
+	ret.constantAttenuation = lightTypeInfo["constantAttenuation"].asFloat();
+	if( ret.type == Light::Type::POINT || ret.type == Light::Type::SPOT ) {
+		ret.distance = lightTypeInfo["distance"].asFloat();
+		if( lightTypeInfo["linearAttenuation"].isNumeric() )
+			ret.linearAttenuation = lightTypeInfo["linearAttenutation"].asFloat();
+		if( lightTypeInfo["quadraticAttenuation"].isNumeric() )
+			ret.quadraticAttenuation = lightTypeInfo["quadraticAttenuation"].asFloat();
+		if( ret.type == Light::Type::SPOT ) {
+			if( lightTypeInfo["falloffAngle"].isNumeric() )
+				ret.falloffAngle = lightTypeInfo["falloffAngle"].asFloat();
+			ret.falloffExponent = lightTypeInfo["falloffExponent"].asFloat();
+		}
+	}
+	
+	add( key, move( ret ) );
+}
+	
 const Material& File::getMaterialInfo( const std::string &key ) const
 {
 	auto found = mMaterials.find( key );
@@ -465,10 +526,70 @@ void File::add( const std::string &key, Material material )
 void File::addMaterialInfo( const std::string &key, const Json::Value &materialInfo )
 {
 	Material ret;
+	
+	auto &materialExt = materialInfo["extensions"]["KHR_materials_common"];
+	auto &material = materialExt.isNull() ? materialInfo : materialExt;
+	
+	ret.technique = material["technique"].asString();
+	
+	auto &values = material["values"];
+	auto valueKeys = material["values"].getMemberNames();
+	int i;
+	for( auto &valueKey : valueKeys ) {
+		if( valueKey == "ambient" ) {
+			auto &ambient = values[valueKey];
+			i = 0;
+			for( auto &ambVal : ambient ) {
+				ret.ambient[i++] = ambVal.asFloat();
+			}
+		}
+		else if( valueKey == "diffuse" || valueKey == "specular" || valueKey == "emission" ) {
+			auto &source = values[valueKey];
+			Material::Source src;
+			
+			if( valueKey == "diffuse" )
+				src.type = Material::Source::Type::DIFFUSE;
+			else if( valueKey == "specular" )
+				src.type = Material::Source::Type::SPECULAR;
+			else if( valueKey == "emission" )
+				src.type = Material::Source::Type::EMISSION;
+			else
+				CI_ASSERT_MSG( false, "Only the above types are supported" );
+			
+			if( source.isArray() ) {
+				i = 0;
+				for( auto & sourceVal : source ) {
+					src.color[i++] = sourceVal.asFloat();
+				}
+			}
+			else if( source.isString() )
+				src.texture = source.asString();
+			
+			ret.sources.emplace_back( move( src ) );
+		}
+		else if( valueKey == "shininess" ) {
+			ret.shininess = values[valueKey].asFloat();
+		}
+		else if( valueKey == "doubleSided" ) {
+			ret.doubleSided = values[valueKey].asBool();
+		}
+		else if( valueKey == "transparency" ) {
+			ret.transparency = values[valueKey].asFloat();
+		}
+		else if( valueKey == "transparent" ) {
+			ret.transparent = values[valueKey].asBool();
+		}
+		else if( valueKey == "jointCount" ) {
+			ret.jointCount = values[valueKey].asUInt();
+		}
+		else {
+			ret.values[valueKey] = values[valueKey];
+		}
+	}
+	
+	
 	ret.name = materialInfo["name"].asString();
-	ret.technique = materialInfo["technique"].asString();
-	ret.values = materialInfo["values"];
-	ret.extras = materialInfo["extras"];
+	ret.extras = material["extras"];
 	
 	add( key, move( ret ) );
 }
@@ -560,7 +681,13 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 		}
 	}
 	
-	if( ! nodeInfo["camera"].isNull() ) {
+	if( ! nodeInfo["extensions"].isNull() ) {
+		auto &ext = nodeInfo["extensions"];
+		if( ! ext["KHR_materials_common"].isNull() ) {
+			ret.light = ext["KHR_materials_common"]["light"].asString();
+		}
+	}
+	else if( ! nodeInfo["camera"].isNull() ) {
 		ret.camera = nodeInfo["camera"].asString();
 	}
 	else if( ! nodeInfo["jointName"].isNull() ) {
@@ -578,9 +705,11 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 		if( ! nodeInfo["skeletons"].isNull() ) {
 			auto &skeletons = nodeInfo["skeletons"];
 			std::transform( skeletons.begin(), skeletons.end(), std::back_inserter( ret.skeletons ),
-						   []( const Json::Value &val ){ return val.asString(); } );
+			[]( const Json::Value &val ){ return val.asString(); } );
 		}
 	}
+	
+	
 	
 	ret.name = nodeInfo["name"].asString();
 	ret.extras = nodeInfo["extras"];

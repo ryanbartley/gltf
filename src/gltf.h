@@ -27,6 +27,7 @@ struct BufferView;
 struct Buffer;
 struct Camera;
 struct Image;
+struct Light;
 struct Material;
 struct Mesh;
 struct Node;
@@ -79,6 +80,8 @@ public:
 	void				addCameraInfo( const std::string &key, const Json::Value &val );
 	const Image&		getImageInfo( const std::string &key ) const;
 	void				addImageInfo( const std::string &key, const Json::Value &val );
+	const Light&		getLightInfo( const std::string &key ) const;
+	void				addLightInfo( const std::string &key, const Json::Value &val );
 	const Material&		getMaterialInfo( const std::string &key ) const;
 	void				addMaterialInfo( const std::string &key, const Json::Value &val );
 	const Mesh &        getMeshInfo( const std::string &key ) const;
@@ -133,6 +136,7 @@ private:
 	std::map<std::string, gltf::Buffer> mBuffers;
 	std::map<std::string, Camera>		mCameras;
 	std::map<std::string, Image>		mImages;
+	std::map<std::string, Light>		mLights;
 	std::map<std::string, Material>		mMaterials;
 	std::map<std::string, Mesh>			mMeshes;
 	std::map<std::string, Node>			mNodes;
@@ -228,6 +232,8 @@ struct Image {
 };
 	
 struct Light {
+	enum class Type { AMBIENT, DIRECTIONAL, POINT, SPOT };
+	
 	ci::vec4	color = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	float		distance = 0.0f,
 				constantAttenuation = 0.0f,
@@ -235,7 +241,7 @@ struct Light {
 				quadraticAttenuation = 1.0f,
 				falloffAngle = M_PI / 2,
 				falloffExponent = 0;
-	std::string type;
+	Type		type;
 };
 
 struct Material {
@@ -249,6 +255,7 @@ struct Material {
 		ci::vec4	color = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	};
 	
+	uint32_t			jointCount = 0;
 	ci::vec4			ambient = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	std::vector<Source> sources;
 	float				shininess = 0.0f,

@@ -27,8 +27,8 @@ class TestApp : public App {
 
 void TestApp::setup()
 {
-	auto file = gltf::File::create( loadAsset( ci::fs::path( "CesiumMan" ) / "glTF" / "Cesium_Man.gltf" ) );
-	gltf::MeshLoader mesh( file, "Cesium_Man-mesh" );
+	auto file = gltf::File::create( loadAsset( ci::fs::path( "duck" ) / "glTF-MaterialsCommon" / "duck.gltf" ) );
+	gltf::MeshLoader mesh( file, "LOD3spShape-lib" );
 	mBatch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color().lambert() ) );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10.0f );
