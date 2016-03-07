@@ -227,10 +227,36 @@ struct Image {
 	ci::ImageSourceRef	imageSource;
 	Json::Value			extras;
 };
+	
+struct Light {
+	ci::vec4	color = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	float		distance = 0.0f,
+				constantAttenuation = 0.0f,
+				linearAttenuation = 1.0f,
+				quadraticAttenuation = 1.0f,
+				falloffAngle = M_PI_2,
+				falloffExponent = 0;
+	std::string type;
+};
 
 struct Material {
 	std::string		name;
 	std::string		technique;
+	
+	struct Source {
+		enum class Type { DIFFUSE, SPECULAR, EMISSION };
+		Type		type;
+		std::string texture;
+		ci::vec4	color = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	};
+	
+	ci::vec4			ambient = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
+	std::vector<Source> sources;
+	float				shininess = 0.0f,
+						transparency = 1.0f;
+	bool				doubleSided = false,
+						transparent = false;
+	
 	Json::Value		values;
 	Json::Value		extras;
 };
@@ -256,7 +282,7 @@ struct Mesh {
 
 struct Node {
 	std::vector<std::string> children, meshes, skeletons;
-	std::string				 camera, jointName, skin;
+	std::string				 camera, jointName, skin, light;
 	ci::mat4				 transformMatrix;
 	ci::quat				 rotation;
 	ci::vec3				 translation, scale = ci::vec3( 1.0f );
