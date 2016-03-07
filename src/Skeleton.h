@@ -15,6 +15,12 @@ struct Joint {
 	uint8_t		parentId;
 };
 
+struct Transform {
+	glm::quat rot;
+	glm::vec3 scale;
+	glm::vec3 trans;
+};
+
 struct JointPose {
 	glm::quat	rot;
 	ci::vec4	trans;
@@ -28,4 +34,15 @@ struct Skeleton {
 struct SkeletonPose {
 	std::shared_ptr<Skeleton>	skeleton;
 	std::vector<JointPose>		localPoses;
+};
+
+struct TransformationManager {
+	
+	std::deque<uint32_t>	mUnusedTransforms;
+	std::vector<Transform>	mTransforms;
+};
+
+struct Node {
+	
+	uint32_t transformIndex;
 };

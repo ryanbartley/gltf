@@ -413,18 +413,36 @@ void File::addImageInfo( const std::string &key, const Json::Value &imageInfo )
 	ret.name = imageInfo["name"].asString();
 	
 	// in embedded use this to look at type
-//	auto beginning = uri.find('/');
-//	auto end = uri.find( ';' );
-//	auto typeStr = uri.substr( beginning + 1, end );
+	size_t dataUri = ret.uri.find( "data:" );
 	
-	auto hasExtInfo = imageInfo["extensions"].size() > 9;
-	if( hasExtension( "KHR_binary_glTF" ) && hasExtInfo ) {
-		cout << imageInfo.toStyledString() << endl;
-		CI_ASSERT( hasExtInfo );
-//		auto binaryExt = imageInfo["extensions"]["KHR_binary_glTF"];
-//		auto bufferView = binaryExt["bufferView"].asString();
-//		auto size = ivec2( binaryExt["width"].asUInt(), binaryExt["height"].asUInt() );
-//		auto mimetype = binaryExt["mimeType"].asString();
+	if( dataUri != std::string::npos  ) {
+		auto binaryExt = imageInfo["extensions"]["KHR_binary_glTF"];
+		std::string extension;
+		ci::BufferRef buf;
+		if( ! binaryExt.isNull() ) {
+			auto binaryExt = imageInfo["extensions"]["KHR_binary_glTF"];
+			auto bufferView = binaryExt["bufferView"].asString();
+			// auto size = ivec2( binaryExt["width"].asUInt(), binaryExt["height"].asUInt() );
+			extension = binaryExt["mimeType"].asString();
+			auto &bufferViewInfo = mGltfTree["bufferViews"][bufferView];
+			auto byteOffset = bufferViewInfo["byteOffset"].asUInt();
+			auto byteLength = bufferViewInfo["byteLength"].asUInt();
+			auto bufferName = bufferViewInfo["buffer"].asString();
+			buf->setSize( byteLength );
+			memcpy( buf->getData(), reinterpret_cast<uint8_t*>(mBuffer->getData()) + byteOffset, byteLength );
+		}
+		else {
+			dataUri += 5; // past data
+			auto beginning = ret.uri.find('/');
+			auto end = ret.uri.find( ';' );
+			auto typeStr = ret.uri.substr( beginning + 1, end );
+			if( typeStr == "image/png" ) extension = "png";
+			else if( typeStr == "image/jpeg" ) extension = "jpeg";
+			auto dataBegin = ret.uri.find( ',' ) + 1;
+			auto len = ret.uri.size() - dataBegin;
+			buf = ci::BufferRef( new ci::Buffer( fromBase64( &ret.uri[dataBegin], len ) ) );
+		}
+		ret.imageSource = ci::loadImage( DataSourceBuffer::create( buf ), ImageSource::Options(), extension );
 	}
 	else
 		ret.imageSource = loadImage( loadFile( mGltfPath / ret.uri ) );
