@@ -8,6 +8,7 @@
 
 #include "cinder/GeomIo.h"
 #include "cinder/ObjLoader.h"
+#include "cinder/CinderAssert.h"
 #include "gltf.h"
 
 namespace gltf {

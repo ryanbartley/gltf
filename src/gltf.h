@@ -8,13 +8,12 @@
 
 #pragma once
 
+#include <math.h>
 #include "jsoncpp/json.h"
 #include "cinder/Text.h"
 #include "cinder/Utilities.h"
 
 #include "cinder/gl/gl.h"
-
-#include "GltfContainer.h"
 
 namespace gltf {
 	
@@ -234,7 +233,7 @@ struct Light {
 				constantAttenuation = 0.0f,
 				linearAttenuation = 1.0f,
 				quadraticAttenuation = 1.0f,
-				falloffAngle = M_PI_2,
+				falloffAngle = M_PI / 2,
 				falloffExponent = 0;
 	std::string type;
 };

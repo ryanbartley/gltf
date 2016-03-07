@@ -103,15 +103,14 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="..\..\..\src\gltf.cpp" />
-    <ClCompile Include="..\..\..\src\GltfContainer.cpp" />
-    <ClCompile Include="..\..\..\src\GLTFLoader.cpp" />
-    <ClCompile Include="..\..\..\src\GLTFWorkApp.cpp" />
+    <ClCompile Include="..\..\..\src\MeshLoader.cpp" />
+    <ClCompile Include="..\..\..\src\Skeleton.cpp" />
     <ClCompile Include="..\src\TestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gltf.h" />
-    <ClInclude Include="..\..\..\src\GltfContainer.h" />
-    <ClInclude Include="..\..\..\src\GLTFLoader.h" />
+    <ClInclude Include="..\..\..\src\MeshLoader.h" />
+    <ClInclude Include="..\..\..\src\Skeleton.h" />
     <ClInclude Include="..\include\Resources.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

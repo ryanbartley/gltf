@@ -33,16 +33,13 @@
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\..\src\GltfContainer.cpp">
-      <Filter>Blocks\Gltf\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\GLTFLoader.cpp">
-      <Filter>Blocks\Gltf\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\GLTFWorkApp.cpp">
-      <Filter>Blocks\Gltf\src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gltf.cpp">
+      <Filter>Blocks\Gltf\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\MeshLoader.cpp">
+      <Filter>Blocks\Gltf\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\Skeleton.cpp">
       <Filter>Blocks\Gltf\src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,13 +47,13 @@
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\GltfContainer.h">
-      <Filter>Blocks\Gltf\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\GLTFLoader.h">
-      <Filter>Blocks\Gltf\src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gltf.h">
+      <Filter>Blocks\Gltf\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\MeshLoader.h">
+      <Filter>Blocks\Gltf\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\Skeleton.h">
       <Filter>Blocks\Gltf\src</Filter>
     </ClInclude>
   </ItemGroup>

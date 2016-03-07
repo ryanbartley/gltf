@@ -8,6 +8,11 @@
 
 #pragma once
 
+#include "cinder/Matrix.h"
+#include "cinder/Vector.h"
+#include <string>
+#include <vector>
+
 
 struct Joint {
 	glm::mat4x3 inverseBindPose;
@@ -38,7 +43,7 @@ struct SkeletonPose {
 
 struct TransformationManager {
 	
-	std::deque<uint32_t>	mUnusedTransforms;
+	std::vector<uint32_t>	mUnusedTransforms;
 	std::vector<Transform>	mTransforms;
 };
 
