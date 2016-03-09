@@ -20,7 +20,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D85EA46A8594328A3A0A91B /* TestApp.cpp */; };
 		B34FEFE81C8B424900EDB8C4 /* Skeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */; };
-		B34FEFEE1C8F1C5D00EDB8C4 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFEC1C8F1C5D00EDB8C4 /* Animation.cpp */; };
+		B34FEFF21C90710500EDB8C4 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFEF1C90710500EDB8C4 /* Animation.cpp */; };
 		B38BD1051C096D790088BC4F /* gltf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* gltf.cpp */; };
 		B38BD1071C096D790088BC4F /* MeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1021C096D790088BC4F /* MeshLoader.cpp */; };
 /* End PBXBuildFile section */
@@ -324,9 +324,9 @@
 		B34FEECD1C8A56CB00EDB8C4 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skeleton.cpp; sourceTree = "<group>"; };
 		B34FEFE71C8B424900EDB8C4 /* Skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skeleton.h; sourceTree = "<group>"; };
-		B34FEFEA1C8E776500EDB8C4 /* Transformation.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Transformation.hpp; path = ../src/Transformation.hpp; sourceTree = "<group>"; };
-		B34FEFEC1C8F1C5D00EDB8C4 /* Animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Animation.cpp; sourceTree = "<group>"; };
-		B34FEFED1C8F1C5D00EDB8C4 /* Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Animation.h; sourceTree = "<group>"; };
+		B34FEFEF1C90710500EDB8C4 /* Animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Animation.cpp; sourceTree = "<group>"; };
+		B34FEFF01C90710500EDB8C4 /* Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Animation.h; sourceTree = "<group>"; };
+		B34FEFF11C90710500EDB8C4 /* Transformation.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Transformation.hpp; sourceTree = "<group>"; };
 		B38BD0FE1C096D790088BC4F /* gltf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gltf.cpp; sourceTree = "<group>"; };
 		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1021C096D790088BC4F /* MeshLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshLoader.cpp; sourceTree = "<group>"; };
@@ -368,9 +368,6 @@
 			isa = PBXGroup;
 			children = (
 				6D85EA46A8594328A3A0A91B /* TestApp.cpp */,
-				B34FEFEA1C8E776500EDB8C4 /* Transformation.hpp */,
-				B34FEFEC1C8F1C5D00EDB8C4 /* Animation.cpp */,
-				B34FEFED1C8F1C5D00EDB8C4 /* Animation.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1652,6 +1649,9 @@
 		B38BD0FD1C096D790088BC4F /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B34FEFEF1C90710500EDB8C4 /* Animation.cpp */,
+				B34FEFF01C90710500EDB8C4 /* Animation.h */,
+				B34FEFF11C90710500EDB8C4 /* Transformation.hpp */,
 				B38BD0FE1C096D790088BC4F /* gltf.cpp */,
 				B38BD0FF1C096D790088BC4F /* gltf.h */,
 				B38BD1021C096D790088BC4F /* MeshLoader.cpp */,
@@ -1729,7 +1729,7 @@
 				B38BD1051C096D790088BC4F /* gltf.cpp in Sources */,
 				A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */,
 				B38BD1071C096D790088BC4F /* MeshLoader.cpp in Sources */,
-				B34FEFEE1C8F1C5D00EDB8C4 /* Animation.cpp in Sources */,
+				B34FEFF21C90710500EDB8C4 /* Animation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
