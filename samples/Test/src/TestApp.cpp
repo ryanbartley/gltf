@@ -60,27 +60,12 @@ void TestApp::setup()
 		}
 		
 	}
-	std::vector<Clip> mClips;
-	const auto &animations = file->getAnimations();
-	for( auto &animation : animations ) {
-		auto & anim = animation.second;
-		mClips.emplace_back( file, anim );
-//		for( auto & param : anim.parameters ) {
-//			const auto &accessor = file->getAccessorInfo( param.accessor );
-//			auto numComponents = gltf::File::getNumComponentsForType( accessor.type );
-//			auto numBytesPerComponent = gltf::File::getNumBytesForComponentType( accessor.componentType );
-//			std::vector<float> data( numComponents * accessor.count );
-//			const auto &bufferView = file->getBufferViewInfo( accessor.bufferView );
-//			const auto &buffer = file->getBufferInfo( bufferView.buffer );
-//			auto dataPtr = reinterpret_cast<uint8_t*>(buffer.data->getData()) + bufferView.byteOffset + accessor.byteOffset;
-//			memcpy( data.data(), dataPtr, accessor.count * numComponents * numBytesPerComponent );
-//			cout << param.parameter << endl;
-//			for( auto &d : data ) {
-//				cout << "\t" << d << endl;
-//			}
-//		}
-		
-	}
+//	std::vector<Clip> mClips;
+//	const auto &animations = file->getAnimations();
+//	for( auto &animation : animations ) {
+//		auto & anim = animation.second;
+//		mClips.emplace_back( file, anim );
+//	}
 
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10.0f );
