@@ -20,9 +20,9 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D85EA46A8594328A3A0A91B /* TestApp.cpp */; };
 		B34FEFE81C8B424900EDB8C4 /* Skeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */; };
+		B34FEFEE1C8F1C5D00EDB8C4 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFEC1C8F1C5D00EDB8C4 /* Animation.cpp */; };
 		B38BD1051C096D790088BC4F /* gltf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* gltf.cpp */; };
 		B38BD1071C096D790088BC4F /* MeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1021C096D790088BC4F /* MeshLoader.cpp */; };
-		B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -324,12 +324,13 @@
 		B34FEECD1C8A56CB00EDB8C4 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skeleton.cpp; sourceTree = "<group>"; };
 		B34FEFE71C8B424900EDB8C4 /* Skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skeleton.h; sourceTree = "<group>"; };
+		B34FEFEA1C8E776500EDB8C4 /* Transformation.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Transformation.hpp; path = ../src/Transformation.hpp; sourceTree = "<group>"; };
+		B34FEFEC1C8F1C5D00EDB8C4 /* Animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Animation.cpp; sourceTree = "<group>"; };
+		B34FEFED1C8F1C5D00EDB8C4 /* Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Animation.h; sourceTree = "<group>"; };
 		B38BD0FE1C096D790088BC4F /* gltf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gltf.cpp; sourceTree = "<group>"; };
 		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1021C096D790088BC4F /* MeshLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshLoader.cpp; sourceTree = "<group>"; };
 		B38BD1031C096D790088BC4F /* MeshLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshLoader.h; sourceTree = "<group>"; };
-		B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GltfTestContainer.cpp; path = ../src/GltfTestContainer.cpp; sourceTree = "<group>"; };
-		B38BD2E51C0A24580088BC4F /* GltfTestContainer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = GltfTestContainer.hpp; path = ../src/GltfTestContainer.hpp; sourceTree = "<group>"; };
 		E21A7D4D799B4C719079CC79 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -367,8 +368,9 @@
 			isa = PBXGroup;
 			children = (
 				6D85EA46A8594328A3A0A91B /* TestApp.cpp */,
-				B38BD2E41C0A24580088BC4F /* GltfTestContainer.cpp */,
-				B38BD2E51C0A24580088BC4F /* GltfTestContainer.hpp */,
+				B34FEFEA1C8E776500EDB8C4 /* Transformation.hpp */,
+				B34FEFEC1C8F1C5D00EDB8C4 /* Animation.cpp */,
+				B34FEFED1C8F1C5D00EDB8C4 /* Animation.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1725,9 +1727,9 @@
 			files = (
 				B34FEFE81C8B424900EDB8C4 /* Skeleton.cpp in Sources */,
 				B38BD1051C096D790088BC4F /* gltf.cpp in Sources */,
-				B38BD2E61C0A24580088BC4F /* GltfTestContainer.cpp in Sources */,
 				A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */,
 				B38BD1071C096D790088BC4F /* MeshLoader.cpp in Sources */,
+				B34FEFEE1C8F1C5D00EDB8C4 /* Animation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

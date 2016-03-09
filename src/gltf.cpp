@@ -153,6 +153,18 @@ bool File::hasExtension( const std::string &extension ) const
 {
 	return std::binary_search( begin( mExtensions ), end( mExtensions ), extension );
 }
+	
+const Scene& File::getDefaultScene() const
+{
+	if( ! mDefaultScene.empty() ) {
+		auto found = mScenes.find( mDefaultScene );
+		return found->second;
+	}
+	else {
+		auto found = mScenes.begin();
+		return found->second;
+	}
+}
 
 const Accessor& File::getAccessorInfo( const std::string& key ) const
 {
@@ -252,7 +264,17 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 	}
 
 	ret.name = animationInfo["name"].asString();
-	ret.parameters = animationInfo["parameters"];
+	auto &params = animationInfo["parameters"];
+	auto paramKeys = params.getMemberNames();
+	for( auto & key : paramKeys ) {
+		if( key == "TIME" ) {
+			ret.timeAccessor = params[key].asString();
+		}
+		else {
+			Animation::Parameter param{ key, params[key].asString() };
+			ret.parameters.emplace_back( move( param ) );
+		}
+	}
 	ret.extras = animationInfo["extras"];
 
 	add( key, move( ret ) );
@@ -652,32 +674,31 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 {
 	Node ret;
 	
-	int i = 0;
 	if( ! nodeInfo["matrix"].isNull() ) {
 		auto matrix = nodeInfo["matrix"];
+		ret.transformMatrix.reserve( 16 );
 		for( auto & matVal : matrix ) {
-			ret.transformMatrix[i / 4][i % 4] = matVal.asFloat();
-			i++;
+			ret.transformMatrix.push_back( matVal.asFloat() );
 		}
 	}
 	else {
 		if( ! nodeInfo["translation"].isNull() ) {
 			auto transArray = nodeInfo["translation"];
-			i = 0;
+			ret.translation.reserve( 3 );
 			for( auto & transVal : transArray )
-				ret.translation[i++] = transVal.asFloat();
+				ret.translation.push_back( transVal.asFloat() );
 		}
 		if( ! nodeInfo["rotation"].isNull() ) {
 			auto rotArray = nodeInfo["rotation"];
-			i = 0;
+			ret.rotation.reserve( 4 );
 			for( auto & rotVal : rotArray )
-				ret.rotation[i++] = rotVal.asFloat();
+				ret.rotation.push_back( rotVal.asFloat() );
 		}
 		if( ! nodeInfo["scale"].isNull() ) {
 			auto & scaleArray = nodeInfo["scale"];
-			i = 0;
+			ret.scale.reserve( 3 );
 			for( auto & scaleVal : scaleArray )
-				ret.scale[i++] = scaleVal.asFloat();
+				ret.scale.push_back( scaleVal.asFloat() );
 		}
 	}
 	
@@ -1410,6 +1431,64 @@ TriMeshRef getTriMeshFromMeshByName( const File &gltf, const std::string &name )
 }
 	
 } // namespace gl
+	
+void Node::outputToConsole( std::ostream &os, uint8_t tabAmount ) const
+{
+	using std::endl;
+	os << "Name: " << name << endl;
+	if( ! camera.empty() )
+		os << "Camera: " << camera << endl;
+	else if( ! light.empty() )
+		os << "Light: " << light << endl;
+	else if( ! jointName.empty() )
+		os << "JointName: " << jointName << endl;
+	else {
+		if( ! meshes.empty() ) {
+			os << "Meshes: " << endl;
+			for( auto &mesh : meshes )
+				os << "\t" << mesh << endl;
+		}
+		if( ! skin.empty() )
+			os << "Skin: " << skin << endl;
+		if( ! skeletons.empty() ) {
+			os << "Skeletons: " << endl;
+			for( auto &skeleton : skeletons )
+				os << "\t" << skeleton << endl;
+		}
+	}
+	os << "Transform:" << endl;
+	if( ! transformMatrix.empty() ) {
+		os << "\tMatrix: [";
+		int i = 0;
+		for( auto &val : transformMatrix )
+			os << " " << val << (i++ < 15 ? "," : " ]");
+		os << endl;
+	}
+	else {
+		if( ! translation.empty() ) {
+			os << "\tTranslation: [";
+			int i = 0;
+			for( auto & val : translation )
+				os << " " << val << (i++ < 2 ? "," : " ]");
+			os << endl;
+		}
+		if( ! rotation.empty() ) {
+			os << "\tRotation: [";
+			int i = 0;
+			for( auto & val : rotation )
+				os << " " << val << (i++ < 3 ? "," : " ]");
+			os << endl;
+		}
+		if( ! scale.empty() ) {
+			os << "\tScale: [";
+			int i = 0;
+			for( auto & val : scale )
+				os << " " << val << (i++ < 2 ? "," : " ]");
+			os << endl;
+		}
+	}
+	os << endl;
+}
 
 std::ostream& operator<<( std::ostream &lhs, const File &rhs )
 {
@@ -1464,6 +1543,7 @@ std::ostream& operator<<( std::ostream &lhs, const Mesh &rhs )
 
 std::ostream& operator<<( std::ostream &lhs, const Node &rhs )
 {
+	rhs.outputToConsole( lhs, 0 );
 	return lhs;
 }
 

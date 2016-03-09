@@ -54,11 +54,13 @@ public:
 	static FileRef create( const ci::DataSourceRef &gltfFile );
 	~File() = default;
 	
-	const ci::fs::path&				getGltfPath() const { return mGltfPath; }
-	const Json::Value&				getTree() const { return mGltfTree; }
+	const ci::fs::path&	getGltfPath() const { return mGltfPath; }
+	const Json::Value&	getTree() const { return mGltfTree; }
 	
-	const Asset&					getAssetInfo() const;
-	void							setAssetInfo( const Json::Value &val );
+	const Asset&		getAssetInfo() const;
+	void				setAssetInfo( const Json::Value &val );
+	
+	const Scene&		getDefaultScene() const;
 	
 	bool							hasExtension( const std::string &extension ) const;
 	const std::vector<std::string>& getExtensions() const { return mExtensions; }
@@ -102,6 +104,8 @@ public:
 	void				addTechniqueInfo( const std::string &key, const Json::Value &val );
 	const Texture&		getTextureInfo( const std::string &key ) const;
 	void				addTextureInfo( const std::string &key, const Json::Value &val );
+	
+	const std::map<std::string, Animation>& getAnimations() { return mAnimations; }
 	
 	//! Returns the converted string as a geom::Attrib. Attribute semantics
 	//! include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX, and
@@ -162,6 +166,7 @@ struct Scene {
 };
 	
 struct Accessor {
+	
 	std::string			bufferView;	// Required Pointer to bufferView
 	uint32_t			byteOffset; // Required
 	uint32_t			byteStride = 0;
@@ -182,11 +187,15 @@ struct Animation {
 	struct Sampler {
 		std::string input, interpolation = "LINEAR", output;
 	};
+	struct Parameter {
+		std::string parameter, accessor;
+	};
 	
 	std::vector<Channel>	channels;
 	std::vector<Sampler>	samplers;
+	std::string				timeAccessor;
+	std::vector<Parameter>	parameters;
 	std::string				name;
-	Json::Value				parameters;
 	Json::Value				extras;
 };
 
@@ -287,11 +296,32 @@ struct Mesh {
 };
 
 struct Node {
+	
+	void outputToConsole( std::ostream &os, uint8_t tabAmount ) const;
+	
+	ci::mat4 getTransformMatrix() const
+	{
+		return glm::make_mat4( transformMatrix.data() );
+	}
+	ci::vec3 getTranslation() const
+	{
+		return glm::make_vec3( translation.data() );
+	}
+	ci::quat getRotation() const
+	{
+		return glm::make_quat( rotation.data() );
+	}
+	ci::vec3 getScale() const
+	{
+		return glm::make_vec3( scale.data() );
+	}
+	
 	std::vector<std::string> children, meshes, skeletons;
 	std::string				 camera, jointName, skin, light;
-	ci::mat4				 transformMatrix;
-	ci::quat				 rotation;
-	ci::vec3				 translation, scale = ci::vec3( 1.0f );
+	std::vector<float>		 transformMatrix,	// either 0 or 16
+							 rotation,			// either 0 or 4
+							 translation,		// either 0 or 3
+							 scale;				// either 0 or 3
 	std::string				 name;
 	Json::Value				 extras;
 };
