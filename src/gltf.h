@@ -10,10 +10,10 @@
 
 #include <math.h>
 #include "jsoncpp/json.h"
-#include "cinder/Text.h"
 #include "cinder/Utilities.h"
-
 #include "cinder/gl/gl.h"
+#include "Transformation.hpp"
+#include "Animation.h"
 
 namespace gltf {
 	
@@ -197,7 +197,12 @@ struct Animation {
 		uint32_t			numComponents;
 		std::vector<float>	data;
 	};
-	std::vector<ParameterData> getParameters( const FileRef &file );
+	std::vector<ParameterData> getParameters( const FileRef &file ) const;
+	
+	static Clip<Transform>	createTransformClip( const std::vector<ParameterData> &paramData );
+	static Clip<ci::vec3>	createTranslationClip( const std::vector<ParameterData> &paramData );
+	static Clip<ci::vec3>	createScaleClip( const std::vector<ParameterData> &paramData );
+	static Clip<ci::quat>	createRotationClip( const std::vector<ParameterData> &paramData );
 	
 	std::vector<Channel>	channels;
 	std::vector<Sampler>	samplers;

@@ -8,102 +8,162 @@
 
 #pragma once
 
-#include "gltf.h"
 
-template< typename T >
+
+template <typename T>
 class Clip {
 public:
-	Clip( const std::vector<std::pair<double, T>> &keyframes );
+	Clip()
+	: mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
+	Clip( const std::vector<std::pair<double, T>> &keyFrames );
 	
-	void addKeyframe( double time, T value );
-	T getValue( double time ) const;
-	
-	inline bool	empty() const { return mKeyframes.empty(); }
-	std::pair<double, double>	getBounds() const { return { mStartTime, mStartTime + mDuration }; }
-	double	getDuration() const { return mDuration; }
-	static inline T	lerp( const T& start, const T& end, double time );
+	void addKeyFrame( double time, T value );
+	T get( double time );
+	T getLooped( double time );
+	double getCyclicTime( double time ) { return glm::mod( time, mDuration ); }
+	T lerp( const T &begin, const T &end, double time );
+	std::pair<double, double> getBounds() const { return { mStartTime, mStartTime + mDuration }; }
 	
 private:
-	Clip();
 	
-	static inline bool	isFinite( const glm::vec3& vec );
-	inline double		getCyclicTime( double time ) const;
+	double				mStartTime, mDuration;
+	std::vector<double> mKeyFrameTimes;
+	std::vector<T>		mKeyFrameValues;
 	
-	std::vector<double>		mTimes;
-	std::vector<T>			mKeyframes;
-	
-	double				mStartTime;
-	double				mDuration;
+	friend std::ostream& operator<<( std::ostream &os, const Clip<T> &clip );
 };
 
-template< typename T >
-Clip<T>::Clip()
-: mStartTime( std::numeric_limits<double>::max() )
-, mDuration( std::numeric_limits<double>::lowest() )
+template <typename T>
+Clip<T>::Clip( const std::vector<std::pair<double, T>> &keyFrames )
 {
-}
-
-template< typename T>
-Clip<T>::Clip( const std::vector<std::pair<double, T>> &keyframe )
-: mStartTime( std::numeric_limits<double>::max() )
-, mDuration( std::numeric_limits<double>::lowest() )
-{
-	// insert in;
-	if( ! mKeyframes.empty() ) {
-		mStartTime = mKeyframes.begin().time;
-		mDuration = mKeyframes.rbegin().time - mStartTime;
+	auto begIt = begin( keyFrames );
+	auto endIt = end( keyFrames );
+//	std::sort( begIt, endIt,
+//			  []( const std::pair<double, T> &lhs, const std::pair<double, T> &rhs ){
+//				  return lhs.first < rhs.first;
+//			  });
+//	begIt = begin( keyFrames );
+//	endIt = end( keyFrames );
+	
+	mStartTime = begIt->first;
+	mDuration = (endIt - 1)->first - mStartTime;
+	std::cout << mDuration << std::endl;
+	auto numKeyFrames = keyFrames.size();
+	mKeyFrameTimes.reserve( numKeyFrames );
+	mKeyFrameValues.reserve( numKeyFrames );
+	while( begIt != endIt ) {
+		mKeyFrameTimes.push_back( begIt->first );
+		mKeyFrameValues.push_back( begIt->second );
+		++begIt;
 	}
 }
 
-template< typename T >
-void Clip<T>::addKeyframe( double time, T value )
+template <typename T>
+inline void Clip<T>::addKeyFrame( double time, T value )
 {
-	auto it = std::lower_bound( begin( mKeyframes ), end( mKeyframes ), time );
-	mKeyframes.emplace( it, { time, value } );
-	
-	
 	mStartTime = glm::min( time, mStartTime );
-	mDuration = mKeyframes.rbegin().time - mStartTime;
-}
-
-template< typename T >
-T Clip<T>::getValue( double relativeTime ) const
-{
-	CI_ASSERT( ! mKeyframes.empty() );
+	mDuration = glm::max( time - mStartTime, mDuration );
 	
-	auto begin = std::begin( mKeyframes );
-	auto end = std::end( mKeyframes );
-	auto next = std::upper_bound( begin, end, relativeTime );
-	auto dist = std::distance( begin, next );
+	auto begIt = begin( mKeyFrameTimes );
+	auto endIt = end( mKeyFrameTimes );
+	auto found = std::lower_bound( begIt, endIt, time );
+	mKeyFrameTimes.emplace( found, time );
 	
-//	CI_ASSERT( 0.0f < normalizedTime && 1.0f >= normalizedTime);
-//	return lerp( itprev->second, itnext->second, normalizedTime );
+	auto dist = std::distance( begIt, found );
+	mKeyFrameValues.emplace( mKeyFrameValues.begin() + dist, value );
 }
 
-template< typename T >
-inline double Clip<T>::getCyclicTime( double time ) const
+template <typename T>
+inline T Clip<T>::get( double absTime )
 {
-	return glm::mod( time, getDuration() );
+	T ret;
+	auto clamped = glm::clamp( absTime, mStartTime, mStartTime + mDuration );
+	auto begIt = begin( mKeyFrameTimes );
+	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, clamped );
+	auto dist = std::distance( begIt, nextIt );
+	
+	auto prevTime = nextIt - 1;
+	auto perTime = (clamped - *(prevTime)) / ((*nextIt) - *(prevTime));
+	return lerp( mKeyFrameValues[dist - 1], mKeyFrameValues[dist], perTime );
 }
 
-template< typename T >
-inline T Clip<T>::lerp( const T& start, const T& end, double time )
+template <typename T>
+inline T Clip<T>::getLooped( double absTime )
 {
-	return glm::mix( start, end, time );
+	T ret;
+	auto cyclicTime = getCyclicTime( absTime ) + mStartTime;
+	auto begIt = begin( mKeyFrameTimes );
+	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, cyclicTime );
+	auto dist = std::distance( begIt, nextIt );
+	
+	// could be last or first, probably not first.
+	auto prevTime = nextIt - 1;
+	auto perTime = (cyclicTime - *(prevTime)) / ((*nextIt) - *(prevTime));
+	return lerp( mKeyFrameValues[dist - 1], mKeyFrameValues[dist], perTime );
 }
 
 template<>
-inline ci::quat Clip<ci::quat>::lerp( const ci::quat& start, const ci::quat& end, double time )
+inline float Clip<float>::lerp( const float &begin, const float &end, double time )
 {
-	return glm::slerp( start, end, static_cast<float>( time ) );
+	return glm::mix( begin, end, time );
 }
 
 template<>
-inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat& start, const ci::dquat& end, double time )
+inline ci::vec2 Clip<ci::vec2>::lerp( const ci::vec2 &begin, const ci::vec2 &end, double time )
 {
-	return glm::slerp( start, end, time );
+	return glm::mix( begin, end, time );
 }
 
-using Vec3Clip = Clip<ci::vec3>;
-using Vec4Clip = Clip<ci::vec4>;
-using QuatClip = Clip<ci::quat>;
+template<>
+inline ci::vec3 Clip<ci::vec3>::lerp( const ci::vec3 &begin, const ci::vec3 &end, double time )
+{
+	return glm::mix( begin, end, time );
+}
+
+template<>
+inline ci::vec4 Clip<ci::vec4>::lerp( const ci::vec4 &begin, const ci::vec4 &end, double time )
+{
+	return glm::mix( begin, end, time );
+}
+
+template<>
+inline ci::quat Clip<ci::quat>::lerp( const ci::quat &begin, const ci::quat &end, double time )
+{
+	return glm::slerp( begin, end, static_cast<float>( time ) );
+}
+
+template<>
+inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat &begin, const ci::dquat &end, double time )
+{
+	return glm::slerp( begin, end, time );
+}
+
+template<>
+inline Transform Clip<Transform>::lerp( const Transform &begin, const Transform &end, double time )
+{
+	Transform ret;
+	ret.trans = glm::mix( begin.trans, end.trans, time );
+	ret.scale = glm::mix( begin.scale, end.scale, time );
+	ret.rot = glm::slerp( begin.rot, end.rot, static_cast<float>( time ) );
+	return ret;
+}
+
+inline std::ostream& operator<<( std::ostream &os, const Clip<ci::vec3> &clip )
+{
+	auto numKeyFrames = clip.mKeyFrameTimes.size();
+	for( int i = 0; i < numKeyFrames; i++ ) {
+		os << clip.mKeyFrameTimes[i] << " = " << clip.mKeyFrameValues[i] << std::endl;
+	}
+	return os;
+}
+
+inline std::ostream& operator<<( std::ostream &os, const Clip<ci::quat> &clip )
+{
+	auto numKeyFrames = clip.mKeyFrameTimes.size();
+	for( int i = 0; i < numKeyFrames; i++ ) {
+		os << clip.mKeyFrameTimes[i] << " = " << clip.mKeyFrameValues[i] << std::endl;
+	}
+	return os;
+}
+
+using ClipVec3 = Clip<ci::vec3>;

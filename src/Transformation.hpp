@@ -28,13 +28,20 @@ struct Transform {
 	const ci::quat& getRotation() const { return rot; }
 	
 	void setTranslation( const ci::vec3 &translation ) { trans = translation; }
-	void translate( const ci::vec3 &translation ) { trans+= translation; }
-	void setScale( const ci::vec3 &scale ) { this->scale = scale; }
 	void setRotation( const ci::quat &rotation ) { rot = rotation; }
-	void rotate( const ci::quat &rotation ) { rot *= rotation; }
+	void setScale( const ci::vec3 &scale ) { this->scale = scale; }
+	
+	void translateBy( const ci::vec3 &translation ) { trans+= translation; }
+	void rotateBy( const ci::quat &rotation ) { rot *= rotation; }
+	void scaleBy( const ci::vec3 &scale ) { this->scale *= scale; }
 	
 	ci::vec3	trans;
 	ci::vec3	scale;
 	ci::quat	rot;
-	
 };
+
+std::ostream& operator<<( std::ostream &os, const Transform &trans )
+{
+	os << "Translation: " << trans.trans << " Rotation: " << trans.rot << " Scale: " << trans.scale << std::endl;
+	return os;
+}

@@ -8,11 +8,6 @@
 
 #pragma once
 
-#include "cinder/Matrix.h"
-#include "cinder/Vector.h"
-#include <string>
-#include <vector>
-
 
 struct Joint {
 	glm::mat4	inverseBindPose;

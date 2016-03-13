@@ -1185,7 +1185,7 @@ void* Accessor::getDataPtr( const gltf::FileRef &file, const Accessor &accessor 
 	return reinterpret_cast<uint8_t*>(buffer.data->getData()) + bufferView.byteOffset + accessor.byteOffset;
 }
 	
-std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file )
+std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file ) const
 {
 	std::vector<Animation::ParameterData> ret;
 	ret.reserve( parameters.size() + 1 );
@@ -1205,13 +1205,119 @@ std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &f
 		auto numComponents = gltf::File::getNumComponentsForType( accessor.type );
 		
 		CI_ASSERT( totalKeyFrames == accessor.count );
-		auto dataPtr = Accessor::getDataPtr( file, timeAccess );
+		auto dataPtr = Accessor::getDataPtr( file, accessor );
 		
 		Animation::ParameterData parameter{ param.parameter, numComponents, std::vector<float>( totalKeyFrames * numComponents ) };
 		memcpy( parameter.data.data(), dataPtr, accessor.count * numComponents * sizeof( float ) );
 		ret.emplace_back( move( parameter ) );
 	}
 
+	return ret;
+}
+	
+Clip<Transform>	Animation::createTransformClip( const std::vector<ParameterData> &paramData )
+{
+	const std::vector<float> *timeData = nullptr, *scaleData = nullptr, *transData = nullptr, *rotData = nullptr;
+	for( auto &param : paramData )
+		if( param.paramName == "TIME" )
+			timeData = &param.data;
+		else if( param.paramName == "rotation" )
+			rotData = &param.data;
+		else if( param.paramName == "scale" )
+			scaleData = &param.data;
+		else if( param.paramName == "translation" )
+			transData = &param.data;
+	
+	std::vector<std::pair<double, Transform>> transformKeyFrames( timeData->size() );
+	
+	int i = 0;
+	for( auto & transformKeyFrame : transformKeyFrames ) {
+		transformKeyFrame.first = (*timeData)[i];
+		if( transData != nullptr ) {
+			auto translation = *reinterpret_cast<const ci::vec3*>( &(*transData)[i*3] );
+			transformKeyFrame.second.setTranslation( translation );
+		}
+		if( rotData != nullptr ) {
+			auto rotation = *reinterpret_cast<const ci::quat*>( &(*rotData)[i*4] );
+			transformKeyFrame.second.setRotation( rotation );
+		}
+		if( scaleData != nullptr ) {
+			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
+			transformKeyFrame.second.setTranslation( scale );
+		}
+		i++;
+	}
+	
+	Clip<Transform> ret( transformKeyFrames );
+	return ret;
+}
+	
+Clip<ci::vec3>	Animation::createTranslationClip( const std::vector<ParameterData> &paramData )
+{
+	const std::vector<float> *timeData = nullptr, *transData = nullptr;
+	for( auto &param : paramData )
+		if( param.paramName == "TIME" )
+			timeData = &param.data;
+		else if( param.paramName == "translation" )
+			transData = &param.data;
+	
+	std::vector<std::pair<double, ci::vec3>> transformKeyFrames( timeData->size() );
+	
+	int i = 0;
+	for( auto & transformKeyFrame : transformKeyFrames ) {
+		transformKeyFrame.first = (*timeData)[i];
+		auto translation = *reinterpret_cast<const ci::vec3*>( &(*transData)[i*3] );
+		transformKeyFrame.second = translation;
+		i++;
+	}
+	
+	Clip<ci::vec3> ret( transformKeyFrames );
+	return ret;
+}
+
+Clip<ci::vec3>	Animation::createScaleClip( const std::vector<ParameterData> &paramData )
+{
+	const std::vector<float> *timeData = nullptr, *scaleData = nullptr;
+	for( auto &param : paramData )
+		if( param.paramName == "TIME" )
+			timeData = &param.data;
+		else if( param.paramName == "scale" )
+			scaleData = &param.data;
+	
+	std::vector<std::pair<double, ci::vec3>> transformKeyFrames( timeData->size() );
+	
+	int i = 0;
+	for( auto & transformKeyFrame : transformKeyFrames ) {
+		transformKeyFrame.first = (*timeData)[i];
+		auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
+		transformKeyFrame.second = scale;
+		i++;
+	}
+	
+	Clip<ci::vec3> ret( transformKeyFrames );
+	return ret;
+}
+
+Clip<ci::quat>	Animation::createRotationClip( const std::vector<ParameterData> &paramData )
+{
+	const std::vector<float> *timeData = nullptr, *rotData = nullptr;
+	for( auto &param : paramData )
+		if( param.paramName == "TIME" )
+			timeData = &param.data;
+		else if( param.paramName == "rotation" )
+			rotData = &param.data;
+	
+	std::vector<std::pair<double, ci::quat>> transformKeyFrames( timeData->size() );
+	
+	int i = 0;
+	for( auto & transformKeyFrame : transformKeyFrames ) {
+		transformKeyFrame.first = (*timeData)[i];
+		auto rotation = *reinterpret_cast<const ci::quat*>( &(*rotData)[i*4] );
+		transformKeyFrame.second = rotation;
+		i++;
+	}
+	
+	Clip<ci::quat> ret( transformKeyFrames );
 	return ret;
 }
 	
