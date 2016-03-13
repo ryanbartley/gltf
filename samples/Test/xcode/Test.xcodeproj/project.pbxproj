@@ -331,6 +331,7 @@
 		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1021C096D790088BC4F /* MeshLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshLoader.cpp; sourceTree = "<group>"; };
 		B38BD1031C096D790088BC4F /* MeshLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshLoader.h; sourceTree = "<group>"; };
+		B3F39FA91C935576009BDE9B /* AnimTemp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AnimTemp.h; sourceTree = "<group>"; };
 		E21A7D4D799B4C719079CC79 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1658,6 +1659,7 @@
 				B38BD1031C096D790088BC4F /* MeshLoader.h */,
 				B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */,
 				B34FEFE71C8B424900EDB8C4 /* Skeleton.h */,
+				B3F39FA91C935576009BDE9B /* AnimTemp.h */,
 			);
 			name = src;
 			path = ../../../src;

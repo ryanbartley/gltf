@@ -156,8 +156,6 @@ private:
 	
 	friend std::ostream& operator<<( std::ostream &lhs, const File &rhs );
 };
-	
-
 
 struct Scene {
 	std::vector<std::string>	nodes;
@@ -166,6 +164,8 @@ struct Scene {
 };
 	
 struct Accessor {
+	
+	static void* getDataPtr( const FileRef &file, const Accessor &accessor );
 	
 	std::string			bufferView;	// Required Pointer to bufferView
 	uint32_t			byteOffset; // Required
@@ -181,15 +181,23 @@ struct Accessor {
 struct Animation {
 
 	struct Channel {
-		std::string sampler, targetId, targetPath;
+		std::string sampler, id, path;
 		Json::Value channelExtras, targetExtras;
 	};
 	struct Sampler {
-		std::string input, interpolation = "LINEAR", output;
+		enum class LerpType { LINEAR };
+		std::string input, output;
+		LerpType type = LerpType::LINEAR;
 	};
 	struct Parameter {
 		std::string parameter, accessor;
 	};
+	struct ParameterData {
+		std::string			paramName;
+		uint32_t			numComponents;
+		std::vector<float>	data;
+	};
+	std::vector<ParameterData> getParameters( const FileRef &file );
 	
 	std::vector<Channel>	channels;
 	std::vector<Sampler>	samplers;

@@ -10,94 +10,74 @@
 
 #include "gltf.h"
 
-
-
 template< typename T >
 class Clip {
 public:
-	Clip();
-	Clip( const std::map<double, T> curve );
+	Clip( const std::vector<std::pair<double, T>> &keyframes );
 	
-	struct KeyFrame {
-		double	time;
-		T		value;
-	};
-	
-	void	addKeyframe( double time, T value );
-	
-	T		getValue( double time ) const;
+	void addKeyframe( double time, T value );
+	T getValue( double time ) const;
 	
 	inline bool	empty() const { return mKeyframes.empty(); }
-	std::pair<double, double>	getBounds() const { return { mStartTime, mEndTime }; }
-	double	getDuration() const { return mEndTime - mStartTime; }
+	std::pair<double, double>	getBounds() const { return { mStartTime, mStartTime + mDuration }; }
+	double	getDuration() const { return mDuration; }
+	static inline T	lerp( const T& start, const T& end, double time );
 	
-	
-	static inline T		lerp( const T& start, const T& end, double time );
 private:
+	Clip();
+	
 	static inline bool	isFinite( const glm::vec3& vec );
 	inline double		getCyclicTime( double time ) const;
 	
-	std::vector<KeyFrame>	mKeyframes;
+	std::vector<double>		mTimes;
+	std::vector<T>			mKeyframes;
 	
 	double				mStartTime;
-	double				mEndTime;
+	double				mDuration;
 };
 
 template< typename T >
 Clip<T>::Clip()
 : mStartTime( std::numeric_limits<double>::max() )
-, mEndTime( std::numeric_limits<double>::lowest() )
+, mDuration( std::numeric_limits<double>::lowest() )
 {
-	
 }
 
 template< typename T>
-Clip<T>::Clip( const std::map<double, T> curve )
-: mKeyframes( curve )
-, mStartTime( std::numeric_limits<double>::max() )
-, mEndTime( std::numeric_limits<double>::lowest() )
+Clip<T>::Clip( const std::vector<std::pair<double, T>> &keyframe )
+: mStartTime( std::numeric_limits<double>::max() )
+, mDuration( std::numeric_limits<double>::lowest() )
 {
+	// insert in;
 	if( ! mKeyframes.empty() ) {
-		mStartTime = mKeyframes.begin()->first;
-		mEndTime = mKeyframes.rbegin()->first;
+		mStartTime = mKeyframes.begin().time;
+		mDuration = mKeyframes.rbegin().time - mStartTime;
 	}
 }
 
 template< typename T >
 void Clip<T>::addKeyframe( double time, T value )
 {
-	mKeyframes[time] = value;
+	auto it = std::lower_bound( begin( mKeyframes ), end( mKeyframes ), time );
+	mKeyframes.emplace( it, { time, value } );
+	
 	
 	mStartTime = glm::min( time, mStartTime );
-	mEndTime = glm::max( time, mEndTime );
+	mDuration = mKeyframes.rbegin().time - mStartTime;
 }
 
 template< typename T >
-T Clip<T>::getValue( double time ) const
+T Clip<T>::getValue( double relativeTime ) const
 {
 	CI_ASSERT( ! mKeyframes.empty() );
 	
-	if( mKeyframes.size() == 1 )
-		return mKeyframes.begin()->second;
+	auto begin = std::begin( mKeyframes );
+	auto end = std::end( mKeyframes );
+	auto next = std::upper_bound( begin, end, relativeTime );
+	auto dist = std::distance( begin, next );
 	
-	double cyclicTime = getCyclicTime( time );
-	
-	auto itnext =  mKeyframes.upper_bound( cyclicTime );
-	auto itprev = ( itnext == mKeyframes.begin() ) ? mKeyframes.end() : itnext;
-	itprev--;
-	
-	// no interpolation needed, we are right on the 'prev' keyframe
-	if( cyclicTime == 0.0f || itprev->first == cyclicTime )
-		return itprev->second;
-	
-	double normalizedTime;
-	if( itnext == mKeyframes.begin() )
-		normalizedTime = cyclicTime / itnext->first;
-	else
-		normalizedTime = (cyclicTime - itprev->first) / (itnext->first - itprev->first);
-	
-	CI_ASSERT( 0.0f < normalizedTime && 1.0f >= normalizedTime);
-	return lerp( itprev->second, itnext->second, normalizedTime );
+//	CI_ASSERT( 0.0f < normalizedTime && 1.0f >= normalizedTime);
+//	return lerp( itprev->second, itnext->second, normalizedTime );
 }
 
 template< typename T >
@@ -124,30 +104,6 @@ inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat& start, const ci::dquat&
 	return glm::slerp( start, end, time );
 }
 
-//class Keyframe {
-//public:
-//	Keyframe( uint32_t index, uint8_t count, float time )
-//	: mIndex( index ), mCount( count ), mAtTime( time ) {}
-//	
-//	float	 getTime() { return mAtTime; }
-//	uint32_t getIndex() { return mIndex; }
-//	uint8_t	 getCount() { return mCount; }
-//	
-//private:
-//	uint32_t	mIndex;
-//	uint8_t		mCount;
-//	float		mAtTime;
-//};
-//
-//class Clip {
-//public:
-//	Clip( const gltf::FileRef &file, const gltf::Animation &param );
-//	
-//	void updateGlobalTime( float globalTime, float elapsedSeconds );
-//	
-//private:
-//	
-//	std::map<std::string, std::vector<Keyframe>> mKeyFrames;
-//	std::vector<float>				mData;
-//};
-
+using Vec3Clip = Clip<ci::vec3>;
+using Vec4Clip = Clip<ci::vec4>;
+using QuatClip = Clip<ci::quat>;

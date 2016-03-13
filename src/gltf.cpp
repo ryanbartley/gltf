@@ -51,7 +51,7 @@ File::File( const ci::DataSourceRef &gltfFile )
 	catch ( const std::runtime_error &e ) {
 		CI_LOG_E( "Error parsing gltf file " << e.what() );
 	}
-	cout << mGltfTree.toStyledString() << endl;
+//	cout << mGltfTree.toStyledString() << endl;
 	loadExtensions();
 	if( ! mGltfTree["asset"].isNull() )
 		setAssetInfo( mGltfTree["asset"] );
@@ -242,8 +242,8 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 		Animation::Channel animChannel;
 
 		animChannel.sampler = channel["sampler"].asString();
-		animChannel.targetId = target["id"].asString();
-		animChannel.targetPath = target["path"].asString();
+		animChannel.id = target["id"].asString();
+		animChannel.path = target["path"].asString();
 		animChannel.channelExtras = channel["extras"];
 		animChannel.targetExtras = channel["extras"];
 		ret.channels.emplace_back( move( animChannel ) );
@@ -258,7 +258,8 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 		animSampler.input = sampler["input"].asString();
 		animSampler.output = sampler["output"].asString();
 		if( sampler["interpolation"].isString() )
-			animSampler.interpolation = sampler["interpolation"].asString();
+			if( sampler["interpolation"].asString() == "LINEAR" )
+				animSampler.type = Animation::Sampler::LerpType::LINEAR;
 		
 		ret.samplers.emplace_back( move( animSampler ) );
 	}
@@ -609,7 +610,6 @@ void File::addMaterialInfo( const std::string &key, const Json::Value &materialI
 		}
 	}
 	
-	
 	ret.name = materialInfo["name"].asString();
 	ret.extras = material["extras"];
 	
@@ -729,8 +729,6 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 			[]( const Json::Value &val ){ return val.asString(); } );
 		}
 	}
-	
-	
 	
 	ret.name = nodeInfo["name"].asString();
 	ret.extras = nodeInfo["extras"];
@@ -1178,6 +1176,43 @@ uint8_t File::getNumBytesForComponentType( GLuint type )
 		}
 			break;
 	}
+}
+	
+void* Accessor::getDataPtr( const gltf::FileRef &file, const Accessor &accessor )
+{
+	const auto &bufferView = file->getBufferViewInfo( accessor.bufferView );
+	const auto &buffer = file->getBufferInfo( bufferView.buffer );
+	return reinterpret_cast<uint8_t*>(buffer.data->getData()) + bufferView.byteOffset + accessor.byteOffset;
+}
+	
+std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file )
+{
+	std::vector<Animation::ParameterData> ret;
+	ret.reserve( parameters.size() + 1 );
+	
+	// Initialize times for keyframes
+	const auto &timeAccess = file->getAccessorInfo( timeAccessor );
+	CI_ASSERT( timeAccess.type == "SCALAR" );
+	auto totalKeyFrames = timeAccess.count;
+	auto dataPtr = Accessor::getDataPtr( file, timeAccess );
+	
+	Animation::ParameterData time{ "TIME", 1, std::vector<float>( totalKeyFrames ) };
+	memcpy( time.data.data(), dataPtr, totalKeyFrames * sizeof( float ) );
+	ret.emplace_back( move( time ) );
+	
+	for( auto & param : parameters ) {
+		const auto &accessor = file->getAccessorInfo( param.accessor );
+		auto numComponents = gltf::File::getNumComponentsForType( accessor.type );
+		
+		CI_ASSERT( totalKeyFrames == accessor.count );
+		auto dataPtr = Accessor::getDataPtr( file, timeAccess );
+		
+		Animation::ParameterData parameter{ param.parameter, numComponents, std::vector<float>( totalKeyFrames * numComponents ) };
+		memcpy( parameter.data.data(), dataPtr, accessor.count * numComponents * sizeof( float ) );
+		ret.emplace_back( move( parameter ) );
+	}
+
+	return ret;
 }
 	
 namespace gl {

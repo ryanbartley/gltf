@@ -15,15 +15,9 @@
 
 
 struct Joint {
-	glm::mat4x3 inverseBindPose;
-	std::string name;
+	glm::mat4	inverseBindPose;
+	uint8_t		nameId;
 	uint8_t		parentId;
-};
-
-struct Transform {
-	glm::quat rot;
-	glm::vec3 scale;
-	glm::vec3 trans;
 };
 
 struct JointPose {
@@ -32,22 +26,19 @@ struct JointPose {
 	ci::vec4	scale;
 };
 
+using SkeletonRef = std::shared_ptr<class Skeleton>;
+
 struct Skeleton {
-	std::vector<Joint>	jointArray;
+	Skeleton( std::vector<std::string> names )
+	: jointNames( move( names ) ), jointArray( jointNames.size() )
+	{}
+	
+	std::vector<std::string>	jointNames;
+	std::vector<JointPose>		jointBindPoses;
+	std::vector<Joint>			jointArray;
 };
 
 struct SkeletonPose {
 	std::shared_ptr<Skeleton>	skeleton;
 	std::vector<JointPose>		localPoses;
-};
-
-struct TransformationManager {
-	
-	std::vector<uint32_t>	mUnusedTransforms;
-	std::vector<Transform>	mTransforms;
-};
-
-struct Node {
-	
-	uint32_t transformIndex;
 };

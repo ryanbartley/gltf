@@ -7,11 +7,12 @@
 #include "gltf.h"
 #include "MeshLoader.h"
 #include "Transformation.hpp"
-#include "Animation.h"
+#include "AnimTemp.h"
 
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+
 
 class TestApp : public App {
   public:
@@ -27,7 +28,7 @@ class TestApp : public App {
 	
 	struct Renderable {
 		std::string nodeName;
-		Transform	transform;
+		ci::mat4	modelMatrix;
 		ci::gl::BatchRef batch;
 	};
 	
@@ -44,30 +45,23 @@ void TestApp::setup()
 			auto &meshKey = nodeInfo.meshes[0];
 			gltf::MeshLoader mesh( file, meshKey );
 			auto batch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color().lambert() ) );
-			Transform trans;
+			Renderable rend{node, ci::mat4(), batch};
 			if( ! nodeInfo.transformMatrix.empty() ) {
-				trans.setMatrix( nodeInfo.getTransformMatrix() );
+				rend.modelMatrix = nodeInfo.getTransformMatrix();
 			}
 			else {
-				trans.setTranslation( vec4( nodeInfo.getTranslation(), 1.0f ) );
+				Transform trans;
+				trans.setTranslation( nodeInfo.getTranslation() );
 				trans.setRotation( nodeInfo.getRotation() );
 				trans.setScale( nodeInfo.getScale() );
-				trans.checkUpdated();
+				rend.modelMatrix = trans.getTRS();
 			}
-			cout << nodeInfo << endl;
-			Renderable rend{node, std::move( trans ), batch};
+			
 			mRenderables.emplace_back( std::move( rend ) );
 		}
 		
 	}
-//	std::vector<Clip> mClips;
-//	const auto &animations = file->getAnimations();
-//	for( auto &animation : animations ) {
-//		auto & anim = animation.second;
-//		mClips.emplace_back( file, anim );
-//	}
 
-	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10.0f );
 	mCam.lookAt( vec3( 0, 0, -3 ), vec3( 0 ) );
 	mCamUi.setCamera( &mCam );
@@ -95,7 +89,7 @@ void TestApp::draw()
 	gl::setMatrices( mCam );
 	for( auto & rend : mRenderables ) {
 		gl::ScopedModelMatrix scopeModel;
-		gl::setModelMatrix( rend.transform.getModelMatrix() );
+		gl::setModelMatrix( rend.modelMatrix );
 		rend.batch->draw();
 	}
 }
