@@ -137,6 +137,25 @@ void File::load()
 				addTextureInfo( typeKey, obj );
 		}
 	}
+	// setup heirarchy for traversal.
+	for( auto & scene : mScenes ) {
+		auto &sceneInfo = scene.second;
+		for( auto & nodeKey : sceneInfo.nodes ) {
+			setParentForChildren( "", nodeKey );
+		}
+	}
+}
+	
+void File::setParentForChildren( const std::string &parentKey, const std::string &childKey )
+{
+	auto foundChild = mNodes.find( childKey );
+	auto &currentNode = foundChild->second;
+	currentNode.parent = parentKey;
+	if( ! currentNode.children.empty() ) {
+		for( auto & currentNodeChildKey : currentNode.children ) {
+			setParentForChildren( childKey, currentNodeChildKey );
+		}
+	}
 }
 	
 void File::loadExtensions()
@@ -730,6 +749,13 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 		}
 	}
 	
+	if( ! nodeInfo["children"].isNull() ) {
+		auto &children = nodeInfo["children"];
+		ret.children.reserve( children.size() );
+		std::transform( children.begin(), children.end(), std::back_inserter( ret.children ),
+		[]( const Json::Value &val ){ return val.asString(); } );
+	}
+	
 	ret.name = nodeInfo["name"].asString();
 	ret.extras = nodeInfo["extras"];
 	
@@ -897,9 +923,12 @@ void File::addSkinInfo( const std::string &key, const Json::Value &skinInfo )
 	Skin ret;
 	
 	ret.inverseBindMatricesAccessor = skinInfo["inverseBindMatrices"].asString();
-	auto &jointNames = skinInfo["jointName"];
+	auto &jointNames = skinInfo["jointNames"];
 	std::transform( jointNames.begin(), jointNames.end(), std::back_inserter( ret.jointNames ),
 	[]( const Json::Value &val ){ return val.asString(); } );
+	cout << "Joint names for skin: " << key << endl;
+	for( auto & jointName : jointNames )
+		cout << jointName << endl;
 	if( ! skinInfo["bindShapeMatrix"].isNull() ) {
 		auto &bindShapeMatrix = skinInfo["bindShapeMatrix"];
 		int i = 0;
@@ -908,6 +937,7 @@ void File::addSkinInfo( const std::string &key, const Json::Value &skinInfo )
 			i++;
 		}
 	}
+	
 	ret.name = skinInfo["name"].asString();
 	ret.extras = skinInfo["extras"];
 	
@@ -1202,6 +1232,52 @@ const Node* Node::getChild( const FileRef &file, const std::string &nodeName ) c
 		ret = &file->getNodeInfo( *found );
 	}
 	return ret;
+}
+	
+std::vector<const Node*> Node::getChildrenAsNodes( const FileRef &file ) const
+{
+	std::vector<const Node*> ret;
+	for( auto & nodeName : children ) {
+		ret.push_back( &file->getNodeInfo( nodeName ) );
+	}
+	return ret;
+}
+	
+SkeletonRef Skin::createSkeleton( const FileRef &file ) const
+{
+	SkeletonRef skeleton( new Skeleton( jointNames ) );
+	const auto &acceptor = file->getAccessorInfo( inverseBindMatricesAccessor );
+	auto matricesPtr = reinterpret_cast<ci::mat4*>(Accessor::getDataPtr( file, acceptor ));
+	int i = 0;
+	auto jointNameBegIt = begin( jointNames );
+	auto jointNameEndIt = end( jointNames );
+	for( auto & jointName : jointNames ) {
+		cout << "Joint: " << jointName << endl;
+		auto &joint = skeleton->jointArray[i];
+		auto &jointBindPose = skeleton->jointBindPoses[i];
+		const auto &jointNodeInfo = file->getNodeInfo( jointName );
+		joint.inverseBindPose = *matricesPtr++;
+		cout << joint.inverseBindPose << endl;
+		jointBindPose.rot = jointNodeInfo.getRotation();
+		cout << jointBindPose.rot << endl;
+		jointBindPose.scale = vec4( jointNodeInfo.getScale(), 1.0f );
+		cout << jointBindPose.scale << endl;
+		jointBindPose.trans = vec4( jointNodeInfo.getTranslation(), 1.0f );
+		cout << jointBindPose.trans << endl;
+		// if this joint is the root.
+		if( i == 0 ) {
+			joint.parentId = 0xFF;
+		}
+		// else find the parentId.
+		else {
+			auto found = std::find( jointNameBegIt, jointNameEndIt, jointNodeInfo.parent );
+			auto dist = std::distance( jointNameBegIt, found );
+			joint.parentId = dist;
+		}
+		i++;
+	}
+	
+	return skeleton;
 }
 	
 std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file ) const

@@ -42,16 +42,9 @@ void TestApp::setup()
 	auto glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
 	auto filePath = loadAsset( ci::fs::path( "RiggedSimple" ) / "glTF" / "riggedSimple.gltf" );
 	auto file = gltf::File::create( filePath );
+	
 	const auto &skin = file->getSkinInfo( "Armature_Cylinder-skin" );
-	Skeleton skeleton( skin.jointNames );
-	for( int i = 0; i < skeleton.jointNames.size(); i++ ) {
-		auto &jointName = skeleton.jointNames[i];
-		auto &joint = skeleton.jointArray[i];
-		auto &pose = skeleton.jointBindPoses[i];
-		const auto &jointNode = file->getNodeInfo( jointName );
-		CI_ASSERT( jointNode.isJoint() );
-		joint.nameId = i;
-	}
+	auto skeleton = skin.createSkeleton( file );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10.0f );
 	mCam.lookAt( vec3( 0, 0, -5 ), vec3( 0 ) );

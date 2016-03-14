@@ -17,6 +17,7 @@
 #include "cinder/gl/gl.h"
 #include "Transformation.hpp"
 #include "Animation.h"
+#include "Skeleton.h"
 
 namespace gltf {
 	
@@ -128,6 +129,7 @@ private:
 	void load();
 	void loadExtensions();
 	void verifyFile( const ci::DataSourceRef &data, std::string &gltfJson );
+	void setParentForChildren( const std::string &parentKey, const std::string &childKey );
 	
 	Json::Value			mGltfTree;
 	cinder::fs::path	mGltfPath;
@@ -326,13 +328,17 @@ struct Node {
 	const std::string& getChild( size_t index ) const { return children.at( index ); }
 	const Node* getChild( const FileRef &file, size_t index ) const;
 	const Node* getChild( const FileRef &file, const std::string &nodeName ) const;
+	std::vector<const Node*> getChildrenAsNodes( const FileRef &file ) const;
+	const Node* getParent( const FileRef &file ) const;
 	
 	bool isCamera() const { return ! camera.empty(); }
 	bool isLight() const { return ! light.empty(); }
-	bool hasMesh() const { return ! meshes.empty(); }
+	bool hasMeshes() const { return ! meshes.empty(); }
 	bool hasSkeletons() const { return ! skeletons.empty(); }
+	bool hasSkin() const { return ! skin.empty(); }
 	bool isJoint() const { return ! jointName.empty(); }
 	bool hasChildren() const { return ! children.empty(); }
+	bool isRoot() const { return parent.empty();}
 	
 	std::string				 parent;
 	std::vector<std::string> children, meshes, skeletons;
@@ -369,6 +375,9 @@ struct Shader {
 };
 
 struct Skin {
+	
+	SkeletonRef createSkeleton( const FileRef &file ) const;
+	
 	ci::mat4					bindShapeMatrix;
 	std::string					inverseBindMatricesAccessor;
 	std::vector<std::string>	jointNames;
