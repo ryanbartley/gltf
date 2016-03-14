@@ -1185,27 +1185,23 @@ void* Accessor::getDataPtr( const gltf::FileRef &file, const Accessor &accessor 
 	return reinterpret_cast<uint8_t*>(buffer.data->getData()) + bufferView.byteOffset + accessor.byteOffset;
 }
 	
-NodeBreadthIter::NodeBreadthIter( const FileRef &file, const Node &root )
-: mFile( file )
+const Node* Node::getChild( const FileRef &file, size_t index ) const
 {
-	mQueue.push( &root );
+	const Node* ret = nullptr;
+	const auto &nodeName = children[index];
+	ret = &file->getNodeInfo( nodeName );
+	return ret;
 }
-	
-NodeBreadthIter::NodeBreadthIter( const FileRef &file, const std::string &root )
-: mFile( file )
+
+const Node* Node::getChild( const FileRef &file, const std::string &nodeName ) const
 {
-	const auto &rootNode = mFile->getNodeInfo( root );
-	mQueue.push( &rootNode );
-}
-	
-bool NodeBreadthIter::hasNext() const
-{
-	return ! mQueue.empty();
-}
-	
-const Node* NodeBreadthIter::next()
-{
-	
+	const Node* ret = nullptr;
+	auto endIt = end( children );
+	auto found = std::find( begin( children ), endIt, nodeName );
+	if( found != endIt ) {
+		ret = &file->getNodeInfo( *found );
+	}
+	return ret;
 }
 	
 std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file ) const

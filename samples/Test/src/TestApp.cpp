@@ -44,7 +44,7 @@ void TestApp::setup()
 	auto file = gltf::File::create( filePath );
 	const auto &skin = file->getSkinInfo( "Armature_Cylinder-skin" );
 	Skeleton skeleton( skin.jointNames );
-	for( int i = 0; i < skeleton.jointNames.zsize(); i++ ) {
+	for( int i = 0; i < skeleton.jointNames.size(); i++ ) {
 		auto &jointName = skeleton.jointNames[i];
 		auto &joint = skeleton.jointArray[i];
 		auto &pose = skeleton.jointBindPoses[i];

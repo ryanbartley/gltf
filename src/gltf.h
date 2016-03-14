@@ -322,6 +322,11 @@ struct Node {
 	ci::quat getRotation() const;
 	ci::vec3 getScale() const;
 	
+	size_t getNumChildren() const { return children.size(); }
+	const std::string& getChild( size_t index ) const { return children.at( index ); }
+	const Node* getChild( const FileRef &file, size_t index ) const;
+	const Node* getChild( const FileRef &file, const std::string &nodeName ) const;
+	
 	bool isCamera() const { return ! camera.empty(); }
 	bool isLight() const { return ! light.empty(); }
 	bool hasMesh() const { return ! meshes.empty(); }
@@ -338,31 +343,6 @@ struct Node {
 							 scale;				// either 0 or 3
 	std::string				 name;
 	Json::Value				 extras;
-};
-	
-struct NodeBreadthIter {
-	NodeBreadthIter( const FileRef &file, const Node &root );
-	NodeBreadthIter( const FileRef &file, const std::string &rootName );
-	
-	bool hasNext() const;
-	const Node* next();
-	
-private:
-	FileRef					mFile;
-	std::queue<const Node*>	mQueue;
-	
-};
-	
-struct NodeDepthIter {
-	NodeDepthIter( const FileRef &file, const Node &root );
-	NodeDepthIter( const FileRef &file, const std::string &rootName );
-	
-	bool hasNext() const;
-	const Node* next();
-	
-private:
-	FileRef					mFile;
-	std::stack<const Node*> mStack;
 };
 
 struct Program {
