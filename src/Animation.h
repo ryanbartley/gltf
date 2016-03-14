@@ -8,21 +8,19 @@
 
 #pragma once
 
-
-
 template <typename T>
 class Clip {
 public:
 	Clip()
 	: mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
-	Clip( const std::vector<std::pair<double, T>> &keyFrames );
+	Clip( std::vector<std::pair<double, T>> keyFrames );
 	
-	void addKeyFrame( double time, T value );
-	T get( double time );
-	T getLooped( double time );
-	double getCyclicTime( double time ) { return glm::mod( time, mDuration ); }
-	T lerp( const T &begin, const T &end, double time );
+	void	addKeyFrame( double time, T value );
 	std::pair<double, double> getBounds() const { return { mStartTime, mStartTime + mDuration }; }
+	
+	T		get( double time );
+	T		getLooped( double time );
+	T		lerp( const T &begin, const T &end, double time );
 	
 private:
 	
@@ -34,23 +32,24 @@ private:
 };
 
 template <typename T>
-Clip<T>::Clip( const std::vector<std::pair<double, T>> &keyFrames )
+Clip<T>::Clip( std::vector<std::pair<double, T>> keyFrames )
 {
 	auto begIt = begin( keyFrames );
 	auto endIt = end( keyFrames );
-//	std::sort( begIt, endIt,
-//			  []( const std::pair<double, T> &lhs, const std::pair<double, T> &rhs ){
-//				  return lhs.first < rhs.first;
-//			  });
-//	begIt = begin( keyFrames );
-//	endIt = end( keyFrames );
+	std::sort( begIt, endIt,
+			  []( const std::pair<double, T> &lhs, const std::pair<double, T> &rhs ){
+				  return lhs.first < rhs.first;
+			  });
+	begIt = begin( keyFrames );
+	endIt = end( keyFrames );
 	
 	mStartTime = begIt->first;
 	mDuration = (endIt - 1)->first - mStartTime;
-	std::cout << mDuration << std::endl;
+	
 	auto numKeyFrames = keyFrames.size();
 	mKeyFrameTimes.reserve( numKeyFrames );
 	mKeyFrameValues.reserve( numKeyFrames );
+	
 	while( begIt != endIt ) {
 		mKeyFrameTimes.push_back( begIt->first );
 		mKeyFrameValues.push_back( begIt->second );
@@ -77,6 +76,7 @@ template <typename T>
 inline T Clip<T>::get( double absTime )
 {
 	T ret;
+	CI_ASSERT( mKeyFrameTimes.size() >= 2 && mKeyFrameValues.size() >= 2 );
 	auto clamped = glm::clamp( absTime, mStartTime, mStartTime + mDuration );
 	auto begIt = begin( mKeyFrameTimes );
 	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, clamped );
@@ -91,7 +91,8 @@ template <typename T>
 inline T Clip<T>::getLooped( double absTime )
 {
 	T ret;
-	auto cyclicTime = getCyclicTime( absTime ) + mStartTime;
+	CI_ASSERT( mKeyFrameTimes.size() >= 2 && mKeyFrameValues.size() >= 2 );
+	auto cyclicTime = glm::mod( absTime, mDuration ) + mStartTime;
 	auto begIt = begin( mKeyFrameTimes );
 	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, cyclicTime );
 	auto dist = std::distance( begIt, nextIt );

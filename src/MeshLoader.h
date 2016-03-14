@@ -129,11 +129,11 @@ inline void MeshLoader::loadInto( ci::geom::Target *target, const ci::geom::Attr
 		if( found != mAttribAccessors.end() ) {
 			auto accessor = found->second;
 			auto dims = File::getNumComponentsForType( accessor->type );
+			auto count = accessor->count;
+			auto accessorOffset = accessor->byteOffset;
 			const auto &bufferView = mFile->getBufferViewInfo( accessor->bufferView );
 			const auto &buffer = mFile->getBufferInfo( bufferView.buffer );
-			auto accessorOffset = accessor->byteOffset;
 			auto bufferViewOffset = bufferView.byteOffset;
-			auto count = accessor->count;
 			auto dataPtr = reinterpret_cast<float*>( static_cast<uint8_t*>( buffer.data->getData() ) + bufferViewOffset + accessorOffset );
 			target->copyAttrib( found->first, dims,  0, dataPtr, count );
 		}

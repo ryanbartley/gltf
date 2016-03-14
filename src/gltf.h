@@ -9,6 +9,9 @@
 #pragma once
 
 #include <math.h>
+#include <queue>
+#include <stack>
+
 #include "jsoncpp/json.h"
 #include "cinder/Utilities.h"
 #include "cinder/gl/gl.h"
@@ -197,6 +200,7 @@ struct Animation {
 		uint32_t			numComponents;
 		std::vector<float>	data;
 	};
+	
 	std::vector<ParameterData> getParameters( const FileRef &file ) const;
 	
 	static Clip<Transform>	createTransformClip( const std::vector<ParameterData> &paramData );
@@ -213,6 +217,7 @@ struct Animation {
 };
 
 struct Buffer {
+	
 	ci::BufferRef	data;
 	uint32_t		byteLength = 0;
 	std::string		uri; // path
@@ -312,23 +317,19 @@ struct Node {
 	
 	void outputToConsole( std::ostream &os, uint8_t tabAmount ) const;
 	
-	ci::mat4 getTransformMatrix() const
-	{
-		return glm::make_mat4( transformMatrix.data() );
-	}
-	ci::vec3 getTranslation() const
-	{
-		return glm::make_vec3( translation.data() );
-	}
-	ci::quat getRotation() const
-	{
-		return glm::make_quat( rotation.data() );
-	}
-	ci::vec3 getScale() const
-	{
-		return glm::make_vec3( scale.data() );
-	}
+	ci::mat4 getTransformMatrix() const;
+	ci::vec3 getTranslation() const;
+	ci::quat getRotation() const;
+	ci::vec3 getScale() const;
 	
+	bool isCamera() const { return ! camera.empty(); }
+	bool isLight() const { return ! light.empty(); }
+	bool hasMesh() const { return ! meshes.empty(); }
+	bool hasSkeletons() const { return ! skeletons.empty(); }
+	bool isJoint() const { return ! jointName.empty(); }
+	bool hasChildren() const { return ! children.empty(); }
+	
+	std::string				 parent;
 	std::vector<std::string> children, meshes, skeletons;
 	std::string				 camera, jointName, skin, light;
 	std::vector<float>		 transformMatrix,	// either 0 or 16
@@ -337,6 +338,31 @@ struct Node {
 							 scale;				// either 0 or 3
 	std::string				 name;
 	Json::Value				 extras;
+};
+	
+struct NodeBreadthIter {
+	NodeBreadthIter( const FileRef &file, const Node &root );
+	NodeBreadthIter( const FileRef &file, const std::string &rootName );
+	
+	bool hasNext() const;
+	const Node* next();
+	
+private:
+	FileRef					mFile;
+	std::queue<const Node*>	mQueue;
+	
+};
+	
+struct NodeDepthIter {
+	NodeDepthIter( const FileRef &file, const Node &root );
+	NodeDepthIter( const FileRef &file, const std::string &rootName );
+	
+	bool hasNext() const;
+	const Node* next();
+	
+private:
+	FileRef					mFile;
+	std::stack<const Node*> mStack;
 };
 
 struct Program {
@@ -348,9 +374,9 @@ struct Program {
 struct Sampler {
 	std::string				name;
 	GLenum					magFilter = GL_LINEAR,
-	minFilter = GL_NEAREST_MIPMAP_LINEAR,
-	wrapS = GL_REPEAT,
-	wrapT = GL_REPEAT;
+							minFilter = GL_NEAREST_MIPMAP_LINEAR,
+							wrapS = GL_REPEAT,
+							wrapT = GL_REPEAT;
 	Json::Value				extras;
 };
 
@@ -364,7 +390,7 @@ struct Shader {
 
 struct Skin {
 	ci::mat4					bindShapeMatrix;
-	std::string					inverseBindMatrices;
+	std::string					inverseBindMatricesAccessor;
 	std::vector<std::string>	jointNames;
 	std::string					name;
 	Json::Value					extras;

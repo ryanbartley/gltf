@@ -896,7 +896,7 @@ void File::addSkinInfo( const std::string &key, const Json::Value &skinInfo )
 	
 	Skin ret;
 	
-	ret.inverseBindMatrices = skinInfo["inverseBindMatrices"].asString();
+	ret.inverseBindMatricesAccessor = skinInfo["inverseBindMatrices"].asString();
 	auto &jointNames = skinInfo["jointName"];
 	std::transform( jointNames.begin(), jointNames.end(), std::back_inserter( ret.jointNames ),
 	[]( const Json::Value &val ){ return val.asString(); } );
@@ -1185,6 +1185,29 @@ void* Accessor::getDataPtr( const gltf::FileRef &file, const Accessor &accessor 
 	return reinterpret_cast<uint8_t*>(buffer.data->getData()) + bufferView.byteOffset + accessor.byteOffset;
 }
 	
+NodeBreadthIter::NodeBreadthIter( const FileRef &file, const Node &root )
+: mFile( file )
+{
+	mQueue.push( &root );
+}
+	
+NodeBreadthIter::NodeBreadthIter( const FileRef &file, const std::string &root )
+: mFile( file )
+{
+	const auto &rootNode = mFile->getNodeInfo( root );
+	mQueue.push( &rootNode );
+}
+	
+bool NodeBreadthIter::hasNext() const
+{
+	return ! mQueue.empty();
+}
+	
+const Node* NodeBreadthIter::next()
+{
+	
+}
+	
 std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file ) const
 {
 	std::vector<Animation::ParameterData> ret;
@@ -1248,7 +1271,7 @@ Clip<Transform>	Animation::createTransformClip( const std::vector<ParameterData>
 		i++;
 	}
 	
-	Clip<Transform> ret( transformKeyFrames );
+	Clip<Transform> ret( move( transformKeyFrames ) );
 	return ret;
 }
 	
@@ -1271,7 +1294,7 @@ Clip<ci::vec3>	Animation::createTranslationClip( const std::vector<ParameterData
 		i++;
 	}
 	
-	Clip<ci::vec3> ret( transformKeyFrames );
+	Clip<ci::vec3> ret( move( transformKeyFrames ) );
 	return ret;
 }
 
@@ -1294,7 +1317,7 @@ Clip<ci::vec3>	Animation::createScaleClip( const std::vector<ParameterData> &par
 		i++;
 	}
 	
-	Clip<ci::vec3> ret( transformKeyFrames );
+	Clip<ci::vec3> ret( move( transformKeyFrames ) );
 	return ret;
 }
 
@@ -1317,7 +1340,39 @@ Clip<ci::quat>	Animation::createRotationClip( const std::vector<ParameterData> &
 		i++;
 	}
 	
-	Clip<ci::quat> ret( transformKeyFrames );
+	Clip<ci::quat> ret( move( transformKeyFrames ) );
+	return ret;
+}
+	
+ci::mat4 Node::getTransformMatrix() const
+{
+	ci::mat4 ret;
+	if( ! transformMatrix.empty() )
+		ret = glm::make_mat4( transformMatrix.data() );
+	return ret;
+}
+
+ci::vec3 Node::getTranslation() const
+{
+	ci::vec3 ret;
+	if( ! translation.empty() )
+		ret = glm::make_vec3( translation.data() );
+	return ret;
+}
+
+ci::quat Node::getRotation() const
+{
+	ci::quat ret;
+	if( ! rotation.empty() )
+		ret = glm::make_quat( rotation.data() );
+	return ret;
+}
+
+ci::vec3 Node::getScale() const
+{
+	ci::vec3 ret( 1.0f );
+	if( ! scale.empty() )
+		ret = glm::make_vec3( scale.data() );
 	return ret;
 }
 	

@@ -329,6 +329,7 @@
 		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1021C096D790088BC4F /* MeshLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshLoader.cpp; sourceTree = "<group>"; };
 		B38BD1031C096D790088BC4F /* MeshLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshLoader.h; sourceTree = "<group>"; };
+		B3BC0F971C96A4F600FC466D /* box_animated.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = box_animated.h; path = ../include/box_animated.h; sourceTree = "<group>"; };
 		E21A7D4D799B4C719079CC79 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -421,6 +422,7 @@
 		29B97315FDCFA39411CA2CEA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				B3BC0F971C96A4F600FC466D /* box_animated.h */,
 				4CABA9F7D5AB4AC5AB4884C5 /* Resources.h */,
 				A89456B4F93841B7AE9DC0D0 /* Test_Prefix.pch */,
 			);
