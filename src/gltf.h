@@ -129,7 +129,7 @@ private:
 	void load();
 	void loadExtensions();
 	void verifyFile( const ci::DataSourceRef &data, std::string &gltfJson );
-	void setParentForChildren( const std::string &parentKey, const std::string &childKey );
+	void setParentForChildren( Node *parent, const std::string &childKey );
 	
 	Json::Value			mGltfTree;
 	cinder::fs::path	mGltfPath;
@@ -163,16 +163,16 @@ private:
 };
 
 struct Scene {
-	std::vector<std::string>	nodes;
+	std::vector<Node*>			nodes;
 	std::string					name;
 	Json::Value					extras;
 };
 	
 struct Accessor {
 	
-	static void* getDataPtr( const FileRef &file, const Accessor &accessor );
+	void* getDataPtr() const;
 	
-	std::string			bufferView;	// Required Pointer to bufferView
+	BufferView*			bufferView = nullptr;	// Required Pointer to bufferView
 	uint32_t			byteOffset; // Required
 	uint32_t			byteStride = 0;
 	uint32_t			componentType; // Required
@@ -186,7 +186,8 @@ struct Accessor {
 struct Animation {
 
 	struct Channel {
-		std::string sampler, id, path;
+		std::string sampler, path;
+		Node		*target;
 		Json::Value channelExtras, targetExtras;
 	};
 	struct Sampler {
@@ -195,7 +196,8 @@ struct Animation {
 		LerpType type = LerpType::LINEAR;
 	};
 	struct Parameter {
-		std::string parameter, accessor;
+		std::string parameter;
+		Accessor* accessor = nullptr;
 	};
 	struct ParameterData {
 		std::string			paramName;
@@ -212,7 +214,7 @@ struct Animation {
 	
 	std::vector<Channel>	channels;
 	std::vector<Sampler>	samplers;
-	std::string				timeAccessor;
+	Accessor				*timeAccessor;
 	std::vector<Parameter>	parameters;
 	std::string				name;
 	Json::Value				extras;
@@ -229,7 +231,7 @@ struct Buffer {
 };
 
 struct BufferView {
-	std::string		buffer; // Pointer to buffer
+	Buffer			*buffer; // Pointer to buffer
 	uint32_t		byteLength = 0;
 	uint32_t		byteOffset;
 	uint32_t		target;
@@ -271,16 +273,17 @@ struct Light {
 				falloffAngle = M_PI / 2,
 				falloffExponent = 0;
 	Type		type;
+	std::string name;
 };
 
 struct Material {
 	std::string		name;
-	std::string		technique;
+	Technique		*technique = nullptr;
 	
 	struct Source {
 		enum class Type { DIFFUSE, SPECULAR, EMISSION };
 		Type		type;
-		std::string texture;
+		Texture		*texture = nullptr;
 		ci::vec4	color = ci::vec4( 0.0f, 0.0f, 0.0f, 1.0f );
 	};
 	
@@ -300,11 +303,11 @@ struct Mesh {
 	struct Primitive {
 		struct AttribAccessor {
 			ci::geom::Attrib	attrib;
-			std::string			accessor;
+			Accessor			*accessor = nullptr;
 		};
 		std::vector<AttribAccessor>	attributes;
-		std::string			indices; // Pointer to indices
-		std::string			material; // Pointer to material
+		Accessor			*indices = nullptr; // Pointer to indices
+		Material			*material; // Pointer to material
 		GLenum				primitive = 4; // ex. GL_TRIANGLES
 		Json::Value			extras;
 	};
@@ -325,34 +328,38 @@ struct Node {
 	ci::vec3 getScale() const;
 	
 	size_t getNumChildren() const { return children.size(); }
-	const std::string& getChild( size_t index ) const { return children.at( index ); }
-	const Node* getChild( const FileRef &file, size_t index ) const;
-	const Node* getChild( const FileRef &file, const std::string &nodeName ) const;
-	std::vector<const Node*> getChildrenAsNodes( const FileRef &file ) const;
-	const Node* getParent( const FileRef &file ) const;
+	//const std::string& getChild( size_t index ) const { return children.at( index ); }
+	const Node* getChild( size_t index ) const;
+	const Node* getChild( const std::string &nodeName ) const;
+	const Node* getParent() const;
 	
-	bool isCamera() const { return ! camera.empty(); }
-	bool isLight() const { return ! light.empty(); }
+	bool isCamera() const { return camera != nullptr; }
+	bool isLight() const { return light != nullptr; }
 	bool hasMeshes() const { return ! meshes.empty(); }
 	bool hasSkeletons() const { return ! skeletons.empty(); }
-	bool hasSkin() const { return ! skin.empty(); }
+	bool hasSkin() const { return skin != nullptr; }
 	bool isJoint() const { return ! jointName.empty(); }
 	bool hasChildren() const { return ! children.empty(); }
-	bool isRoot() const { return parent.empty();}
+	bool isRoot() const { return parent == nullptr; }
 	
-	std::string				 parent;
-	std::vector<std::string> children, meshes, skeletons;
-	std::string				 camera, jointName, skin, light;
-	std::vector<float>		 transformMatrix,	// either 0 or 16
-							 rotation,			// either 0 or 4
-							 translation,		// either 0 or 3
-							 scale;				// either 0 or 3
-	std::string				 name;
-	Json::Value				 extras;
+	Node					*parent = nullptr;
+	std::vector<Node*>		children, skeletons;
+	std::vector<Mesh*>		meshes;
+	Camera*					camera = nullptr;
+	std::string				jointName;
+	Skin					*skin = nullptr;
+	Light					*light = nullptr;
+	std::vector<float>		transformMatrix,	// either 0 or 16
+							rotation,			// either 0 or 4
+							translation,		// either 0 or 3
+							scale;				// either 0 or 3
+	std::string				name;
+	Json::Value				extras;
 };
 
 struct Program {
-	std::string				 name, fragmentShader, vertexShader;
+	Shader					*frag = nullptr, *vert = nullptr;
+	std::string				 name;
 	std::vector<std::string> attributes;
 	Json::Value				 extras;
 };
@@ -376,11 +383,11 @@ struct Shader {
 
 struct Skin {
 	
-	SkeletonRef createSkeleton( const FileRef &file ) const;
+	SkeletonRef createSkeleton() const;
 	
 	ci::mat4					bindShapeMatrix;
-	std::string					inverseBindMatricesAccessor;
-	std::vector<std::string>	jointNames;
+	Accessor					*inverseBindMatrices = nullptr;
+	std::vector<Node*>			joints;
 	std::string					name;
 	Json::Value					extras;
 };
@@ -388,7 +395,7 @@ struct Skin {
 struct Technique {
 	struct Parameter {
 		std::string				name;
-		std::string				node;
+		Node*					node = nullptr;
 		std::string				semantic;
 		uint32_t				count = 0;
 		GLenum					type;
@@ -419,14 +426,14 @@ struct Technique {
 	std::string				name;
 	std::vector<Parameter>	parameters;
 	State					states;
-	std::string				program;
+	Program					*program = nullptr;
 	std::vector<std::pair<std::string, std::string>> attributes, uniforms;
 	Json::Value				extras;
 };
 
 struct Texture {
-	std::string		sampler;
-	std::string		source;
+	Sampler			*sampler = nullptr;
+	Image			*image = nullptr;
 	std::string		name;
 	GLenum			format = GL_RGBA,
 					internalFormat = GL_RGBA,

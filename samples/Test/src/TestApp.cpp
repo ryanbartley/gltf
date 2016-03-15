@@ -9,6 +9,7 @@
 #include "Transformation.hpp"
 #include "Animation.h"
 #include "Skeleton.h"
+#include "BoxAnimated.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -23,6 +24,8 @@ class TestApp : public App {
 	void update() override;
 	void draw() override;
 	
+	std::shared_ptr<BoxAnimated> mBoxAnimated;
+	
 	CameraUi mCamUi;
 	gl::BatchRef mBatch;
 	CameraPersp mCam;
@@ -34,31 +37,24 @@ class TestApp : public App {
 	};
 	std::vector<Renderable> mRenderables;
 	
-	void iterateNode(  const gltf::Node &node );
 };
 
 void TestApp::setup()
 {
-	auto glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
-	auto filePath = loadAsset( ci::fs::path( "RiggedSimple" ) / "glTF" / "riggedSimple.gltf" );
-	auto file = gltf::File::create( filePath );
+//	auto glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
+//	auto filePath = loadAsset( ci::fs::path( "RiggedSimple" ) / "glTF" / "riggedSimple.gltf" );
+//	auto file = gltf::File::create( filePath );
+//	
+//	const auto &skin = file->getSkinInfo( "Armature_Cylinder-skin" );
+//	auto skeleton = skin.createSkeleton();
 	
-	const auto &skin = file->getSkinInfo( "Armature_Cylinder-skin" );
-	auto skeleton = skin.createSkeleton( file );
+	mBoxAnimated.reset( new BoxAnimated );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10.0f );
 	mCam.lookAt( vec3( 0, 0, -5 ), vec3( 0 ) );
 	mCamUi.setCamera( &mCam );
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
-}
-
-void TestApp::iterateNode( const gltf::Node &node )
-{
-	if( node.hasChildren() ) {
-		const auto &parent = node;
-		
-	}
 }
 
 void TestApp::mouseDown( MouseEvent event )
@@ -79,11 +75,12 @@ void TestApp::draw()
 {
 	gl::clear();
 	gl::setMatrices( mCam );
-	for( auto & rend : mRenderables ) {
-		gl::ScopedModelMatrix scopeModel;
-		gl::setModelMatrix( rend.modelMatrix );
-		rend.batch->draw();
-	}
+//	for( auto & rend : mRenderables ) {
+//		gl::ScopedModelMatrix scopeModel;
+//		gl::setModelMatrix( rend.modelMatrix );
+//		rend.batch->draw();
+//	}
+	mBoxAnimated->draw();
 }
 
 CINDER_APP( TestApp, RendererGl )

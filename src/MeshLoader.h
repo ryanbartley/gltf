@@ -15,7 +15,7 @@ namespace gltf {
 
 class MeshLoader : public ci::geom::Source {
 public:
-	MeshLoader( const FileRef &gltfFile, const std::string &meshId );
+	MeshLoader( const FileRef &gltfFile, const Mesh *mesh );
 	
 	~MeshLoader() = default;
 	
@@ -30,9 +30,9 @@ public:
 	virtual Source*		clone() const { return new MeshLoader( *this ); }
 	
 	struct MeshInstance {
-		MeshInstance( Material material, uint32_t first, uint32_t count )
-		: material( std::move( material ) ), first( first ), count( count ) {}
-		Material material;
+		MeshInstance( Material *material, uint32_t first, uint32_t count )
+		: material( material ), first( first ), count( count ) {}
+		Material *material;
 		uint32_t first;
 		uint32_t count;
 	};
@@ -46,7 +46,7 @@ private:
 	void copyIndices( std::vector<uint32_t> &indices, const T* data, uint32_t count ) const;
 	
 	FileRef				mFile;
-	std::string			mMeshId;
+	const Mesh			*mMesh;
 	ci::geom::AttribSet mAvailableAttribs;
 	size_t				mNumVertices, mNumIndices;
 	ci::geom::Primitive mPrimitive;
@@ -56,15 +56,14 @@ private:
 	
 };
 	
-inline MeshLoader::MeshLoader( const FileRef &gltfFile, const std::string &meshId )
-: mFile( gltfFile ), mMeshId( meshId ), mNumIndices( 0 ), mNumVertices( 0 ),
+inline MeshLoader::MeshLoader( const FileRef &gltfFile, const Mesh *mesh )
+: mFile( gltfFile ), mMesh( mesh ), mNumIndices( 0 ), mNumVertices( 0 ),
 	mPrimitive( ci::geom::Primitive::NUM_PRIMITIVES )
 {
 	bool primitiveSet = false;
 	bool verticesSet = false;
-	const auto &mesh = gltfFile->getMeshInfo( mMeshId );
 	
-	for( const auto &prim : mesh.primitives ) {
+	for( const auto &prim : mMesh->primitives ) {
 		// Primitive Mode should be the same throughout.
 		if( ! primitiveSet ) {
 			mPrimitive = File::convertToPrimitive( prim.primitive );
@@ -75,29 +74,28 @@ inline MeshLoader::MeshLoader( const FileRef &gltfFile, const std::string &meshI
 		
 		// Go through the attributes
 		for( const auto &attribAccessors : prim.attributes ) {
-			const auto &vertAccessor = gltfFile->getAccessorInfo( attribAccessors.accessor );
+			const auto vertAccessor = attribAccessors.accessor;
 			// The number of vertices should also be the same for each primitive
 			if( ! verticesSet ) {
-				mNumVertices = vertAccessor.count;
+				mNumVertices = vertAccessor->count;
 				verticesSet = true;
 			}
 			else
-				CI_ASSERT( mNumVertices == vertAccessor.count );
+				CI_ASSERT( mNumVertices == vertAccessor->count );
 			
-			auto material = gltfFile->getMaterialInfo( prim.material );
-			if( ! prim.indices.empty() ) {
-				const auto &index = gltfFile->getAccessorInfo( prim.indices );
-				mIndexAccessors.emplace_back( &index );
-				mMeshInstances.emplace_back( std::move( material ), mNumIndices, index.count );
-				mNumIndices += index.count;
+			if( prim.indices != nullptr ) {
+				auto count = prim.indices->count;
+				mIndexAccessors.emplace_back( prim.indices );
+				mMeshInstances.emplace_back( prim.material, mNumIndices, count );
+				mNumIndices += count;
 			}
 			else {
 				
 			}
 			
-			auto emplaced = mAttribAccessors.emplace( attribAccessors.attrib, &vertAccessor );
+			auto emplaced = mAttribAccessors.emplace( attribAccessors.attrib, vertAccessor );
 			if( ! emplaced.second )
-				CI_ASSERT( emplaced.first->second == &vertAccessor );
+				CI_ASSERT( emplaced.first->second == vertAccessor );
 			mAvailableAttribs.insert( attribAccessors.attrib );
 		}
 	}
@@ -130,11 +128,7 @@ inline void MeshLoader::loadInto( ci::geom::Target *target, const ci::geom::Attr
 			auto accessor = found->second;
 			auto dims = File::getNumComponentsForType( accessor->type );
 			auto count = accessor->count;
-			auto accessorOffset = accessor->byteOffset;
-			const auto &bufferView = mFile->getBufferViewInfo( accessor->bufferView );
-			const auto &buffer = mFile->getBufferInfo( bufferView.buffer );
-			auto bufferViewOffset = bufferView.byteOffset;
-			auto dataPtr = reinterpret_cast<float*>( static_cast<uint8_t*>( buffer.data->getData() ) + bufferViewOffset + accessorOffset );
+			auto dataPtr = reinterpret_cast<float*>(accessor->getDataPtr());
 			target->copyAttrib( found->first, dims,  0, dataPtr, count );
 		}
 	}
@@ -142,9 +136,7 @@ inline void MeshLoader::loadInto( ci::geom::Target *target, const ci::geom::Attr
 		std::vector<uint32_t> indices;
 		for( auto index : mIndexAccessors ) {
 			auto byteLengthPerComponent = File::getNumBytesForComponentType( index->componentType );
-			const auto &bufferView = mFile->getBufferViewInfo( index->bufferView );
-			const auto &buffer = mFile->getBufferInfo( bufferView.buffer );
-			auto dataPtr = reinterpret_cast<uint8_t*>( buffer.data->getData() ) + bufferView.byteOffset + index->byteOffset;
+			auto dataPtr = reinterpret_cast<uint8_t*>(index->getDataPtr());
 			
 			if( byteLengthPerComponent == 1 )
 				copyIndices( indices, dataPtr, index->count );

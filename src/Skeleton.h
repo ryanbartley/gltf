@@ -24,8 +24,8 @@ struct JointPose {
 using SkeletonRef = std::shared_ptr<class Skeleton>;
 
 struct Skeleton {
-	Skeleton( std::vector<std::string> names )
-	: jointNames( move( names ) ), jointArray( jointNames.size() ),
+	Skeleton( uint32_t numJoints )
+	: jointNames( numJoints ), jointArray( jointNames.size() ),
 		jointBindPoses( jointNames.size() )
 	{}
 	

@@ -10,7 +10,7 @@
 
 class BoxAnimated {
 public:
-	
+	BoxAnimated();
 	void setup();
 	void draw();
 	
@@ -25,26 +25,25 @@ public:
 	std::vector<Renderable> mRenderables;
 };
 
-void BoxAnimated::setup()
+BoxAnimated::BoxAnimated()
 {
-	auto file = gltf::File::create( loadAsset( ci::fs::path( "boxAnimated" ) / "glTF" / "glTF.gltf" ) );
+	auto file = gltf::File::create( ci::app::loadAsset( ci::fs::path( "boxAnimated" ) / "glTF" / "glTF.gltf" ) );
 	const auto &defaultScene = file->getDefaultScene();
 	for( auto & node : defaultScene.nodes ) {
-		const auto &nodeInfo = file->getNodeInfo( node );
-		if( ! nodeInfo.meshes.empty() ) {
-			auto &meshKey = nodeInfo.meshes[0];
-			gltf::MeshLoader mesh( file, meshKey );
-			auto batch = gl::Batch::create( mesh, gl::getStockShader( gl::ShaderDef().color().lambert() ) );
-			Renderable rend{nodeInfo.name, ci::mat4(), batch};
+		if( node->hasMeshes() ) {
+			auto mesh = node->meshes[0];
+			gltf::MeshLoader meshLoader( file, mesh );
+			auto batch = ci::gl::Batch::create( meshLoader, ci::gl::getStockShader( ci::gl::ShaderDef().color().lambert() ) );
+			Renderable rend{ node->name, ci::mat4(), batch };
 			
-			if( ! nodeInfo.transformMatrix.empty() ) {
-				rend.modelMatrix = nodeInfo.getTransformMatrix();
+			if( ! node->transformMatrix.empty() ) {
+				rend.modelMatrix = node->getTransformMatrix();
 			}
 			else {
 				Transform trans;
-				trans.setTranslation( nodeInfo.getTranslation() );
-				trans.setRotation( nodeInfo.getRotation() );
-				trans.setScale( nodeInfo.getScale() );
+				trans.setTranslation( node->getTranslation() );
+				trans.setRotation( node->getRotation() );
+				trans.setScale( node->getScale() );
 				rend.modelMatrix = trans.getTRS();
 			}
 			
@@ -68,14 +67,14 @@ void BoxAnimated::setup()
 void BoxAnimated::draw()
 {
 	for( auto & rend : mRenderables ) {
-		gl::ScopedModelMatrix scopeModel;
-		gl::setModelMatrix( rend.modelMatrix );
+		ci::gl::ScopedModelMatrix scopeModel;
+		ci::gl::setModelMatrix( rend.modelMatrix );
 		if( rend.nodeName == "inner_box" ) {
-			auto elapsedSeconds = getElapsedFrames() / 60.0;
+			auto elapsedSeconds = ci::app::getElapsedFrames() / 60.0;
 			Transform trans;
 			trans.setTranslation( animTrans.get( elapsedSeconds ) );
 			trans.setRotation( animRot.get( elapsedSeconds ) );
-			gl::multModelMatrix( trans.getTRS() );
+			ci::gl::multModelMatrix( trans.getTRS() );
 		}
 		rend.batch->draw();
 	}

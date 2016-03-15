@@ -138,22 +138,25 @@ void File::load()
 		}
 	}
 	// setup heirarchy for traversal.
-	for( auto & scene : mScenes ) {
-		auto &sceneInfo = scene.second;
-		for( auto & nodeKey : sceneInfo.nodes ) {
-			setParentForChildren( "", nodeKey );
+	for( auto &scenes : mGltfTree["scenes"] ) {
+		for( auto & node : scenes["nodes"] ) {
+			setParentForChildren( nullptr, node.asString() );
 		}
 	}
 }
 	
-void File::setParentForChildren( const std::string &parentKey, const std::string &childKey )
+void File::setParentForChildren( Node *parent, const std::string &childKey )
 {
 	auto foundChild = mNodes.find( childKey );
 	auto &currentNode = foundChild->second;
-	currentNode.parent = parentKey;
-	if( ! currentNode.children.empty() ) {
-		for( auto & currentNodeChildKey : currentNode.children ) {
-			setParentForChildren( childKey, currentNodeChildKey );
+	currentNode.parent = parent;
+	if( parent ) {
+		parent->children.push_back( &currentNode );
+	}
+	auto children = mGltfTree["nodes"][childKey]["children"];
+	if( ! children.empty() ) {
+		for( auto & child : children ) {
+			setParentForChildren( &currentNode, child.asString() );
 		}
 	}
 }
@@ -207,7 +210,9 @@ void File::addAccessorInfo( const std::string &key, const Json::Value &accessorI
 	CI_ASSERT( accessorInfo["count"].isNumeric() );
 
 	Accessor ret;
-	ret.bufferView = accessorInfo["bufferView"].asString();
+	auto bufferViewKey = accessorInfo["bufferView"].asString();
+	auto &bufferView = mBufferViews[bufferViewKey];
+	ret.bufferView = &bufferView;
 	ret.byteOffset = accessorInfo["byteOffset"].asUInt();
 	ret.count = accessorInfo["count"].asUInt();
 	ret.type = accessorInfo["type"].asString();
@@ -259,9 +264,10 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 		CI_ASSERT( target["path"].isString() );
 
 		Animation::Channel animChannel;
-
+		auto targetNodeKey = target["id"].asString();
+		auto &targetNode = mNodes[targetNodeKey];
+		animChannel.target = &targetNode;
 		animChannel.sampler = channel["sampler"].asString();
-		animChannel.id = target["id"].asString();
 		animChannel.path = target["path"].asString();
 		animChannel.channelExtras = channel["extras"];
 		animChannel.targetExtras = channel["extras"];
@@ -288,10 +294,16 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 	auto paramKeys = params.getMemberNames();
 	for( auto & key : paramKeys ) {
 		if( key == "TIME" ) {
-			ret.timeAccessor = params[key].asString();
+			auto accessorKey = params[key].asString();
+			auto &accessor = mAccessors[accessorKey];
+			ret.timeAccessor = &accessor;
 		}
 		else {
-			Animation::Parameter param{ key, params[key].asString() };
+			auto accessorKey = params[key].asString();
+			auto &accessor = mAccessors[accessorKey];
+			Animation::Parameter param;
+			param.accessor = &accessor;
+			param.parameter = key;
 			ret.parameters.emplace_back( move( param ) );
 		}
 	}
@@ -381,8 +393,9 @@ void File::addBufferViewInfo( const std::string &key, const Json::Value &bufferV
 	CI_ASSERT( bufferViewInfo["buffer"].isString() );
 	
 	BufferView ret;
-	
-	ret.buffer = bufferViewInfo["buffer"].asString();
+	auto bufferKey = bufferViewInfo["buffer"].asString();
+	auto &buffer = mBuffers[bufferKey];
+	ret.buffer = &buffer;
 	ret.byteOffset = bufferViewInfo["byteOffset"].asUInt();
 	ret.byteLength = bufferViewInfo["byteLength"].asUInt();
 	ret.target = bufferViewInfo["target"].asUInt();
@@ -549,7 +562,7 @@ void File::addLightInfo( const std::string &key, const Json::Value &val )
 			ret.falloffExponent = lightTypeInfo["falloffExponent"].asFloat();
 		}
 	}
-	
+	ret.name = key;
 	add( key, move( ret ) );
 }
 	
@@ -572,7 +585,9 @@ void File::addMaterialInfo( const std::string &key, const Json::Value &materialI
 	auto &materialExt = materialInfo["extensions"]["KHR_materials_common"];
 	auto &material = materialExt.isNull() ? materialInfo : materialExt;
 	
-	ret.technique = material["technique"].asString();
+	auto techKey = material["technique"].asString();
+	auto &technique = mTechniques[techKey];
+	ret.technique = &technique;
 	
 	auto &values = material["values"];
 	auto valueKeys = material["values"].getMemberNames();
@@ -604,8 +619,11 @@ void File::addMaterialInfo( const std::string &key, const Json::Value &materialI
 					src.color[i++] = sourceVal.asFloat();
 				}
 			}
-			else if( source.isString() )
-				src.texture = source.asString();
+			else if( source.isString() ) {
+				auto sourceKey = source.asString();
+				auto &texture = mTextures[sourceKey];
+				src.texture = &texture;
+			}
 			
 			ret.sources.emplace_back( move( src ) );
 		}
@@ -654,8 +672,12 @@ void File::addMeshInfo( const std::string &key, const Json::Value &meshInfo )
 		CI_ASSERT( primitive["material"].isString() );
 		
 		Mesh::Primitive meshPrim;
-		meshPrim.material = primitive["material"].asString();
-		meshPrim.indices = primitive["indices"].asString();
+		auto materialKey = primitive["material"].asString();
+		auto &material = mMaterials[materialKey];
+		meshPrim.material = &material;
+		auto indicesAccessor = primitive["indices"].asString();
+		auto &accessor = mAccessors[indicesAccessor];
+		meshPrim.indices = &accessor;
 		meshPrim.primitive = primitive["mode"].asUInt();
 		meshPrim.extras = primitive["extras"];
 		
@@ -665,7 +687,9 @@ void File::addMeshInfo( const std::string &key, const Json::Value &meshInfo )
 			auto &attribName = attribNames[i];
 			Mesh::Primitive::AttribAccessor attrib;
 			attrib.attrib = getAttribEnum( attribName );
-			attrib.accessor = attributes[attribName].asString();
+			auto accessorKey = attributes[attribName].asString();
+			auto &attribAccessor = mAccessors[accessorKey];
+			attrib.accessor = &attribAccessor;
 			meshPrim.attributes.emplace_back( move( attrib ) );
 		}
 		
@@ -724,37 +748,46 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 	if( ! nodeInfo["extensions"].isNull() ) {
 		auto &ext = nodeInfo["extensions"];
 		if( ! ext["KHR_materials_common"].isNull() ) {
-			ret.light = ext["KHR_materials_common"]["light"].asString();
+			auto lightKey = ext["KHR_materials_common"]["light"].asString();
+			auto &light = mLights[lightKey];
+			ret.light = &light;
 		}
 	}
 	else if( ! nodeInfo["camera"].isNull() ) {
-		ret.camera = nodeInfo["camera"].asString();
+		auto cameraKey = nodeInfo["camera"].asString();
+		auto &camera = mCameras[cameraKey];
+		ret.camera = &camera;
 	}
 	else if( ! nodeInfo["jointName"].isNull() ) {
 		ret.jointName = nodeInfo["jointName"].asString();
 	}
 	else {
 		if( ! nodeInfo["meshes"].isNull() ) {
-			auto &meshes = nodeInfo["meshes"];
-			std::transform( meshes.begin(), meshes.end(), std::back_inserter( ret.meshes ),
-						   []( const Json::Value &val ){ return val.asString(); } );
+			for( auto &meshInfo : nodeInfo["meshes"] ) {
+				auto meshKey = meshInfo.asString();
+				auto &mesh = mMeshes[meshKey];
+				ret.meshes.push_back( &mesh );
+			}
 		}
 		if( ! nodeInfo["skin"].isNull() ) {
-			ret.skin = nodeInfo["skin"].asString();
+			auto skinKey = nodeInfo["skin"].asString();
+			auto &skin = mSkins[skinKey];
+			ret.skin = &skin;
 		}
 		if( ! nodeInfo["skeletons"].isNull() ) {
-			auto &skeletons = nodeInfo["skeletons"];
-			std::transform( skeletons.begin(), skeletons.end(), std::back_inserter( ret.skeletons ),
-			[]( const Json::Value &val ){ return val.asString(); } );
+			for( auto &skeletonInfo : nodeInfo["skeletons"] ) {
+				auto skeletonRootKey = skeletonInfo.asString();
+				auto &skeleton = mNodes[skeletonRootKey];
+				ret.skeletons.push_back( &skeleton );
+			}
 		}
 	}
 	
-	if( ! nodeInfo["children"].isNull() ) {
-		auto &children = nodeInfo["children"];
-		ret.children.reserve( children.size() );
-		std::transform( children.begin(), children.end(), std::back_inserter( ret.children ),
-		[]( const Json::Value &val ){ return val.asString(); } );
-	}
+//	if( ! nodeInfo["children"].isNull() ) {
+//		for( auto &childInfo : nodeInfo["children"] ) {
+//			auto childKey
+//		}
+//	}
 	
 	ret.name = nodeInfo["name"].asString();
 	ret.extras = nodeInfo["extras"];
@@ -780,8 +813,12 @@ void File::addProgramInfo( const std::string &key, const Json::Value &programInf
 	CI_ASSERT( programInfo["fragmentShader"].isString() );
 	
 	Program ret;
-	ret.vertexShader = programInfo["vertexShader"].asString();
-	ret.fragmentShader = programInfo["fragmentShader"].asString();
+	auto vertShaderKey = programInfo["vertexShader"].asString();
+	auto &vertShader = mShaders[vertShaderKey];
+	ret.vert = &vertShader;
+	auto fragShaderKey = programInfo["fragmentShader"].asString();
+	auto &fragShader = mShaders[fragShaderKey];
+	ret.frag = &fragShader;
 	
 	auto &attributes = programInfo["attributes"];
 	for( auto & attribute : attributes )
@@ -843,8 +880,11 @@ void File::addSceneInfo( const std::string &key, const Json::Value &sceneInfo )
 	auto &nodes = sceneInfo["nodes"];
 	ret.nodes.resize( nodes.size() );
 	int i = 0;
-	for( auto & node : nodes )
-		ret.nodes[i++] = node.asString();
+	for( auto & node : nodes ) {
+		auto nodeKey = node.asString();
+		auto &nodeInst = mNodes[nodeKey];
+		ret.nodes[i++] = &nodeInst;
+	}
 	
 	ret.name = sceneInfo["names"].asString();
 	ret.extras = sceneInfo["extras"];
@@ -922,13 +962,13 @@ void File::addSkinInfo( const std::string &key, const Json::Value &skinInfo )
 	
 	Skin ret;
 	
-	ret.inverseBindMatricesAccessor = skinInfo["inverseBindMatrices"].asString();
-	auto &jointNames = skinInfo["jointNames"];
-	std::transform( jointNames.begin(), jointNames.end(), std::back_inserter( ret.jointNames ),
-	[]( const Json::Value &val ){ return val.asString(); } );
-	cout << "Joint names for skin: " << key << endl;
-	for( auto & jointName : jointNames )
-		cout << jointName << endl;
+	auto accessorKey = skinInfo["inverseBindMatrices"].asString();
+	auto &accessor = mAccessors[accessorKey];
+	ret.inverseBindMatrices = &accessor;
+	for( auto &jointName : skinInfo["jointNames"] ) {
+		auto &joint = mNodes[jointName.asString()];
+		ret.joints.push_back( &joint );
+	}
 	if( ! skinInfo["bindShapeMatrix"].isNull() ) {
 		auto &bindShapeMatrix = skinInfo["bindShapeMatrix"];
 		int i = 0;
@@ -961,7 +1001,9 @@ void File::addTechniqueInfo( const std::string &key, const Json::Value &techniqu
 	CI_ASSERT( techniqueInfo["program"].isString() );
 	
 	Technique ret;
-	ret.program = techniqueInfo["program"].asString();
+	auto programKey = techniqueInfo["program"].asString();
+	auto &program = mPrograms[programKey];
+	ret.program = &program;
 	
 	auto &attribs = techniqueInfo["attributes"];
 	auto attribNames = attribs.getMemberNames();
@@ -1051,8 +1093,11 @@ void File::addTechniqueInfo( const std::string &key, const Json::Value &techniqu
 		techParam.type = param["type"].asUInt();
 		if( ! param["count"].isNull() )
 			techParam.count = param["count"].asUInt();
-		if( ! param["node"].isNull() )
-			techParam.node = param["node"].asString();
+		if( ! param["node"].isNull() ) {
+			auto nodeKey = param["node"].asString();
+			auto &node = mNodes[nodeKey];
+			techParam.node = &node;
+		}
 		if( ! param["semantic"].isNull() )
 			techParam.semantic = param["semantic"].asString();
 		techParam.name = param["name"].asString();
@@ -1084,8 +1129,12 @@ void File::addTextureInfo( const std::string &key, const Json::Value &textureInf
 	CI_ASSERT( textureInfo["source"].isString() );
 	
 	Texture ret;
-	ret.source = textureInfo["source"].asString();
-	ret.sampler = textureInfo["sampler"].asString();
+	auto imageKey = textureInfo["source"].asString();
+	auto &image = mImages[imageKey];
+	ret.image = &image;
+	auto samplerKey = textureInfo["sampler"].asString();
+	auto &sampler = mSamplers[samplerKey];
+	ret.sampler = &sampler;
 	if( textureInfo["target"].isNumeric() )
 		ret.target = textureInfo["target"].asUInt();
 	if( textureInfo["format"].isNumeric() )
@@ -1208,72 +1257,53 @@ uint8_t File::getNumBytesForComponentType( GLuint type )
 	}
 }
 	
-void* Accessor::getDataPtr( const gltf::FileRef &file, const Accessor &accessor )
+void* Accessor::getDataPtr() const
 {
-	const auto &bufferView = file->getBufferViewInfo( accessor.bufferView );
-	const auto &buffer = file->getBufferInfo( bufferView.buffer );
-	return reinterpret_cast<uint8_t*>(buffer.data->getData()) + bufferView.byteOffset + accessor.byteOffset;
+	const auto &buffer = bufferView->buffer;
+	return reinterpret_cast<uint8_t*>(buffer->data->getData()) + bufferView->byteOffset + byteOffset;
 }
 	
-const Node* Node::getChild( const FileRef &file, size_t index ) const
+const Node* Node::getChild( size_t index ) const
 {
-	const Node* ret = nullptr;
-	const auto &nodeName = children[index];
-	ret = &file->getNodeInfo( nodeName );
-	return ret;
+	return children[index];
 }
 
-const Node* Node::getChild( const FileRef &file, const std::string &nodeName ) const
+const Node* Node::getChild( const std::string &nodeName ) const
 {
 	const Node* ret = nullptr;
 	auto endIt = end( children );
-	auto found = std::find( begin( children ), endIt, nodeName );
+	auto found = std::find_if( begin( children ), endIt,
+	[nodeName]( const Node *node ){
+		return nodeName == node->name;
+	});
 	if( found != endIt ) {
-		ret = &file->getNodeInfo( *found );
+		ret = *found;
 	}
 	return ret;
 }
 	
-std::vector<const Node*> Node::getChildrenAsNodes( const FileRef &file ) const
+SkeletonRef Skin::createSkeleton() const
 {
-	std::vector<const Node*> ret;
-	for( auto & nodeName : children ) {
-		ret.push_back( &file->getNodeInfo( nodeName ) );
-	}
-	return ret;
-}
-	
-SkeletonRef Skin::createSkeleton( const FileRef &file ) const
-{
-	SkeletonRef skeleton( new Skeleton( jointNames ) );
-	const auto &acceptor = file->getAccessorInfo( inverseBindMatricesAccessor );
-	auto matricesPtr = reinterpret_cast<ci::mat4*>(Accessor::getDataPtr( file, acceptor ));
+	SkeletonRef skeleton( new Skeleton( joints.size() ) );
+	auto matricesPtr = reinterpret_cast<ci::mat4*>( inverseBindMatrices->getDataPtr() );
 	int i = 0;
-	auto jointNameBegIt = begin( jointNames );
-	auto jointNameEndIt = end( jointNames );
-	for( auto & jointName : jointNames ) {
-		cout << "Joint: " << jointName << endl;
+	for( auto jointNode : joints ) {
 		auto &joint = skeleton->jointArray[i];
 		auto &jointBindPose = skeleton->jointBindPoses[i];
-		const auto &jointNodeInfo = file->getNodeInfo( jointName );
+		skeleton->jointNames[i] = jointNode->name;
 		joint.inverseBindPose = *matricesPtr++;
-		cout << joint.inverseBindPose << endl;
-		jointBindPose.rot = jointNodeInfo.getRotation();
-		cout << jointBindPose.rot << endl;
-		jointBindPose.scale = vec4( jointNodeInfo.getScale(), 1.0f );
-		cout << jointBindPose.scale << endl;
-		jointBindPose.trans = vec4( jointNodeInfo.getTranslation(), 1.0f );
-		cout << jointBindPose.trans << endl;
-		// if this joint is the root.
-		if( i == 0 ) {
+		jointBindPose.rot = jointNode->getRotation();
+		jointBindPose.scale = vec4( jointNode->getScale(), 1.0f );
+		jointBindPose.trans = vec4( jointNode->getTranslation(), 1.0f );
+		if( i == 0 )
 			joint.parentId = 0xFF;
-		}
-		// else find the parentId.
 		else {
-			auto found = std::find( jointNameBegIt, jointNameEndIt, jointNodeInfo.parent );
-			auto dist = std::distance( jointNameBegIt, found );
-			joint.parentId = dist;
+			auto begIt = begin( skeleton->jointNames );
+			auto foundIt = std::find( begIt, end( skeleton->jointNames ), jointNode->parent->name );
+			auto distance = std::distance( begIt, foundIt );
+			joint.parentId = distance;
 		}
+		// if this joint is the root.
 		i++;
 	}
 	
@@ -1286,24 +1316,23 @@ std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &f
 	ret.reserve( parameters.size() + 1 );
 	
 	// Initialize times for keyframes
-	const auto &timeAccess = file->getAccessorInfo( timeAccessor );
-	CI_ASSERT( timeAccess.type == "SCALAR" );
-	auto totalKeyFrames = timeAccess.count;
-	auto dataPtr = Accessor::getDataPtr( file, timeAccess );
+	CI_ASSERT( timeAccessor->type == "SCALAR" );
+	auto totalKeyFrames = timeAccessor->count;
+	auto dataPtr = timeAccessor->getDataPtr();
 	
 	Animation::ParameterData time{ "TIME", 1, std::vector<float>( totalKeyFrames ) };
 	memcpy( time.data.data(), dataPtr, totalKeyFrames * sizeof( float ) );
 	ret.emplace_back( move( time ) );
 	
 	for( auto & param : parameters ) {
-		const auto &accessor = file->getAccessorInfo( param.accessor );
-		auto numComponents = gltf::File::getNumComponentsForType( accessor.type );
+		const auto accessor = param.accessor;
+		auto numComponents = gltf::File::getNumComponentsForType( accessor->type );
 		
-		CI_ASSERT( totalKeyFrames == accessor.count );
-		auto dataPtr = Accessor::getDataPtr( file, accessor );
+		CI_ASSERT( totalKeyFrames == accessor->count );
+		auto dataPtr = accessor->getDataPtr();
 		
 		Animation::ParameterData parameter{ param.parameter, numComponents, std::vector<float>( totalKeyFrames * numComponents ) };
-		memcpy( parameter.data.data(), dataPtr, accessor.count * numComponents * sizeof( float ) );
+		memcpy( parameter.data.data(), dataPtr, accessor->count * numComponents * sizeof( float ) );
 		ret.emplace_back( move( parameter ) );
 	}
 
@@ -1704,24 +1733,24 @@ void Node::outputToConsole( std::ostream &os, uint8_t tabAmount ) const
 {
 	using std::endl;
 	os << "Name: " << name << endl;
-	if( ! camera.empty() )
-		os << "Camera: " << camera << endl;
-	else if( ! light.empty() )
-		os << "Light: " << light << endl;
+	if( camera != nullptr )
+		os << "Camera: " << camera->name << endl;
+	else if( light != nullptr )
+		os << "Light: " << light->name << endl;
 	else if( ! jointName.empty() )
 		os << "JointName: " << jointName << endl;
 	else {
 		if( ! meshes.empty() ) {
 			os << "Meshes: " << endl;
 			for( auto &mesh : meshes )
-				os << "\t" << mesh << endl;
+				os << "\t" << mesh->name << endl;
 		}
-		if( ! skin.empty() )
-			os << "Skin: " << skin << endl;
+		if( skin != nullptr )
+			os << "Skin: " << skin->name << endl;
 		if( ! skeletons.empty() ) {
 			os << "Skeletons: " << endl;
 			for( auto &skeleton : skeletons )
-				os << "\t" << skeleton << endl;
+				os << "\t" << skeleton->name << endl;
 		}
 	}
 	os << "Transform:" << endl;
