@@ -111,16 +111,6 @@ public:
 	
 	const std::map<std::string, Animation>& getAnimations() { return mAnimations; }
 	
-	//! Returns the converted string as a geom::Attrib. Attribute semantics
-	//! include POSITION, NORMAL, TEXCOORD, COLOR, JOINT, JOINTMATRIX, and
-	//! WEIGHT.  Attribute semantics can be of the form [semantic]_[set_index],
-	//! e.g, TEXCOORD_0, TEXCOORD_1, etc."
-	static ci::geom::Attrib getAttribEnum( const std::string &attrib );
-	static ci::geom::Primitive convertToPrimitive( GLenum primitive );
-	static ci::gl::UniformSemantic getUniformEnum( const std::string &uniform );
-	static uint8_t getNumComponentsForType( const std::string &type );
-	static uint8_t getNumBytesForComponentType( GLuint type );
-	
 	ci::CameraPersp		getPerspCameraByName( const std::string &name );
 	ci::CameraOrtho		getOrthoCameraByName( const std::string &name );
 	
@@ -170,14 +160,25 @@ struct Scene {
 	
 struct Accessor {
 	
-	void* getDataPtr() const;
+	enum class DataType { SCALAR, VEC2, VEC3, VEC4, MAT2, MAT3, MAT4 };
+	enum class ComponentType {
+		BYTE = GL_BYTE,
+		UNSIGNED_BYTE = GL_UNSIGNED_BYTE,
+		SHORT = GL_SHORT,
+		UNSIGNED_SHORT = GL_UNSIGNED_SHORT,
+		FLOAT = GL_FLOAT
+	};
+	
+	void*	getDataPtr() const;
+	uint8_t getNumComponents() const;
+	uint8_t getNumBytesForComponentType() const;
 	
 	BufferView*			bufferView = nullptr;	// Required Pointer to bufferView
-	uint32_t			byteOffset; // Required
-	uint32_t			byteStride = 0;
-	uint32_t			componentType; // Required
-	uint32_t			count;		// Required
-	std::string			type;		// Required, type of data in string form Aka VEC4
+	DataType			dataType;
+	ComponentType		componentType;
+	uint32_t			byteOffset, // Required
+						byteStride = 0,
+						count;		// Required
 	std::vector<float>	min, max;
 	std::string			name;		// The user-defined name of this object.
 	Json::Value			extras;
@@ -187,7 +188,7 @@ struct Animation {
 
 	struct Channel {
 		std::string sampler, path;
-		Node		*target;
+		Node		*target	= nullptr;
 		Json::Value channelExtras, targetExtras;
 	};
 	struct Sampler {
@@ -205,7 +206,7 @@ struct Animation {
 		std::vector<float>	data;
 	};
 	
-	std::vector<ParameterData> getParameters( const FileRef &file ) const;
+	std::vector<ParameterData> getParameters() const;
 	
 	static Clip<Transform>	createTransformClip( const std::vector<ParameterData> &paramData );
 	static Clip<ci::vec3>	createTranslationClip( const std::vector<ParameterData> &paramData );
@@ -214,7 +215,7 @@ struct Animation {
 	
 	std::vector<Channel>	channels;
 	std::vector<Sampler>	samplers;
-	Accessor				*timeAccessor;
+	Accessor				*timeAccessor = nullptr;
 	std::vector<Parameter>	parameters;
 	std::string				name;
 	Json::Value				extras;
@@ -222,19 +223,31 @@ struct Animation {
 
 struct Buffer {
 	
-	ci::BufferRef	data;
+	ci::BufferRef getBuffer() const;
+	
 	uint32_t		byteLength = 0;
 	std::string		uri; // path
 	std::string		type = "arrayBuffer";
 	std::string		name;
 	Json::Value		extras;
+	
+private:
+	void cacheData() const;
+	
+	mutable ci::BufferRef		data;
+	friend class File;
 };
 
 struct BufferView {
-	Buffer			*buffer; // Pointer to buffer
-	uint32_t		byteLength = 0;
-	uint32_t		byteOffset;
-	uint32_t		target;
+	enum class Target {
+		ARRAY_BUFFER = GL_ARRAY_BUFFER,
+		ELEMENT_ARRAY_BUFFER = GL_ELEMENT_ARRAY_BUFFER
+	};
+	
+	Buffer			*buffer = nullptr; // Pointer to buffer
+	uint32_t		byteLength = 0,
+					byteOffset;
+	Target			target;
 	std::string		name;
 	Json::Value		extras;
 };
@@ -256,10 +269,17 @@ struct Camera {
 };
 
 struct Image {
+	
+	ci::ImageSourceRef getImage() const;
+	
 	std::string			name;
 	std::string			uri; // path
-	ci::ImageSourceRef	imageSource;
 	Json::Value			extras;
+private:
+	void cacheData() const;
+	
+	mutable ci::ImageSourceRef	imageSource;
+	friend class File;
 };
 	
 struct Light {
@@ -270,7 +290,7 @@ struct Light {
 				constantAttenuation = 0.0f,
 				linearAttenuation = 1.0f,
 				quadraticAttenuation = 1.0f,
-				falloffAngle = M_PI / 2,
+				falloffAngle = M_PI / 2.0,
 				falloffExponent = 0;
 	Type		type;
 	std::string name;
@@ -307,11 +327,13 @@ struct Mesh {
 		};
 		std::vector<AttribAccessor>	attributes;
 		Accessor			*indices = nullptr; // Pointer to indices
-		Material			*material; // Pointer to material
+		Material			*material = nullptr; // Pointer to material
 		GLenum				primitive = 4; // ex. GL_TRIANGLES
 		Json::Value			extras;
 	};
 	
+	static ci::geom::Attrib getAttribEnum( const std::string &attrib );
+	static ci::geom::Primitive convertToPrimitive( GLenum primitive );
 	
 	std::string				name;
 	std::vector<Primitive>	primitives;
@@ -328,7 +350,6 @@ struct Node {
 	ci::vec3 getScale() const;
 	
 	size_t getNumChildren() const { return children.size(); }
-	//const std::string& getChild( size_t index ) const { return children.at( index ); }
 	const Node* getChild( size_t index ) const;
 	const Node* getChild( const std::string &nodeName ) const;
 	const Node* getParent() const;
@@ -343,12 +364,12 @@ struct Node {
 	bool isRoot() const { return parent == nullptr; }
 	
 	Node					*parent = nullptr;
-	std::vector<Node*>		children, skeletons;
-	std::vector<Mesh*>		meshes;
-	Camera*					camera = nullptr;
-	std::string				jointName;
+	Camera					*camera = nullptr;
 	Skin					*skin = nullptr;
 	Light					*light = nullptr;
+	std::vector<Node*>		children, skeletons;
+	std::vector<Mesh*>		meshes;
+	std::string				jointName;
 	std::vector<float>		transformMatrix,	// either 0 or 16
 							rotation,			// either 0 or 4
 							translation,		// either 0 or 3
@@ -374,22 +395,34 @@ struct Sampler {
 };
 
 struct Shader {
+	enum class Type {
+		VERTEX = GL_VERTEX_SHADER,
+		FRAGMENT = GL_FRAGMENT_SHADER
+	};
+	
+	const std::string& getSource() const;
+	
 	std::string				name;
 	std::string				uri; // path
-	uint32_t				type;
-	std::string				source;
+	Type					type;
 	Json::Value				extras;
+	
+private:
+	void cacheData() const;
+	
+	mutable std::string		source;
+	friend class File;
 };
 
 struct Skin {
 	
 	SkeletonRef createSkeleton() const;
 	
-	ci::mat4					bindShapeMatrix;
-	Accessor					*inverseBindMatrices = nullptr;
-	std::vector<Node*>			joints;
-	std::string					name;
-	Json::Value					extras;
+	ci::mat4			bindShapeMatrix;
+	Accessor			*inverseBindMatrices = nullptr;
+	std::vector<Node*>	joints;
+	std::string			name;
+	Json::Value			extras;
 };
 
 struct Technique {
@@ -411,6 +444,7 @@ struct Technique {
 			std::array<float, 2>	depthRange = { 0.0f, 1.0f };
 			std::array<float, 2>	polygonOffset = { 0.0f, 0.0f };
 			std::array<float, 4>	scissor = { 0.0f, 0.0f, 0.0f, 0.0f };
+			
 			float		lineWidth	= 1.0f;
 			GLenum		cullFace	= GL_BACK;
 			GLenum		depthFunc	= GL_LESS;
@@ -423,10 +457,12 @@ struct Technique {
 		Json::Value			extras;
 	};
 	
+	static ci::gl::UniformSemantic getUniformEnum( const std::string &uniform );
+	
+	Program					*program = nullptr;
 	std::string				name;
 	std::vector<Parameter>	parameters;
 	State					states;
-	Program					*program = nullptr;
 	std::vector<std::pair<std::string, std::string>> attributes, uniforms;
 	Json::Value				extras;
 };
@@ -441,16 +477,6 @@ struct Texture {
 					type = GL_UNSIGNED_BYTE;
 	Json::Value		extras;
 };
-	
-namespace gl {
-	
-ci::gl::BatchRef	getBatchFromMeshByName( const Scene &gltf, const std::string &name );
-ci::gl::VboMeshRef	getVboMeshFromMeshByName( const Scene &gltf, const std::string &name );
-ci::gl::GlslProgRef	getGlslProgramFromMaterial( const Scene &gltf, const std::string &name );
-ci::gl::TextureRef	getTextureByName( const Scene &gltf, const std::string &name );
-ci::TriMeshRef		getTriMeshFromMeshByName( const Scene &gltf, const std::string &name );
-	
-} // namespace gl
 	
 std::ostream& operator<<( std::ostream &lhs, const File &rhs );
 std::ostream& operator<<( std::ostream &lhs, const Accessor &rhs );

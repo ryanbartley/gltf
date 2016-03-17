@@ -66,11 +66,11 @@ inline MeshLoader::MeshLoader( const FileRef &gltfFile, const Mesh *mesh )
 	for( const auto &prim : mMesh->primitives ) {
 		// Primitive Mode should be the same throughout.
 		if( ! primitiveSet ) {
-			mPrimitive = File::convertToPrimitive( prim.primitive );
+			mPrimitive = Mesh::convertToPrimitive( prim.primitive );
 			primitiveSet = true;
 		}
 		else
-			CI_ASSERT( mPrimitive == File::convertToPrimitive( prim.primitive ) );
+			CI_ASSERT( mPrimitive == Mesh::convertToPrimitive( prim.primitive ) );
 		
 		// Go through the attributes
 		for( const auto &attribAccessors : prim.attributes ) {
@@ -105,7 +105,7 @@ inline uint8_t MeshLoader::getAttribDims( ci::geom::Attrib attr ) const
 {
 	auto found = mAttribAccessors.find( attr );
 	if( found != mAttribAccessors.end() )
-		return File::getNumComponentsForType( found->second->type );
+		return found->second->getNumComponents();
 	else
 		return 0;
 }
@@ -126,7 +126,7 @@ inline void MeshLoader::loadInto( ci::geom::Target *target, const ci::geom::Attr
 		auto found = mAttribAccessors.find( attrib );
 		if( found != mAttribAccessors.end() ) {
 			auto accessor = found->second;
-			auto dims = File::getNumComponentsForType( accessor->type );
+			auto dims = accessor->getNumComponents();
 			auto count = accessor->count;
 			auto dataPtr = reinterpret_cast<float*>(accessor->getDataPtr());
 			target->copyAttrib( found->first, dims,  0, dataPtr, count );
@@ -135,7 +135,7 @@ inline void MeshLoader::loadInto( ci::geom::Target *target, const ci::geom::Attr
 	if( ! mIndexAccessors.empty() ) {
 		std::vector<uint32_t> indices;
 		for( auto index : mIndexAccessors ) {
-			auto byteLengthPerComponent = File::getNumBytesForComponentType( index->componentType );
+			auto byteLengthPerComponent = index->getNumBytesForComponentType();
 			auto dataPtr = reinterpret_cast<uint8_t*>(index->getDataPtr());
 			
 			if( byteLengthPerComponent == 1 )

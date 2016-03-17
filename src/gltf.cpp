@@ -150,9 +150,8 @@ void File::setParentForChildren( Node *parent, const std::string &childKey )
 	auto foundChild = mNodes.find( childKey );
 	auto &currentNode = foundChild->second;
 	currentNode.parent = parent;
-	if( parent ) {
+	if( parent )
 		parent->children.push_back( &currentNode );
-	}
 	auto children = mGltfTree["nodes"][childKey]["children"];
 	if( ! children.empty() ) {
 		for( auto & child : children ) {
@@ -215,8 +214,18 @@ void File::addAccessorInfo( const std::string &key, const Json::Value &accessorI
 	ret.bufferView = &bufferView;
 	ret.byteOffset = accessorInfo["byteOffset"].asUInt();
 	ret.count = accessorInfo["count"].asUInt();
-	ret.type = accessorInfo["type"].asString();
-	ret.componentType = accessorInfo["componentType"].asUInt();
+	
+	auto type = accessorInfo["type"].asString();
+	if( type == "SCALAR" )	  ret.dataType = Accessor::DataType::SCALAR;
+	else if( type == "VEC2" ) ret.dataType = Accessor::DataType::VEC2;
+	else if( type == "VEC3" ) ret.dataType = Accessor::DataType::VEC3;
+	else if( type == "VEC4" ) ret.dataType = Accessor::DataType::VEC4;
+	else if( type == "MAT2" ) ret.dataType = Accessor::DataType::MAT2;
+	else if( type == "MAT3" ) ret.dataType = Accessor::DataType::MAT3;
+	else if( type == "MAT4" ) ret.dataType = Accessor::DataType::MAT4;
+	else					  CI_ASSERT_MSG( false, "Unknown data type" );
+	
+	ret.componentType = static_cast<Accessor::ComponentType>( accessorInfo["componentType"].asUInt() );
 	ret.name = accessorInfo["name"].asString();
 	ret.extras = accessorInfo["extras"];
 
@@ -398,7 +407,7 @@ void File::addBufferViewInfo( const std::string &key, const Json::Value &bufferV
 	ret.buffer = &buffer;
 	ret.byteOffset = bufferViewInfo["byteOffset"].asUInt();
 	ret.byteLength = bufferViewInfo["byteLength"].asUInt();
-	ret.target = bufferViewInfo["target"].asUInt();
+	ret.target = static_cast<BufferView::Target>( bufferViewInfo["target"].asUInt() );
 	ret.name = bufferViewInfo["name"].asString();
 	ret.extras = bufferViewInfo["extras"];
 	
@@ -686,7 +695,7 @@ void File::addMeshInfo( const std::string &key, const Json::Value &meshInfo )
 		for( int i = 0; i < attribNames.size(); i++ ) {
 			auto &attribName = attribNames[i];
 			Mesh::Primitive::AttribAccessor attrib;
-			attrib.attrib = getAttribEnum( attribName );
+			attrib.attrib = Mesh::getAttribEnum( attribName );
 			auto accessorKey = attributes[attribName].asString();
 			auto &attribAccessor = mAccessors[accessorKey];
 			attrib.accessor = &attribAccessor;
@@ -935,7 +944,7 @@ void File::addShaderInfo( const std::string &key, const Json::Value &shaderInfo 
 	else {
 		ret.source = loadString( loadFile( mGltfPath / uri ) );
 	}
-	ret.type = shaderInfo["type"].asUInt();
+	ret.type = static_cast<Shader::Type>( shaderInfo["type"].asUInt() );
 	ret.uri = shaderInfo["uri"].asString();
 	ret.name = shaderInfo["name"].asString();
 	ret.extras = shaderInfo["extras"];
@@ -1172,7 +1181,7 @@ CameraPersp File::getPerspCameraByName( const std::string &name )
 	return ret;
 }
 	
-ci::geom::Primitive File::convertToPrimitive( GLenum primitive )
+ci::geom::Primitive Mesh::convertToPrimitive( GLenum primitive )
 {
 	switch (primitive) {
 		case GL_LINES: return ci::geom::LINES; break;
@@ -1184,7 +1193,7 @@ ci::geom::Primitive File::convertToPrimitive( GLenum primitive )
 	}
 }
 	
-ci::geom::Attrib File::getAttribEnum( const std::string &attrib )
+ci::geom::Attrib Mesh::getAttribEnum( const std::string &attrib )
 {
 	using namespace ci::geom;
 	if( attrib == "POSITION" )			return Attrib::POSITION;
@@ -1203,50 +1212,51 @@ ci::geom::Attrib File::getAttribEnum( const std::string &attrib )
 	else								return Attrib::NUM_ATTRIBS;
 }
 	
-ci::gl::UniformSemantic File::getUniformEnum( const std::string &uniform )
+ci::gl::UniformSemantic Technique::getUniformEnum( const std::string &uniform )
 {
 	auto & u = uniform;
 	using namespace ci::gl;
-	if( u == "MODEL" )						return UniformSemantic::UNIFORM_MODEL_MATRIX;
-	else if( u == "VIEW" )					return UniformSemantic::UNIFORM_VIEW_MATRIX;
-	else if( u == "PROJECTION" )			return UniformSemantic::UNIFORM_PROJECTION_MATRIX;
-	else if( u == "MODELVIEW" )				return UniformSemantic::UNIFORM_MODEL_VIEW;
-	else if( u == "MODELVIEWPROJECTION" )	return UniformSemantic::UNIFORM_MODEL_VIEW_PROJECTION;
-	else if( u == "MODELINVERSE" )			return UniformSemantic::UNIFORM_MODEL_MATRIX_INVERSE;
-	else if( u == "VIEWINVERSE" )			return UniformSemantic::UNIFORM_VIEW_MATRIX_INVERSE;
-	else if( u == "PROJECTIONINVERSE" )		return UniformSemantic::UNIFORM_PROJECTION_MATRIX_INVERSE;
-	else if( u == "MODELVIEWINVERSE" )		return UniformSemantic::UNIFORM_MODEL_VIEW;
-	else if( u == "MODELVIEWPROJECTIONINVERSE" ) return UniformSemantic::UNIFORM_MODEL_VIEW_PROJECTION;
-	else if( u == "MODELINVERSETRANSPOSE" ) return UniformSemantic::UNIFORM_MODEL_MATRIX_INVERSE;
-	else if( u == "MODELVIEWINVERSETRANSPOSE" ) return UniformSemantic::UNIFORM_MODEL_VIEW_INVERSE_TRANSPOSE;
-	else if( u == "VIEWPORT" )				return UniformSemantic::UNIFORM_VIEWPORT_MATRIX;
+	if( u == "MODEL" )								return UniformSemantic::UNIFORM_MODEL_MATRIX;
+	else if( u == "VIEW" )							return UniformSemantic::UNIFORM_VIEW_MATRIX;
+	else if( u == "PROJECTION" )					return UniformSemantic::UNIFORM_PROJECTION_MATRIX;
+	else if( u == "MODELVIEW" )						return UniformSemantic::UNIFORM_MODEL_VIEW;
+	else if( u == "MODELVIEWPROJECTION" )			return UniformSemantic::UNIFORM_MODEL_VIEW_PROJECTION;
+	else if( u == "MODELINVERSE" )					return UniformSemantic::UNIFORM_MODEL_MATRIX_INVERSE;
+	else if( u == "VIEWINVERSE" )					return UniformSemantic::UNIFORM_VIEW_MATRIX_INVERSE;
+	else if( u == "PROJECTIONINVERSE" )				return UniformSemantic::UNIFORM_PROJECTION_MATRIX_INVERSE;
+	else if( u == "MODELVIEWINVERSE" )				return UniformSemantic::UNIFORM_MODEL_VIEW;
+	else if( u == "MODELVIEWPROJECTIONINVERSE" )	return UniformSemantic::UNIFORM_MODEL_VIEW_PROJECTION;
+	else if( u == "MODELINVERSETRANSPOSE" )			return UniformSemantic::UNIFORM_MODEL_MATRIX_INVERSE;
+	else if( u == "MODELVIEWINVERSETRANSPOSE" )		return UniformSemantic::UNIFORM_MODEL_VIEW_INVERSE_TRANSPOSE;
+	else if( u == "VIEWPORT" )						return UniformSemantic::UNIFORM_VIEWPORT_MATRIX;
 	else return (UniformSemantic)-1;
 }
 	
-uint8_t File::getNumComponentsForType( const std::string &type )
+uint8_t Accessor::getNumComponents() const
 {
-	if( type == "SCALAR" )	  return 1;
-	else if( type == "VEC2" ) return 2;
-	else if( type == "VEC3" ) return 3;
-	else if( type == "VEC4" ) return 4;
-	else if( type == "MAT2" ) return 4;
-	else if( type == "MAT3" ) return 9;
-	else if( type == "MAT4" ) return 16;
-	else					  return 0;
+	switch( dataType ) {
+		case Accessor::DataType::SCALAR: return 1;
+		case Accessor::DataType::VEC2: return 2;
+		case Accessor::DataType::VEC3: return 3;
+		case Accessor::DataType::VEC4:
+		case Accessor::DataType::MAT2: return 4;
+		case Accessor::DataType::MAT3: return 9;
+		case Accessor::DataType::MAT4: return 12;
+	}
 }
 
-uint8_t File::getNumBytesForComponentType( GLuint type )
+uint8_t Accessor::getNumBytesForComponentType() const
 {
-	switch (type) {
-		case 5120: // BYTE
-		case 5121: // UNSIGNED_BYTE
+	switch (componentType) {
+		case Accessor::ComponentType::BYTE:
+		case Accessor::ComponentType::UNSIGNED_BYTE:
 			return 1;
 			break;
-		case 5122: // SHORT
-		case 5123: // UNSIGNED_SHORT
+		case Accessor::ComponentType::SHORT: // SHORT
+		case Accessor::ComponentType::UNSIGNED_SHORT: // UNSIGNED_SHORT
 			return 2;
 			break;
-		case 5126: // FLOAT
+		case Accessor::ComponentType::FLOAT: // FLOAT
 			return 4;
 			break;
 		default: {
@@ -1260,7 +1270,7 @@ uint8_t File::getNumBytesForComponentType( GLuint type )
 void* Accessor::getDataPtr() const
 {
 	const auto &buffer = bufferView->buffer;
-	return reinterpret_cast<uint8_t*>(buffer->data->getData()) + bufferView->byteOffset + byteOffset;
+	return reinterpret_cast<uint8_t*>(buffer->getBuffer()->getData()) + bufferView->byteOffset + byteOffset;
 }
 	
 const Node* Node::getChild( size_t index ) const
@@ -1289,12 +1299,12 @@ SkeletonRef Skin::createSkeleton() const
 	int i = 0;
 	for( auto jointNode : joints ) {
 		auto &joint = skeleton->jointArray[i];
-		auto &jointBindPose = skeleton->jointBindPoses[i];
+		auto &jointBindPose = skeleton->bindPose.localPoses[i];
 		skeleton->jointNames[i] = jointNode->name;
 		joint.inverseBindPose = *matricesPtr++;
 		jointBindPose.rot = jointNode->getRotation();
-		jointBindPose.scale = vec4( jointNode->getScale(), 1.0f );
-		jointBindPose.trans = vec4( jointNode->getTranslation(), 1.0f );
+		jointBindPose.scale = jointNode->getScale();
+		jointBindPose.trans = jointNode->getTranslation();
 		if( i == 0 )
 			joint.parentId = 0xFF;
 		else {
@@ -1306,17 +1316,18 @@ SkeletonRef Skin::createSkeleton() const
 		// if this joint is the root.
 		i++;
 	}
+	skeleton->resolveGlobalBindPose();
 	
 	return skeleton;
 }
 	
-std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &file ) const
+std::vector<Animation::ParameterData> Animation::getParameters() const
 {
 	std::vector<Animation::ParameterData> ret;
 	ret.reserve( parameters.size() + 1 );
 	
 	// Initialize times for keyframes
-	CI_ASSERT( timeAccessor->type == "SCALAR" );
+	CI_ASSERT( timeAccessor->dataType == Accessor::DataType::SCALAR );
 	auto totalKeyFrames = timeAccessor->count;
 	auto dataPtr = timeAccessor->getDataPtr();
 	
@@ -1326,7 +1337,7 @@ std::vector<Animation::ParameterData> Animation::getParameters( const FileRef &f
 	
 	for( auto & param : parameters ) {
 		const auto accessor = param.accessor;
-		auto numComponents = gltf::File::getNumComponentsForType( accessor->type );
+		auto numComponents = accessor->getNumComponents();
 		
 		CI_ASSERT( totalKeyFrames == accessor->count );
 		auto dataPtr = accessor->getDataPtr();
@@ -1369,6 +1380,7 @@ Clip<Transform>	Animation::createTransformClip( const std::vector<ParameterData>
 			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
 			transformKeyFrame.second.setTranslation( scale );
 		}
+		cout << "Time: " << transformKeyFrame.first << " - Trans: " << transformKeyFrame.second.getTranslation() << " Scale: " << transformKeyFrame.second.getScale() << " Rotation: " << transformKeyFrame.second.getRotation() << endl;
 		i++;
 	}
 	
@@ -1476,258 +1488,6 @@ ci::vec3 Node::getScale() const
 		ret = glm::make_vec3( scale.data() );
 	return ret;
 }
-	
-namespace gl {
-	
-GlslProgRef	getGlslProgramFromMaterial( const File &gltf, const std::string &name )
-{
-	//std::map<std::string, GlslProgRef> GlslCache;
-	//
-	//auto found = GlslCache.find( name );
-	//
-	//if( found != GlslCache.end() ) return found->second;
-	//
-	//GlslProgRef ret;
-	//
-	//auto material = gltf.getMaterialInfo( name );
-	//auto technique = gltf.getTechniqueInfo( material.instanceTechnique.technique );
-	//auto pass = technique.passes[0];
-	//
-	//GlslProg::Format format;
-	//
-	//auto attribs = pass.instanceProgram.attributes;
-	//for( auto attrib = attribs.begin(); attrib != attribs.end(); ++attrib ) {
-	//	// attrib->first is the name of the glsl variable
-	//	// attrib->second is the name into the parameter
-	//	// which offers type and semantic
-	//	auto found = technique.parameters.find( attrib->second );
-	//	if( found != technique.parameters.end() ) {
-	//		format.attrib( gltf.getAttribEnum( found->second.semantic ), attrib->first );
-	//	}
-	//}
-	//
-	//auto uniforms = pass.instanceProgram.uniforms;
-	//for( auto uniform = uniforms.begin(); uniform != uniforms.end(); ++uniform ) {
-	//	// uniform->first is the name of the glsl variable
-	//	// uniform->second is the name into the parameter
-	//	// which offers type and semantic
-	//	auto found = technique.parameters.find( uniform->second );
-	//	
-	//	if( found != technique.parameters.end() ) {
-	//		if( !found->second.semantic.empty() )
-	//			format.uniform( gltf.getUniformEnum( found->second.semantic ), uniform->first );
-	//	}
-	//}
-	//
-	//auto program = gltf.getProgramInfo( pass.instanceProgram.program );
-	//auto fragShader = gltf.getShaderInfo( program.frag );
-	//auto vertShader = gltf.getShaderInfo( program.vert );
-	//
-	//format.fragment( fragShader.source ).vertex( vertShader.source );
-	//
-	//ret = GlslProg::create( format );
-	//
-	//return ret;
-	return  GlslProgRef();
-}
-
-TextureRef getTextureByName( const File &gltf, const std::string &name )
-{
-	//static std::map<std::string, TextureRef> TextureRefCache;
-	//
-	//auto found = TextureRefCache.find( name );
-	//
-	//if( found != TextureRefCache.end() ) return found->second;
-	//
-	//TextureRef ret;
-	//
-	//auto texture = gltf.getTextureInfo( name );
-	//auto sampler = gltf.getSamplerInfo( texture.sampler );
-	//auto source = gltf.getImageInfo( texture.source );
-	//
-	//ci::gl::Texture2d::Format format;
-	//format.wrapS( sampler.wrapS )
-	//.wrapT( sampler.wrapT )
-	//.magFilter( sampler.magFilter )
-	//.minFilter( sampler.minFilter )
-	//.target( texture.target )
-	//.internalFormat( texture.internalFormat )
-	////		.pixelDataFormat( texture.format )
-	//.dataType( texture.type )
-	//// TODO: Test what should be here!
-	//.loadTopDown();
-	//
-	//ret = ci::gl::Texture::create( *(source.surface), ci::gl::Texture2d::Format().loadTopDown() );
-	//
-	//return ret;
-	return TextureRef();
-}
-
-BatchRef getBatchFromMeshByName( const File &gltf, const std::string &name )
-{
-	//static std::map<std::string, BatchRef> BatchCache;
-	//
-	//auto found = BatchCache.find( name );
-	//
-	//if( found != BatchCache.end() ) return found->second;
-	//
-	//BatchRef ret;
-	//
-	////	auto glsl = getGlslProgramByName( );
-	//
-	//return ret;
-	return BatchRef();
-}
-
-VboMeshRef getVboMeshFromMeshByName( const File &gltf, const std::string &name )
-{
-	//static std::map<std::string, VboMeshRef> VboMeshCache;
-	//
-	//auto found = VboMeshCache.find( name );
-	//
-	//if( found != VboMeshCache.end() ) return found->second;
-	//
-	//VboMeshRef ret;
-	//std::vector<std::pair<geom::BufferLayout, VboRef>> arrayVbos;
-	//std::map<std::string, geom::BufferLayout> layoutsForVbo;
-	//Mesh mesh = gltf.getMeshInfo( name );
-	//
-	//uint32_t numVertices = 0;
-	//for( auto & attribute : mesh.primitives[0].attributes ) {
-	//	
-	//	auto attribAccessor = gltf.getAccessorInfo( attribute.first );
-	//	auto attribBufferView = gltf.getBufferViewInfo( attribAccessor.bufferView );
-	//	auto attribBuffer = gltf.getBufferInfo( attribBufferView.buffer );
-	//	
-	//	auto numComponents = gltf.getNumComponentsForType( attribAccessor.type );
-	//	//		auto numBytesComponent = getNumBytesForComponentType( attribAccessor.componentType );
-	//	
-	//	if( numVertices == 0 ) {
-	//		numVertices = attribAccessor.count;
-	//	}
-	//	else if( numVertices != attribAccessor.count ) {
-	//		CI_LOG_W( "Vertices don't match in " << attribAccessor.name << " accessor." );
-	//	}
-	//	
-	//	auto foundBuffer = layoutsForVbo.find( attribBufferView.name );
-	//	if( foundBuffer != layoutsForVbo.end() ) {
-	//		auto & layout = foundBuffer->second;
-	//		layout.append( attribute.second, numComponents, attribAccessor.byteStride, attribAccessor.byteOffset );
-	//	}
-	//	else {
-	//		geom::BufferLayout layout;
-	//		layout.append( attribute.second, numComponents, attribAccessor.byteStride, attribAccessor.byteOffset );
-	//		layoutsForVbo.insert( make_pair( attribBufferView.name, layout ) );
-	//	}
-	//}
-	//VboRef indices;
-	//uint32_t numIndices = 0;
-	//uint32_t indexComponentType = 0;
-	//{
-	//	auto indexAccessor = gltf.getAccessorInfo( mesh.primitives[0].indices );
-	//	auto indexBufferView = gltf.getBufferViewInfo( indexAccessor.bufferView );
-	//	auto indexBuffer = gltf.getBufferInfo( indexBufferView.buffer );
-	//	
-	//	numIndices = indexAccessor.count;
-	//	indexComponentType = indexAccessor.componentType;
-	//	auto ptr = (uint8_t*)indexBuffer.data->getData();
-	//	indices = ci::gl::Vbo::create( GL_ELEMENT_ARRAY_BUFFER, indexBufferView.byteLength, &ptr[indexAccessor.byteOffset + indexBufferView.byteOffset], GL_STATIC_DRAW );
-	//}
-	//for( auto & bufferLayout : layoutsForVbo ) {
-	//	auto bufferView = gltf.getBufferViewInfo( bufferLayout.first );
-	//	auto buffer = gltf.getBufferInfo( bufferView.buffer );
-	//	
-	//	auto ptr = (uint8_t*)buffer.data->getData();
-	//	VboRef temp = ci::gl::Vbo::create( GL_ARRAY_BUFFER, buffer.byteLength, &ptr[bufferView.byteOffset], GL_STATIC_DRAW );
-	//	arrayVbos.push_back( make_pair( bufferLayout.second, temp ) );
-	//}
-	//
-	//ret = VboMesh::create( numVertices, mesh.primitives[0].primitive, arrayVbos, numIndices, indexComponentType, indices );
-	//
-	//VboMeshCache.insert( make_pair( name, ret ) );
-	//return ret;
-	return VboMeshRef();
-}
-	
-TriMeshRef getTriMeshFromMeshByName( const File &gltf, const std::string &name )
-{
-	//static std::map<std::string, TriMeshRef> TriMeshCache;
-	//
-	//auto found = TriMeshCache.find( name );
-	//
-	//if( found != TriMeshCache.end() ) return found->second;
-	//
-	//TriMesh::Format format;
-	//format.positions(3);
-	//format.texCoords0(2);
-	//format.normals();
-	//TriMeshRef ret = TriMesh::create( format );
-	//Mesh mesh = gltf.getMeshInfo( name );
-	//
-	//for( auto & attribute : mesh.primitives[0].attributes ) {
-	//	
-	//	auto attribAccessor = gltf.getAccessorInfo( attribute.first );
-	//	auto attribBufferView = gltf.getBufferViewInfo( attribAccessor.bufferView );
-	//	auto attribBuffer = gltf.getBufferInfo( attribBufferView.buffer );
-	//	
-	//	auto numComponents = gltf.getNumComponentsForType( attribAccessor.type );
-	//	auto numBytesComponent = gltf.getNumBytesForComponentType( attribAccessor.componentType );
-	//	
-	//	float * floatContainer = new float[attribAccessor.count * numComponents];
-	//	uint8_t * data = (uint8_t*)attribBuffer.data->getData();
-	//	
-	//	memcpy( floatContainer,
-	//		   &data[attribBufferView.byteOffset + attribAccessor.byteOffset],
-	//		   attribAccessor.count * numComponents * numBytesComponent);
-	//	
-	//	// TODO: Decipher how many components and use the correct one.
-	//	if( attribute.second == geom::Attrib::POSITION ) {
-	//		ret->appendPositions( (vec3*)floatContainer, attribAccessor.count );
-	//	}
-	//	else if( attribute.second == geom::Attrib::NORMAL ) {
-	//		ret->appendNormals( (vec3*)floatContainer, attribAccessor.count );
-	//	}
-	//	else if( attribute.second == geom::Attrib::TEX_COORD_0 ) {
-	//		ret->appendTexCoords0( (vec2*)floatContainer, attribAccessor.count );
-	//	}
-	//	else if( attribute.second == geom::Attrib::TEX_COORD_1 ) {
-	//		ret->appendTexCoords1( (vec2*)floatContainer, attribAccessor.count );
-	//	}
-	//	else if( attribute.second == geom::Attrib::TEX_COORD_2 ) {
-	//		ret->appendTexCoords2( (vec2*)floatContainer, attribAccessor.count );
-	//	}
-	//	else if( attribute.second == geom::Attrib::TEX_COORD_3 ) {
-	//		ret->appendTexCoords3( (vec3*)floatContainer, attribAccessor.count );
-	//	}
-	//	else if( attribute.second == geom::Attrib::COLOR ) {
-	//		ret->appendColors( (Color*)floatContainer, attribAccessor.count );
-	//	}
-	//	
-	//	delete [] floatContainer;
-	//}
-	//
-	//auto indexAccessor = gltf.getAccessorInfo( mesh.primitives[0].indices );
-	//auto indexBufferView = gltf.getBufferViewInfo( indexAccessor.bufferView );
-	//auto indexBuffer = gltf.getBufferInfo( indexBufferView.buffer );
-	//
-	//std::vector<uint16_t> indices(indexAccessor.count);
-	//char * data = (char*)indexBuffer.data->getData();
-	//memcpy(indices.data(), &data[indexBufferView.byteOffset], indexAccessor.count * sizeof(uint16_t) );
-	//std::vector<uint32_t> convertedIndices(indices.size());
-	//
-	//
-	//for( int i = 0; i < indices.size() && i < convertedIndices.size(); ++i ) {
-	//	convertedIndices[i] = indices[i];
-	//}
-	//
-	//ret->appendIndices( convertedIndices.data(), convertedIndices.size() );
-	//
-	//TriMeshCache.insert( make_pair(name, ret) );
-	//return ret;
-	return TriMeshRef();
-}
-	
-} // namespace gl
 	
 void Node::outputToConsole( std::ostream &os, uint8_t tabAmount ) const
 {

@@ -54,7 +54,7 @@ BoxAnimated::BoxAnimated()
 	for( const auto &animationKV : animations ) {
 		auto &animation = animationKV.second;
 		
-		auto paramData = animation.getParameters( file );
+		auto paramData = animation.getParameters();
 		if( paramData[1].paramName == "rotation" ) {
 			animRot = gltf::Animation::createRotationClip( paramData );
 		}

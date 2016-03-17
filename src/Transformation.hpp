@@ -15,7 +15,7 @@ struct Transform {
 	Transform( const ci::vec4 &translation, const ci::quat &rotation, const ci::vec3 &scale )
 	: trans( translation ), rot( rotation ), scale( scale )
 	{}
-	inline ci::mat4 getTRS() {
+	inline ci::mat4 getTRS() const {
 		ci::mat4 ret;
 		ret *= ci::translate( trans );
 		ret *= ci::toMat4( rot );
