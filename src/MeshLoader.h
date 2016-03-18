@@ -99,6 +99,7 @@ inline MeshLoader::MeshLoader( const FileRef &gltfFile, const Mesh *mesh )
 			mAvailableAttribs.insert( attribAccessors.attrib );
 		}
 	}
+	verticesSet = true;
 }
 
 inline uint8_t MeshLoader::getAttribDims( ci::geom::Attrib attr ) const

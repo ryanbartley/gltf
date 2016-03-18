@@ -42,6 +42,7 @@ class TestApp : public App {
 		Clip<Transform> animTransform;
 	};
 	std::vector<AnimationWithTarget> animTransforms;
+	ci::TriMeshRef mTrimesh, mDrawable;
 };
 
 void TestApp::setup()
@@ -61,7 +62,14 @@ void TestApp::setup()
 		target.animTransform = gltf::Animation::createTransformClip( paramData );
 		animTransforms.emplace_back( move( target ) );
 	}
-
+	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Cylinder-mesh" ) );
+	mTrimesh = ci::TriMesh::create( mesh, TriMesh::Format().boneIndex().boneWeight().positions().normals() );
+	mDrawable = ci::TriMesh::create( *mTrimesh, TriMesh::Format().positions() );
+	for( int i = 0; i < mTrimesh->getNumVertices(); i++ ) {
+		auto boneIndex = mTrimesh->getBoneIndices<4>()[i];
+		auto boneWeight = mTrimesh->getBoneWeights<4>()[i];
+		cout << i << " - Indices: " << boneIndex << " Weight: " << boneWeight << endl;
+	}
 //	mBoxAnimated.reset( new BoxAnimated );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10000.0f );
@@ -92,16 +100,38 @@ void TestApp::draw()
 	const std::array<ci::Colorf, 2> colors = { Colorf( 1, 0, 0 ), Colorf( 0, 1, 0 ) };
 	gl::ScopedModelMatrix scopeModel;
 	auto time = getElapsedFrames() / 60.0;
-	for( int i = 0; i < mSkeleton->jointNames.size(); i++ ) {
-		auto &local = mSkeleton->bindPose.localPoses[i];
-		gl::multModelMatrix( local.getTRS() );
-		auto &trans = animTransforms[i];
-		auto currentTransform = trans.animTransform.getLooped( time );
-		auto mat = currentTransform.getTRS();
-		gl::multModelMatrix( mat );
-		gl::color( colors[i] );
-		gl::drawCube( vec3( 0, 2.5, 0 ), vec3( 1, 5, 1 ) );
+	std::array<ci::mat4, 2> mats, offsets;
+	for( int i = 0; i < 2; i++ ) {
+		auto &inverseBindPose = mSkeleton->jointArray[i].inverseBindPose;
+		if( i == 0 ) {
+			mats[0] = animTransforms[0].animTransform.getLooped( time ).getTRS();
+			offsets[0] = inverseBindPose * mats[0];
+		}
+		else {
+			mats[1] = mats[0] * animTransforms[1].animTransform.getLooped( time ).getTRS();
+			offsets[1] = inverseBindPose * mats[1];
+		}
 	}
+	auto &bufferInd = mTrimesh->getBufferBoneIndices();
+	auto &bufferWei = mTrimesh->getBufferBoneWeights();
+	for( int i = 0; i < mTrimesh->getNumVertices(); i++ ) {
+		auto &pos = mTrimesh->getPositions<3>()[i];
+		const auto &boneWeight = mTrimesh->getBoneWeights<4>()[i];
+		const auto &boneIndices = mTrimesh->getBoneIndices<4>()[i];
+		auto &writeablePos = mDrawable->getPositions<3>()[i];
+		mat4 ret;
+		// Weight normalization factor
+		float normfac = 1.0 / (boneWeight.x + boneWeight.y);
+		
+		// Weight1 * Bone1 + Weight2 * Bone2
+		ret = normfac * boneWeight.y * offsets[int(boneIndices.y)]
+		    + normfac * boneWeight.x * offsets[int(boneIndices.x)];
+		
+		writeablePos = vec3(ret * vec4(pos, 1.0));
+	}
+	
+	gl::draw( *mDrawable );
+	
 //	for( auto & rend : mRenderables ) {
 //		gl::ScopedModelMatrix scopeModel;
 //		gl::setModelMatrix( rend.modelMatrix );

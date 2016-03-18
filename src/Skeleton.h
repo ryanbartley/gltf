@@ -39,7 +39,7 @@ struct Skeleton {
 	};
 	
 	void resolveGlobalBindPose();
-	ci::mat4 getParentsLocalTransform( uint8_t parentId ) const;
+	const ci::mat4& getParentsWorldTransform( uint8_t parentId ) const;
 	
 	std::vector<std::string>	jointNames;
 	std::vector<Joint>			jointArray;

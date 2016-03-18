@@ -223,7 +223,7 @@ struct Animation {
 
 struct Buffer {
 	
-	ci::BufferRef getBuffer() const;
+	ci::BufferRef getBuffer() const { return data; }
 	
 	uint32_t		byteLength = 0;
 	std::string		uri; // path
