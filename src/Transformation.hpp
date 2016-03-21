@@ -17,9 +17,9 @@ struct Transform {
 	{}
 	inline ci::mat4 getTRS() const {
 		ci::mat4 ret;
-		ret *= ci::translate( trans );
-		ret *= ci::toMat4( rot );
 		ret *= ci::scale( scale );
+		ret *= ci::toMat4( rot );
+		ret *= ci::translate( trans );
 		return ret;
 	}
 	

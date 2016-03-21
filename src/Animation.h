@@ -16,11 +16,14 @@ public:
 	Clip( std::vector<std::pair<double, T>> keyFrames );
 	
 	void	addKeyFrame( double time, T value );
-	std::pair<double, double> getBounds() const { return { mStartTime, mStartTime + mDuration }; }
 	
-	T		get( double time );
-	T		getLooped( double time );
-	T		lerp( const T &begin, const T &end, double time );
+	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
+	std::pair<double, T>		getKeyFrameAt( uint32_t keyframeId ) const;
+	size_t						getNumKeyFrames() { return mKeyFrameValues.size(); }
+	
+	T		get( double time ) const;
+	T		getLooped( double time ) const;
+	T		lerp( const T &begin, const T &end, double time ) const;
 	
 private:
 	
@@ -34,6 +37,7 @@ private:
 template <typename T>
 Clip<T>::Clip( std::vector<std::pair<double, T>> keyFrames )
 {
+	CI_ASSERT( keyFrames.size() >= 2 );
 	auto begIt = begin( keyFrames );
 	auto endIt = end( keyFrames );
 	std::sort( begIt, endIt,
@@ -73,10 +77,10 @@ inline void Clip<T>::addKeyFrame( double time, T value )
 }
 
 template <typename T>
-inline T Clip<T>::get( double absTime )
+inline T Clip<T>::get( double absTime ) const
 {
-	T ret;
 	CI_ASSERT( mKeyFrameTimes.size() >= 2 && mKeyFrameValues.size() >= 2 );
+	T ret;
 	auto clamped = glm::clamp( absTime, mStartTime, mStartTime + mDuration );
 	auto begIt = begin( mKeyFrameTimes );
 	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, clamped );
@@ -87,11 +91,18 @@ inline T Clip<T>::get( double absTime )
 	return lerp( mKeyFrameValues[dist - 1], mKeyFrameValues[dist], perTime );
 }
 
-template <typename T>
-inline T Clip<T>::getLooped( double absTime )
+template<typename T>
+inline std::pair<double, T> Clip<T>::getKeyFrameAt( uint32_t keyframeId ) const
 {
-	T ret;
+	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
+	return { mKeyFrameTimes[keyframeId], mKeyFrameValues[keyframeId] };
+}
+
+template <typename T>
+inline T Clip<T>::getLooped( double absTime ) const
+{
 	CI_ASSERT( mKeyFrameTimes.size() >= 2 && mKeyFrameValues.size() >= 2 );
+	T ret;
 	auto cyclicTime = glm::mod( absTime, mDuration ) + mStartTime;
 	auto begIt = begin( mKeyFrameTimes );
 	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, cyclicTime );
@@ -104,43 +115,43 @@ inline T Clip<T>::getLooped( double absTime )
 }
 
 template<>
-inline float Clip<float>::lerp( const float &begin, const float &end, double time )
+inline float Clip<float>::lerp( const float &begin, const float &end, double time ) const
 {
 	return glm::mix( begin, end, time );
 }
 
 template<>
-inline ci::vec2 Clip<ci::vec2>::lerp( const ci::vec2 &begin, const ci::vec2 &end, double time )
+inline ci::vec2 Clip<ci::vec2>::lerp( const ci::vec2 &begin, const ci::vec2 &end, double time ) const
 {
 	return glm::mix( begin, end, time );
 }
 
 template<>
-inline ci::vec3 Clip<ci::vec3>::lerp( const ci::vec3 &begin, const ci::vec3 &end, double time )
+inline ci::vec3 Clip<ci::vec3>::lerp( const ci::vec3 &begin, const ci::vec3 &end, double time ) const
 {
 	return glm::mix( begin, end, time );
 }
 
 template<>
-inline ci::vec4 Clip<ci::vec4>::lerp( const ci::vec4 &begin, const ci::vec4 &end, double time )
+inline ci::vec4 Clip<ci::vec4>::lerp( const ci::vec4 &begin, const ci::vec4 &end, double time ) const
 {
 	return glm::mix( begin, end, time );
 }
 
 template<>
-inline ci::quat Clip<ci::quat>::lerp( const ci::quat &begin, const ci::quat &end, double time )
+inline ci::quat Clip<ci::quat>::lerp( const ci::quat &begin, const ci::quat &end, double time ) const
 {
 	return glm::slerp( begin, end, static_cast<float>( time ) );
 }
 
 template<>
-inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat &begin, const ci::dquat &end, double time )
+inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat &begin, const ci::dquat &end, double time ) const
 {
 	return glm::slerp( begin, end, time );
 }
 
 template<>
-inline Transform Clip<Transform>::lerp( const Transform &begin, const Transform &end, double time )
+inline Transform Clip<Transform>::lerp( const Transform &begin, const Transform &end, double time ) const
 {
 	Transform ret;
 	ret.trans = glm::mix( begin.trans, end.trans, time );

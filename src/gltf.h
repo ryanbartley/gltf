@@ -189,6 +189,7 @@ struct Animation {
 	struct Channel {
 		std::string sampler, path;
 		Node		*target	= nullptr;
+		std::string	targetId;
 		Json::Value channelExtras, targetExtras;
 	};
 	struct Sampler {
@@ -213,6 +214,7 @@ struct Animation {
 	static Clip<ci::vec3>	createScaleClip( const std::vector<ParameterData> &paramData );
 	static Clip<ci::quat>	createRotationClip( const std::vector<ParameterData> &paramData );
 	
+	std::string				target;
 	std::vector<Channel>	channels;
 	std::vector<Sampler>	samplers;
 	Accessor				*timeAccessor = nullptr;

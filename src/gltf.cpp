@@ -275,6 +275,7 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 		Animation::Channel animChannel;
 		auto targetNodeKey = target["id"].asString();
 		auto &targetNode = mNodes[targetNodeKey];
+		animChannel.targetId = targetNodeKey;
 		animChannel.target = &targetNode;
 		animChannel.sampler = channel["sampler"].asString();
 		animChannel.path = target["path"].asString();
@@ -282,6 +283,9 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 		animChannel.targetExtras = channel["extras"];
 		ret.channels.emplace_back( move( animChannel ) );
 	}
+	
+	// This isn't good but I don't know any quicker way.
+	ret.target = ret.channels[0].targetId;
 
 	auto &samplers = animationInfo["samplers"];
 	for( auto &sampler : samplers ) {
@@ -1300,8 +1304,10 @@ SkeletonRef Skin::createSkeleton() const
 	for( auto jointNode : joints ) {
 		auto &joint = skeleton->jointArray[i];
 		auto &jointBindPose = skeleton->bindPose.localPoses[i];
-		skeleton->jointNames[i] = jointNode->name;
-		joint.inverseBindPose = *matricesPtr++;
+		auto &jointName = joints[i]->jointName;
+		CI_ASSERT( ! jointName.empty() );
+		skeleton->jointNames[i] = jointName;
+		joint.inverseGlobalBindPose = *matricesPtr++;
 		jointBindPose.rot = jointNode->getRotation();
 		jointBindPose.scale = jointNode->getScale();
 		jointBindPose.trans = jointNode->getTranslation();

@@ -26,6 +26,7 @@ class TestApp : public App {
 	
 	std::shared_ptr<BoxAnimated> mBoxAnimated;
 	SkeletonRef mSkeleton;
+	SkeletonAnimRef mSkeletonAnim;
 	
 	gl::BatchRef mBatch;
 	CameraPersp mCam;
@@ -54,22 +55,22 @@ void TestApp::setup()
 	const auto &skin = file->getSkinInfo( "Armature_Cylinder-skin" );
 	mSkeleton = skin.createSkeleton();
 	const auto &animations = file->getAnimations();
-	for( auto &animationPair : animations ) {
-		auto &animation = animationPair.second;
-		auto paramData = animation.getParameters();
-		AnimationWithTarget target;
-		target.target = animation.channels[0].target->name;
-		target.animTransform = gltf::Animation::createTransformClip( paramData );
-		animTransforms.emplace_back( move( target ) );
+	std::vector<Clip<Transform>> skeletonAnims;
+	skeletonAnims.reserve( mSkeleton->jointArray.size() );
+	for( auto &boneName : mSkeleton->jointNames ) {
+		auto found = std::find_if( animations.begin(), animations.end(),
+		[boneName]( const std::pair<std::string, gltf::Animation> &animation ){
+			return animation.second.target == boneName;
+		});
+		if( found != animations.end() ) {
+			auto params = found->second.getParameters();
+			skeletonAnims.emplace_back( gltf::Animation::createTransformClip( params ) );
+		}
 	}
+	mSkeletonAnim.reset( new SkeletonAnim( mSkeleton, move( skeletonAnims ) ) );
 	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Cylinder-mesh" ) );
 	mTrimesh = ci::TriMesh::create( mesh, TriMesh::Format().boneIndex().boneWeight().positions().normals() );
-	mDrawable = ci::TriMesh::create( *mTrimesh, TriMesh::Format().positions() );
-	for( int i = 0; i < mTrimesh->getNumVertices(); i++ ) {
-		auto boneIndex = mTrimesh->getBoneIndices<4>()[i];
-		auto boneWeight = mTrimesh->getBoneWeights<4>()[i];
-		cout << i << " - Indices: " << boneIndex << " Weight: " << boneWeight << endl;
-	}
+	mDrawable = ci::TriMesh::create( *mTrimesh, TriMesh::Format().positions().colors( 3 ) );
 //	mBoxAnimated.reset( new BoxAnimated );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10000.0f );
@@ -100,20 +101,10 @@ void TestApp::draw()
 	const std::array<ci::Colorf, 2> colors = { Colorf( 1, 0, 0 ), Colorf( 0, 1, 0 ) };
 	gl::ScopedModelMatrix scopeModel;
 	auto time = getElapsedFrames() / 60.0;
-	std::array<ci::mat4, 2> mats, offsets;
-	for( int i = 0; i < 2; i++ ) {
-		auto &inverseBindPose = mSkeleton->jointArray[i].inverseBindPose;
-		if( i == 0 ) {
-			mats[0] = animTransforms[0].animTransform.getLooped( time ).getTRS();
-			offsets[0] = inverseBindPose * mats[0];
-		}
-		else {
-			mats[1] = mats[0] * animTransforms[1].animTransform.getLooped( time ).getTRS();
-			offsets[1] = inverseBindPose * mats[1];
-		}
-	}
-	auto &bufferInd = mTrimesh->getBufferBoneIndices();
-	auto &bufferWei = mTrimesh->getBufferBoneWeights();
+	std::vector<ci::mat4> offsets;
+	
+	mSkeletonAnim->getLooped( time, offsets );
+	
 	for( int i = 0; i < mTrimesh->getNumVertices(); i++ ) {
 		auto &pos = mTrimesh->getPositions<3>()[i];
 		const auto &boneWeight = mTrimesh->getBoneWeights<4>()[i];
