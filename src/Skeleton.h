@@ -46,26 +46,29 @@ public:
 		void calcMatrixPalette( std::vector<ci::mat4> &offsetMatrices );
 		void calcGlobalStack();
 		
-		const std::vector<Transform>&	getLocalPoses() const { return mLocalPoseTransforms; }
-		std::vector<Transform>&			getLocalPoses() { return mLocalPoseTransforms; }
-		const std::vector<ci::mat4>&	getGlobalMatrices() const { return mGlobalPose; }
-		std::vector<ci::mat4>&			getGlobalMatrices() { return mGlobalPose; }
+		const std::vector<Transform>&	getLocalJointTransforms() const { return mLocalJointTransforms; }
+		std::vector<Transform>&			getLocalJointTransforms() { return mLocalJointTransforms; }
+		const std::vector<ci::mat4>&	getGlobalJointMatrices() const { return mGlobalJointMatrices; }
+		std::vector<ci::mat4>&			getGlobalJointMatrices() { return mGlobalJointMatrices; }
 		bool							needsGlobalCache() const { return mNeedsGlobalCache; }
+		void setNeedsGlobalCache( bool needsCache ) { mNeedsGlobalCache = needsCache; }
 		
 	private:
 		Skeleton				*mSkeleton = nullptr;
-		std::vector<Transform>	mLocalPoseTransforms;
-		std::vector<ci::mat4>	mGlobalPose;
+		std::vector<Transform>	mLocalJointTransforms;
+		std::vector<ci::mat4>	mGlobalJointMatrices;
 		bool					mNeedsGlobalCache;
 	};
 	
-	struct Anim {
+	using AnimRef = std::shared_ptr<class Anim>;
+	class Anim {
+	public:
 		Anim( const std::vector<Clip<Transform>> &jointClips );
 		
 		void get( double time, Pose &localJointTransforms ) const;
 		void getLooped( double time, Pose &localJointTransforms  ) const;
 		
-	public:
+	private:
 		std::vector<Clip<Transform>> mJointClips;
 	};
 	
@@ -75,20 +78,23 @@ public:
 	bool			hasJoint( const std::string& name ) const;
 	size_t			getNumJoints() { return mJointArray.size(); }
 	
+	const Pose&		getBindPose() const { return mBindPose; }
+	Pose&			getBindPose() { return mBindPose; }
+	
 	const std::string*	getJointName( const Joint &joint ) const;
 	const std::string*	getJointName( uint8_t nameId ) const;
 	
 	const std::vector<Joint>&		getJoints() const { return mJointArray; }
-	const std::vector<std::string>& getJointNames() const { return mJointNames; }
+	std::vector<Joint>&				getJoints() { return mJointArray; }
 	
-	ci::AxisAlignedBox calcBoundingBox() const;
+	const std::vector<std::string>& getJointNames() const { return mJointNames; }
 	
 	void calcGlobalStack( const Pose &jointLocalTransforms,
 						  std::vector<ci::mat4> &globalStack );
 	void calcMatrixPalette( const std::vector<ci::mat4> &globalCache,
 						   std::vector<ci::mat4> &offsetMatrices ) const;
 	
-	const Pose&		getBindPose() { return mBindPose; }
+	ci::AxisAlignedBox calcBoundingBox() const;
 	
 private:
 	std::vector<Joint>			mJointArray;
@@ -96,31 +102,53 @@ private:
 	std::vector<std::string>	mJointNames;
 };
 
-using SkeletonAnimRef = std::shared_ptr<class SkeletonAnim>;
-
-class SkeletonAnim {
-public:
-	SkeletonAnim( SkeletonRef skeleton, std::vector<Clip<Transform>> animations )
-	: mSkeleton( skeleton ), jointClips( std::move( animations ) ), numJoints( jointClips.size() ) {}
+inline void Skeleton::Pose::calcMatrixPalette( std::vector<ci::mat4> &offsetMatrices )
+{
+	if( mNeedsGlobalCache )
+		calcGlobalStack();
 	
-	void get( double time, std::vector<ci::mat4> &offsetMatrices ) const;
-	void getLooped( double time, std::vector<ci::mat4> &offsetMatrices ) const;
-	void getPreInverse( double time, std::vector<Transform> &preInverseBakedTransforms ) const;
-	void getLoopedPreInverse( double time, std::vector<Transform> &preInverseBakedTransforms ) const;
-
-	void			traverse( std::function<void( const Skeleton::Joint& )> visit ) const;
-	static void		traverse( const Skeleton::Joint& node, std::function<void( const Skeleton::Joint& )> visit );
+	auto numJoints = mGlobalJointMatrices.size();
+	offsetMatrices.resize( numJoints );
 	
-private:
-	void calcGlobalStack( const std::vector<Transform> &preInverseTransforms,
-						  std::vector<ci::mat4> &globalCache ) const;
-	void calcMatrixPalette( const std::vector<ci::mat4> &globalCache,
-						    std::vector<ci::mat4> &offsetMatrices ) const;
-	
-	SkeletonRef						mSkeleton;
-	std::vector<Clip<Transform>>	jointClips;
-	uint32_t						numJoints;
-	std::function<void()>			postProcessor;
-};
+	auto &joints = mSkeleton->getJoints();
+	// Derive root
+	offsetMatrices[0] = joints[0].getInverseBindMatrix() * mGlobalJointMatrices[0];
+	// Derive children
+	for( int i = 1; i < numJoints; i++ ) {
+		offsetMatrices[i] = joints[i].getInverseBindMatrix() * mGlobalJointMatrices[i];
+	}
+}
 
+inline void Skeleton::Pose::calcGlobalStack()
+{
+	auto numJoints = mGlobalJointMatrices.size();
+	auto &joints = mSkeleton->getJoints();
+	// Derive root
+	mGlobalJointMatrices[0] = mLocalJointTransforms[0].getTRS();
+	// Derive children
+	for( int i = 1; i < numJoints; i++ ) {
+		mGlobalJointMatrices[i] = mGlobalJointMatrices[joints[i].getParentId()] * mLocalJointTransforms[i].getTRS();
+	}
+}
 
+inline void Skeleton::Anim::get( double time, Skeleton::Pose &localJointTransforms ) const
+{
+	auto &jointTransforms = localJointTransforms.getLocalJointTransforms();
+	CI_ASSERT( jointTransforms.size() == mJointClips.size() );
+	int i = 0;
+	for( auto & jointClip : mJointClips ) {
+		jointTransforms[i++] = jointClip.get( time );
+	}
+	localJointTransforms.setNeedsGlobalCache( true );
+}
+
+inline void Skeleton::Anim::getLooped( double time, Skeleton::Pose &localJointTransforms ) const
+{
+	auto &jointTransforms = localJointTransforms.getLocalJointTransforms();
+	CI_ASSERT( jointTransforms.size() == mJointClips.size() );
+	int i = 0;
+	for( auto &jointClip : mJointClips ) {
+		jointTransforms[i++] = jointClip.getLooped( time );
+	}
+	localJointTransforms.setNeedsGlobalCache( true );
+}

@@ -26,7 +26,7 @@ class TestApp : public App {
 	
 	std::shared_ptr<BoxAnimated> mBoxAnimated;
 	SkeletonRef mSkeleton;
-	SkeletonAnimRef mSkeletonAnim;
+	Skeleton::AnimRef mSkeletonAnim;
 	
 	gl::BatchRef mBatch;
 	CameraPersp mCam;
@@ -56,8 +56,8 @@ void TestApp::setup()
 	mSkeleton = skin.createSkeleton();
 	const auto &animations = file->getAnimations();
 	std::vector<Clip<Transform>> skeletonAnims;
-	skeletonAnims.reserve( mSkeleton->jointArray.size() );
-	for( auto &boneName : mSkeleton->jointNames ) {
+	skeletonAnims.reserve( mSkeleton->getNumJoints() );
+	for( auto &boneName : mSkeleton->getJointNames() ) {
 		auto found = std::find_if( animations.begin(), animations.end(),
 		[boneName]( const std::pair<std::string, gltf::Animation> &animation ){
 			return animation.second.target == boneName;
@@ -67,7 +67,7 @@ void TestApp::setup()
 			skeletonAnims.emplace_back( gltf::Animation::createTransformClip( params ) );
 		}
 	}
-	mSkeletonAnim.reset( new SkeletonAnim( mSkeleton, move( skeletonAnims ) ) );
+	mSkeletonAnim.reset( new Skeleton::Anim( move( skeletonAnims ) ) );
 	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Cylinder-mesh" ) );
 	mTrimesh = ci::TriMesh::create( mesh, TriMesh::Format().boneIndex().boneWeight().positions().normals() );
 	mDrawable = ci::TriMesh::create( *mTrimesh, TriMesh::Format().positions().colors( 3 ) );
