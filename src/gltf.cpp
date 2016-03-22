@@ -1303,11 +1303,11 @@ SkeletonRef Skin::createSkeleton() const
 	int i = 0;
 	for( auto jointNode : joints ) {
 		auto &joint = skeleton->jointArray[i];
-		auto &jointBindPose = skeleton->bindPose.localPoses[i];
+		auto &jointBindPose = skeleton->bindPose.getLocalPoses()[i];
 		auto &jointName = joints[i]->jointName;
 		CI_ASSERT( ! jointName.empty() );
 		skeleton->jointNames[i] = jointName;
-		joint.inverseGlobalBindPose = *matricesPtr++;
+		joint.setInverseBindMatrix( *matricesPtr++ );
 		jointBindPose.rot = jointNode->getRotation();
 		jointBindPose.scale = jointNode->getScale();
 		jointBindPose.trans = jointNode->getTranslation();
@@ -1322,7 +1322,6 @@ SkeletonRef Skin::createSkeleton() const
 		// if this joint is the root.
 		i++;
 	}
-	skeleton->resolveGlobalBindPose();
 	
 	return skeleton;
 }

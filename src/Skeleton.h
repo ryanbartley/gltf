@@ -13,56 +13,87 @@
 
 using SkeletonRef = std::shared_ptr<class Skeleton>;
 
-struct Skeleton {
-	Skeleton( uint32_t numJoints )
-	: jointNames( numJoints ), jointArray( jointNames.size() )
-	{
-		bindPose.skeleton = this;
-		bindPose.localPoses.resize( numJoints );
-		bindPose.globalPoses.resize( numJoints );
-	}
+class Skeleton {
+public:
+	Skeleton( uint8_t numJoints );
 	
 	struct Joint {
-		glm::mat4	inverseGlobalBindPose;
-		uint8_t		nameId;
-		uint8_t		parentId;
+		Joint();
+		Joint( uint8_t parentId, uint8_t nameId );
+		
+		void setInverseBindMatrix( const glm::mat4 &inverseBind ) { mInverseBindMatrix = inverseBind; }
+		glm::mat4& getInverseBindMatrix() { return mInverseBindMatrix; }
+		const glm::mat4& getInverseBindMatrix() const { return mInverseBindMatrix; }
+		
+		uint8_t getNameId() const { return mNameId; }
+		uint8_t getParentId() const { return mParentId; }
+		
+	private:
+		void setNameId( uint8_t nameId ) { mNameId = nameId; }
+		void setParentId( uint8_t parentId ) { mParentId = parentId; }
+		
+		glm::mat4	mInverseBindMatrix;
+		uint8_t		mNameId;
+		uint8_t		mParentId;
+		
+		friend class Skeleton;
 	};
 	
-	struct TreeJoint {
-		Joint*				parent;
-		std::vector<Joint*> children;
-		std::string			*name;
+	class Pose {
+	public:
+		Pose( Skeleton *skeleton );
+		
+		void calcMatrixPalette( std::vector<ci::mat4> &offsetMatrices );
+		void calcGlobalStack();
+		
+		const std::vector<Transform>&	getLocalPoses() const { return mLocalPoseTransforms; }
+		std::vector<Transform>&			getLocalPoses() { return mLocalPoseTransforms; }
+		const std::vector<ci::mat4>&	getGlobalMatrices() const { return mGlobalPose; }
+		std::vector<ci::mat4>&			getGlobalMatrices() { return mGlobalPose; }
+		bool							needsGlobalCache() const { return mNeedsGlobalCache; }
+		
+	private:
+		Skeleton				*mSkeleton = nullptr;
+		std::vector<Transform>	mLocalPoseTransforms;
+		std::vector<ci::mat4>	mGlobalPose;
+		bool					mNeedsGlobalCache;
 	};
 	
-	const Joint*	getRoot() const { return &jointArray[0]; }
+	struct Anim {
+		Anim( const std::vector<Clip<Transform>> &jointClips );
+		
+		void get( double time, Pose &localJointTransforms ) const;
+		void getLooped( double time, Pose &localJointTransforms  ) const;
+		
+	public:
+		std::vector<Clip<Transform>> mJointClips;
+	};
 	
-	void			traverse( std::function<void( const Joint& )> visit ) const;
-	static void		traverse( const Joint& node, std::function<void( const Joint& )> visit );
-	
-	bool			hasJoint( const std::string& name ) const;
+	const Joint*	getRoot() const { return &mJointArray[0]; }
 	const Joint*	getJoint( const std::string& name ) const;
 	const Joint*	getJoint( uint8_t jointId ) const;
+	bool			hasJoint( const std::string& name ) const;
+	size_t			getNumJoints() { return mJointArray.size(); }
 	
-	const std::string* getJointName( const Joint &joint ) const;
-	const std::string* getJointName( uint8_t nameId ) const;
+	const std::string*	getJointName( const Joint &joint ) const;
+	const std::string*	getJointName( uint8_t nameId ) const;
 	
-	size_t			getNumJoints() { return jointArray.size(); }
-	const std::vector<Joint>&	getJoints() const { return jointArray; }
+	const std::vector<Joint>&		getJoints() const { return mJointArray; }
+	const std::vector<std::string>& getJointNames() const { return mJointNames; }
 	
 	ci::AxisAlignedBox calcBoundingBox() const;
 	
-	struct Pose {
-		Skeleton					*skeleton = nullptr;
-		std::vector<Transform>		localPoses;
-		std::vector<ci::mat4>		globalPoses;
-	};
+	void calcGlobalStack( const Pose &jointLocalTransforms,
+						  std::vector<ci::mat4> &globalStack );
+	void calcMatrixPalette( const std::vector<ci::mat4> &globalCache,
+						   std::vector<ci::mat4> &offsetMatrices ) const;
 	
-	void resolveGlobalBindPose();
-	const ci::mat4& getParentsWorldTransform( uint8_t parentId ) const;
+	const Pose&		getBindPose() { return mBindPose; }
 	
-	std::vector<std::string>	jointNames;
-	std::vector<Joint>			jointArray;
-	Pose						bindPose;
+private:
+	std::vector<Joint>			mJointArray;
+	Pose						mBindPose;
+	std::vector<std::string>	mJointNames;
 };
 
 using SkeletonAnimRef = std::shared_ptr<class SkeletonAnim>;
@@ -76,6 +107,9 @@ public:
 	void getLooped( double time, std::vector<ci::mat4> &offsetMatrices ) const;
 	void getPreInverse( double time, std::vector<Transform> &preInverseBakedTransforms ) const;
 	void getLoopedPreInverse( double time, std::vector<Transform> &preInverseBakedTransforms ) const;
+
+	void			traverse( std::function<void( const Skeleton::Joint& )> visit ) const;
+	static void		traverse( const Skeleton::Joint& node, std::function<void( const Skeleton::Joint& )> visit );
 	
 private:
 	void calcGlobalStack( const std::vector<Transform> &preInverseTransforms,
