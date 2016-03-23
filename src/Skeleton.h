@@ -60,7 +60,14 @@ public:
 		bool					mNeedsGlobalCache;
 	};
 	
+	class PartialPose {
+		PartialPose( Skeleton *skeleton, const std::string &rootName );
+		PartialPose( Skeleton *skeleton, const Joint &rootJoint );
+		
+	};
+	
 	using AnimRef = std::shared_ptr<class Anim>;
+	
 	class Anim {
 	public:
 		Anim( const std::vector<Clip<Transform>> &jointClips );
@@ -77,6 +84,8 @@ public:
 	const Joint*	getJoint( uint8_t jointId ) const;
 	bool			hasJoint( const std::string& name ) const;
 	size_t			getNumJoints() { return mJointArray.size(); }
+	
+	bool			jointIsChildOf( uint8_t childIndex, uint8_t parentIndex ) const;
 	
 	const Pose&		getBindPose() const { return mBindPose; }
 	Pose&			getBindPose() { return mBindPose; }
