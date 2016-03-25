@@ -1162,6 +1162,27 @@ void File::addTextureInfo( const std::string &key, const Json::Value &textureInf
 	
 	add( key, move( ret ) );
 }
+	
+Skeleton::AnimRef File::createSkeletonAnim( const SkeletonRef &skeleton ) const
+{
+	std::vector<Clip<Transform>> skeletonClips;
+	skeletonClips.reserve( skeleton->getNumJoints() );
+	for( auto &boneName : skeleton->getJointNames() ) {
+		auto found = std::find_if( mAnimations.begin(), mAnimations.end(),
+		[boneName]( const std::pair<std::string, gltf::Animation> &animation ){
+			  return animation.second.target == boneName;
+		});
+		if( found != mAnimations.end() ) {
+			auto params = found->second.getParameters();
+			skeletonClips.emplace_back( gltf::Animation::createTransformClip( params ) );
+		}
+		else {
+			CI_ASSERT_MSG( false, "Need to figure out how to handle this case" );
+		}
+	}
+	auto ret = make_shared<Skeleton::Anim>( std::move( skeletonClips ) );
+	return ret;
+}
 
 CameraOrtho File::getOrthoCameraByName( const std::string &name )
 {
@@ -1298,32 +1319,29 @@ const Node* Node::getChild( const std::string &nodeName ) const
 	
 SkeletonRef Skin::createSkeleton() const
 {
-	SkeletonRef skeleton( new Skeleton( joints.size() ) );
 	auto matricesPtr = reinterpret_cast<ci::mat4*>( inverseBindMatrices->getDataPtr() );
-	int i = 0;
-	for( auto jointNode : joints ) {
-		auto &joint = skeleton->jointArray[i];
-		auto &jointBindPose = skeleton->bindPose.getLocalPoses()[i];
-		auto &jointName = joints[i]->jointName;
-		CI_ASSERT( ! jointName.empty() );
-		skeleton->jointNames[i] = jointName;
-		joint.setInverseBindMatrix( *matricesPtr++ );
-		jointBindPose.rot = jointNode->getRotation();
-		jointBindPose.scale = jointNode->getScale();
-		jointBindPose.trans = jointNode->getTranslation();
-		if( i == 0 )
-			joint.parentId = 0xFF;
-		else {
-			auto begIt = begin( skeleton->jointNames );
-			auto foundIt = std::find( begIt, end( skeleton->jointNames ), jointNode->parent->name );
-			auto distance = std::distance( begIt, foundIt );
-			joint.parentId = distance;
-		}
+	auto numJoints = joints.size();
+	std::vector<std::string> jointNames;
+	jointNames.reserve( numJoints );
+	std::vector<Skeleton::Joint> jointsContainer;
+	jointsContainer.reserve( numJoints );
+	for( int i = 0; i < numJoints; i++ ) {
+		uint8_t parentId;
 		// if this joint is the root.
-		i++;
+		if( i == 0 )
+			parentId = 0xFF;
+		else {
+			auto begIt = begin( jointNames );
+			auto foundIt = std::find( begIt, end( jointNames ), joints[i]->parent->name );
+			auto distance = std::distance( begIt, foundIt );
+			parentId = distance;
+		}
+		CI_ASSERT( !  joints[i]->jointName.empty() );
+		jointNames.emplace_back(  joints[i]->jointName );
+		jointsContainer.emplace_back( parentId, jointNames.size() - 1, *matricesPtr++ );
 	}
-	
-	return skeleton;
+	auto ret = std::make_shared<Skeleton>( std::move( jointsContainer ), std::move( jointNames ) );
+	return ret;
 }
 	
 std::vector<Animation::ParameterData> Animation::getParameters() const
@@ -1383,9 +1401,8 @@ Clip<Transform>	Animation::createTransformClip( const std::vector<ParameterData>
 		}
 		if( scaleData != nullptr ) {
 			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
-			transformKeyFrame.second.setTranslation( scale );
+			transformKeyFrame.second.setScale( scale );
 		}
-		cout << "Time: " << transformKeyFrame.first << " - Trans: " << transformKeyFrame.second.getTranslation() << " Scale: " << transformKeyFrame.second.getScale() << " Rotation: " << transformKeyFrame.second.getRotation() << endl;
 		i++;
 	}
 	

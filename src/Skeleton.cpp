@@ -8,9 +8,8 @@
 
 #include "Skeleton.h"
 
-Skeleton::Skeleton( uint8_t numJoints )
-: mJointArray( numJoints ), mJointNames( numJoints ),
-	mBindPose( this )
+Skeleton::Skeleton( std::vector<Joint> joints, std::vector<std::string> jointNames )
+: mJointArray( std::move( joints ) ), mJointNames( std::move( jointNames ) )
 {
 }
 
@@ -48,4 +47,13 @@ const std::string* Skeleton::getJointName( uint8_t nameId ) const
 {
 	CI_ASSERT( nameId < mJointNames.size() );
 	return &mJointNames[nameId];
+}
+
+bool Skeleton::jointIsChildOf( uint8_t childIndex, uint8_t parentIndex ) const
+{
+	uint8_t currentParent = mJointArray[childIndex].getParentId();
+	while ( currentParent != parentIndex && currentParent != 0xFF ) {
+		currentParent = mJointArray[currentParent].getParentId();
+	}
+	return currentParent == parentIndex;
 }

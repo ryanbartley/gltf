@@ -49,26 +49,14 @@ class TestApp : public App {
 void TestApp::setup()
 {
 	auto glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
-	auto filePath = loadAsset( ci::fs::path( "RiggedSimple" ) / "glTF" / "riggedSimple.gltf" );
+	auto filePath = loadAsset( ci::fs::path( "RiggedFigure" ) / "glTF" / "rigged-figure.gltf" );
 	auto file = gltf::File::create( filePath );
 	
-	const auto &skin = file->getSkinInfo( "Armature_Cylinder-skin" );
+	const auto &skin = file->getSkinInfo( "Armature_Proxy-skin" );
 	mSkeleton = skin.createSkeleton();
-	const auto &animations = file->getAnimations();
-	std::vector<Clip<Transform>> skeletonAnims;
-	skeletonAnims.reserve( mSkeleton->getNumJoints() );
-	for( auto &boneName : mSkeleton->getJointNames() ) {
-		auto found = std::find_if( animations.begin(), animations.end(),
-		[boneName]( const std::pair<std::string, gltf::Animation> &animation ){
-			return animation.second.target == boneName;
-		});
-		if( found != animations.end() ) {
-			auto params = found->second.getParameters();
-			skeletonAnims.emplace_back( gltf::Animation::createTransformClip( params ) );
-		}
-	}
-	mSkeletonAnim.reset( new Skeleton::Anim( move( skeletonAnims ) ) );
-	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Cylinder-mesh" ) );
+	mSkeletonAnim = file->createSkeletonAnim( mSkeleton );
+	
+	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Proxy-mesh" ) );
 	mTrimesh = ci::TriMesh::create( mesh, TriMesh::Format().boneIndex().boneWeight().positions().normals() );
 	mDrawable = ci::TriMesh::create( *mTrimesh, TriMesh::Format().positions().colors( 3 ) );
 //	mBoxAnimated.reset( new BoxAnimated );
@@ -97,13 +85,14 @@ void TestApp::update()
 void TestApp::draw()
 {
 	gl::clear();
-	gl::setMatrices( mCam );
-	const std::array<ci::Colorf, 2> colors = { Colorf( 1, 0, 0 ), Colorf( 0, 1, 0 ) };
-	gl::ScopedModelMatrix scopeModel;
 	auto time = getElapsedFrames() / 60.0;
+	std::vector<Transform> localTransforms;
+	mSkeletonAnim->getLoopedLocal( time, &localTransforms );
 	std::vector<ci::mat4> offsets;
+	mSkeleton->calcMatrixPalette( localTransforms, &offsets );
 	
-	mSkeletonAnim->getLooped( time, offsets );
+	gl::setMatrices( mCam );
+	gl::ScopedModelMatrix scopeModel;
 	
 	for( int i = 0; i < mTrimesh->getNumVertices(); i++ ) {
 		auto &pos = mTrimesh->getPositions<3>()[i];
@@ -112,11 +101,13 @@ void TestApp::draw()
 		auto &writeablePos = mDrawable->getPositions<3>()[i];
 		mat4 ret;
 		// Weight normalization factor
-		float normfac = 1.0 / (boneWeight.x + boneWeight.y);
+		float normfac = 1.0 / (boneWeight.x + boneWeight.y + boneWeight.z + boneWeight.w);
 		
 		// Weight1 * Bone1 + Weight2 * Bone2
-		ret = normfac * boneWeight.y * offsets[int(boneIndices.y)]
-		    + normfac * boneWeight.x * offsets[int(boneIndices.x)];
+		ret = normfac * boneWeight.w * offsets[int(boneIndices.w)]
+		+ normfac * boneWeight.z * offsets[int(boneIndices.z)]
+		+ normfac * boneWeight.y * offsets[int(boneIndices.y)]
+		+ normfac * boneWeight.x * offsets[int(boneIndices.x)];
 		
 		writeablePos = vec3(ret * vec4(pos, 1.0));
 	}

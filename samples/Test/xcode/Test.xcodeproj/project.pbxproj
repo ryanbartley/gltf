@@ -43,6 +43,7 @@
 		6D85EA46A8594328A3A0A91B /* TestApp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = TestApp.cpp; path = ../src/TestApp.cpp; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A89456B4F93841B7AE9DC0D0 /* Test_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; path = Test_Prefix.pch; sourceTree = "<group>"; };
+		B31465351CA43CA500AA15CF /* dqconv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dqconv.h; sourceTree = "<group>"; };
 		B34FED481C8A56CA00EDB8C4 /* 2_cylinder_engine.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = 2_cylinder_engine.dae; sourceTree = "<group>"; };
 		B34FED4A1C8A56CA00EDB8C4 /* 2_cylinder_engine.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = 2_cylinder_engine.bin; sourceTree = "<group>"; };
 		B34FED4B1C8A56CA00EDB8C4 /* 2_cylinder_engine.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 2_cylinder_engine.gltf; sourceTree = "<group>"; };
@@ -1657,6 +1658,7 @@
 				B38BD1031C096D790088BC4F /* MeshLoader.h */,
 				B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */,
 				B34FEFE71C8B424900EDB8C4 /* Skeleton.h */,
+				B31465351CA43CA500AA15CF /* dqconv.h */,
 			);
 			name = src;
 			path = ../../../src;

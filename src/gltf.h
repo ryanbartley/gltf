@@ -111,6 +111,8 @@ public:
 	
 	const std::map<std::string, Animation>& getAnimations() { return mAnimations; }
 	
+	Skeleton::AnimRef createSkeletonAnim( const SkeletonRef &skeleton ) const;
+	
 	ci::CameraPersp		getPerspCameraByName( const std::string &name );
 	ci::CameraOrtho		getOrthoCameraByName( const std::string &name );
 	
