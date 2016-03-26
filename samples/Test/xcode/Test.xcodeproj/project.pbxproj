@@ -19,6 +19,8 @@
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		A45DCAE8FD7A4CDB9323A8B7 /* TestApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D85EA46A8594328A3A0A91B /* TestApp.cpp */; };
+		B31465381CA6CA3B00AA15CF /* Cesium_Man0FS.glsl in Resources */ = {isa = PBXBuildFile; fileRef = B31465361CA6CA3B00AA15CF /* Cesium_Man0FS.glsl */; };
+		B31465391CA6CA3B00AA15CF /* Cesium_Man0VS.glsl in Resources */ = {isa = PBXBuildFile; fileRef = B31465371CA6CA3B00AA15CF /* Cesium_Man0VS.glsl */; };
 		B34FEFE81C8B424900EDB8C4 /* Skeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */; };
 		B38BD1051C096D790088BC4F /* gltf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD0FE1C096D790088BC4F /* gltf.cpp */; };
 		B38BD1071C096D790088BC4F /* MeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B38BD1021C096D790088BC4F /* MeshLoader.cpp */; };
@@ -44,6 +46,8 @@
 		8D1107320486CEB800E47090 /* Test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A89456B4F93841B7AE9DC0D0 /* Test_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = "\"\""; path = Test_Prefix.pch; sourceTree = "<group>"; };
 		B31465351CA43CA500AA15CF /* dqconv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dqconv.h; sourceTree = "<group>"; };
+		B31465361CA6CA3B00AA15CF /* Cesium_Man0FS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cesium_Man0FS.glsl; path = ../assets/Cesium_Man0FS.glsl; sourceTree = "<group>"; };
+		B31465371CA6CA3B00AA15CF /* Cesium_Man0VS.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Cesium_Man0VS.glsl; path = ../assets/Cesium_Man0VS.glsl; sourceTree = "<group>"; };
 		B34FED481C8A56CA00EDB8C4 /* 2_cylinder_engine.dae */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml.dae; path = 2_cylinder_engine.dae; sourceTree = "<group>"; };
 		B34FED4A1C8A56CA00EDB8C4 /* 2_cylinder_engine.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = 2_cylinder_engine.bin; sourceTree = "<group>"; };
 		B34FED4B1C8A56CA00EDB8C4 /* 2_cylinder_engine.gltf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = 2_cylinder_engine.gltf; sourceTree = "<group>"; };
@@ -433,6 +437,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B31465361CA6CA3B00AA15CF /* Cesium_Man0FS.glsl */,
+				B31465371CA6CA3B00AA15CF /* Cesium_Man0VS.glsl */,
 				B34FED461C8A56CA00EDB8C4 /* 2_cylinder_engine */,
 				B34FED561C8A56CA00EDB8C4 /* box */,
 				B34FED681C8A56CA00EDB8C4 /* boxAnimated */,
@@ -1716,6 +1722,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B31465391CA6CA3B00AA15CF /* Cesium_Man0VS.glsl in Resources */,
+				B31465381CA6CA3B00AA15CF /* Cesium_Man0FS.glsl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
