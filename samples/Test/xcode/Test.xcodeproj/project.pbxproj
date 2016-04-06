@@ -329,7 +329,6 @@
 		B34FEFE61C8B424900EDB8C4 /* Skeleton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skeleton.cpp; sourceTree = "<group>"; };
 		B34FEFE71C8B424900EDB8C4 /* Skeleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skeleton.h; sourceTree = "<group>"; };
 		B34FEFF01C90710500EDB8C4 /* Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Animation.h; sourceTree = "<group>"; };
-		B34FEFF11C90710500EDB8C4 /* Transformation.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Transformation.hpp; sourceTree = "<group>"; };
 		B38BD0FE1C096D790088BC4F /* gltf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gltf.cpp; sourceTree = "<group>"; };
 		B38BD0FF1C096D790088BC4F /* gltf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gltf.h; sourceTree = "<group>"; };
 		B38BD1021C096D790088BC4F /* MeshLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MeshLoader.cpp; sourceTree = "<group>"; };
@@ -1657,7 +1656,6 @@
 			isa = PBXGroup;
 			children = (
 				B34FEFF01C90710500EDB8C4 /* Animation.h */,
-				B34FEFF11C90710500EDB8C4 /* Transformation.hpp */,
 				B38BD0FE1C096D790088BC4F /* gltf.cpp */,
 				B38BD0FF1C096D790088BC4F /* gltf.h */,
 				B38BD1021C096D790088BC4F /* MeshLoader.cpp */,

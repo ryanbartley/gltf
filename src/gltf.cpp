@@ -1165,7 +1165,7 @@ void File::addTextureInfo( const std::string &key, const Json::Value &textureInf
 	
 Skeleton::AnimRef File::createSkeletonAnim( const SkeletonRef &skeleton ) const
 {
-	std::vector<Clip<Transform>> skeletonClips;
+	std::vector<TransformClip> skeletonClips;
 	skeletonClips.reserve( skeleton->getNumJoints() );
 	for( auto &boneName : skeleton->getJointNames() ) {
 		auto found = std::find_if( mAnimations.begin(), mAnimations.end(),
@@ -1373,7 +1373,7 @@ std::vector<Animation::ParameterData> Animation::getParameters() const
 	return ret;
 }
 	
-Clip<Transform>	Animation::createTransformClip( const std::vector<ParameterData> &paramData )
+TransformClip Animation::createTransformClip( const std::vector<ParameterData> &paramData )
 {
 	const std::vector<float> *timeData = nullptr, *scaleData = nullptr, *transData = nullptr, *rotData = nullptr;
 	for( auto &param : paramData )
@@ -1386,27 +1386,33 @@ Clip<Transform>	Animation::createTransformClip( const std::vector<ParameterData>
 		else if( param.paramName == "translation" )
 			transData = &param.data;
 	
-	std::vector<std::pair<double, Transform>> transformKeyFrames( timeData->size() );
+	std::vector<std::pair<double, ci::vec3>> translationKeyframes( transData->size() ), scaleKeyframes( scaleData->size() );
+	std::vector<std::pair<double, ci::quat>> rotationKeyframes( rotData->size() );
 	
-	int i = 0;
-	for( auto & transformKeyFrame : transformKeyFrames ) {
-		transformKeyFrame.first = (*timeData)[i];
+	
+	for( int i = 0, end = timeData->size(); i < end; i++ ) {
+		auto time = (*timeData)[i];
 		if( transData != nullptr ) {
 			auto translation = *reinterpret_cast<const ci::vec3*>( &(*transData)[i*3] );
-			transformKeyFrame.second.setTranslation( translation );
+			translationKeyframes[i].first = time;
+			translationKeyframes[i].second = translation;
 		}
 		if( rotData != nullptr ) {
 			auto rotation = *reinterpret_cast<const ci::quat*>( &(*rotData)[i*4] );
-			transformKeyFrame.second.setRotation( rotation );
+			rotationKeyframes[i].first = time;
+			rotationKeyframes[i].second = rotation;
 		}
 		if( scaleData != nullptr ) {
 			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
-			transformKeyFrame.second.setScale( scale );
+			scaleKeyframes[i].first = time;
+			scaleKeyframes[i].second = scale;
 		}
-		i++;
 	}
 	
-	Clip<Transform> ret( move( transformKeyFrames ) );
+	TransformClip ret;
+	ret.mTrans = std::move( Clip<ci::vec3>( std::move( translationKeyframes ) ) );
+	ret.mScale = std::move( Clip<ci::vec3>( std::move( scaleKeyframes ) ) );
+	ret.mRot = std::move( Clip<ci::quat>( std::move( rotationKeyframes ) ) );
 	return ret;
 }
 	

@@ -15,7 +15,6 @@
 #include "jsoncpp/json.h"
 #include "cinder/Utilities.h"
 #include "cinder/gl/gl.h"
-#include "Transformation.hpp"
 #include "Animation.h"
 #include "Skeleton.h"
 
@@ -211,7 +210,7 @@ struct Animation {
 	
 	std::vector<ParameterData> getParameters() const;
 	
-	static Clip<Transform>	createTransformClip( const std::vector<ParameterData> &paramData );
+	static TransformClip	createTransformClip( const std::vector<ParameterData> &paramData );
 	static Clip<ci::vec3>	createTranslationClip( const std::vector<ParameterData> &paramData );
 	static Clip<ci::vec3>	createScaleClip( const std::vector<ParameterData> &paramData );
 	static Clip<ci::quat>	createRotationClip( const std::vector<ParameterData> &paramData );

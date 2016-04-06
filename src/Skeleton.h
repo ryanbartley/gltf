@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "Transformation.hpp"
 #include "Animation.h"
 
 using SkeletonRef = std::shared_ptr<class Skeleton>;
@@ -39,13 +38,13 @@ public:
 	
 	class Anim {
 	public:
-		Anim( std::vector<Clip<Transform>> jointClips ) : mJointClips( std::move( jointClips ) ) {}
+		Anim( std::vector<TransformClip> jointClips ) : mJointClips( std::move( jointClips ) ) {}
 		
-		void getLocal( double time, std::vector<Transform> *localJointTransforms ) const;
-		void getLoopedLocal( double time, std::vector<Transform> *localJointTransforms  ) const;
+		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
+		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms  ) const;
 		
 	private:
-		std::vector<Clip<Transform>> mJointClips;
+		std::vector<TransformClip> mJointClips;
 	};
 	
 	using AnimRef = std::shared_ptr<Anim>;
@@ -69,11 +68,11 @@ public:
 	const std::vector<std::string>& getJointNames() const { return mJointNames; }
 	std::vector<std::string>&		getJointNames() { return mJointNames; }
 	
-	void calcMatrixPalette( const std::vector<ci::mat4> &globalCache,
+	void calcMatrixPaletteFromGlobal( const std::vector<ci::mat4> &globalCache,
 							std::vector<ci::mat4> *offsetMatrices ) const;
-	void calcMatrixPalette( const std::vector<Transform> &localJointTransforms,
+	void calcMatrixPaletteFromLocal( const std::vector<ci::mat4> &localJointTransforms,
 						    std::vector<ci::mat4> *offsetMatrices ) const;
-	void calcGlobalMatrices( const std::vector<Transform> &localJointTransforms,
+	void calcGlobalMatrices( const std::vector<ci::mat4> &localJointTransforms,
 							 std::vector<ci::mat4> *globalJointTransforms ) const;
 	
 private:
@@ -81,8 +80,8 @@ private:
 	std::vector<std::string>	mJointNames;
 };
 
-inline void Skeleton::calcMatrixPalette( const std::vector<ci::mat4> &globalCache,
-										 std::vector<ci::mat4> *offset ) const
+inline void Skeleton::calcMatrixPaletteFromGlobal( const std::vector<ci::mat4> &globalCache,
+												  std::vector<ci::mat4> *offset ) const
 {
 	offset->clear();
 	// Derive root
@@ -92,35 +91,35 @@ inline void Skeleton::calcMatrixPalette( const std::vector<ci::mat4> &globalCach
 		offset->emplace_back( globalCache[i] * mJointArray[i].getInverseBindMatrix() );
 }
 
-inline void Skeleton::calcMatrixPalette( const std::vector<Transform> &localJointTransforms,
-										 std::vector<ci::mat4> *offsetMatrices ) const
+inline void Skeleton::calcMatrixPaletteFromLocal( const std::vector<ci::mat4> &localJointTransforms,
+												 std::vector<ci::mat4> *offsetMatrices ) const
 {
 	std::vector<ci::mat4> globalJointTransforms;
 	globalJointTransforms.reserve( mJointArray.size() );
 	calcGlobalMatrices( localJointTransforms, &globalJointTransforms );
-	calcMatrixPalette( globalJointTransforms, offsetMatrices );
+	calcMatrixPaletteFromGlobal( globalJointTransforms, offsetMatrices );
 }
 
-inline void Skeleton::calcGlobalMatrices( const std::vector<Transform> &localJointTransforms,
+inline void Skeleton::calcGlobalMatrices( const std::vector<ci::mat4> &localJointTransforms,
 										 std::vector<ci::mat4> *globalJoint ) const
 {
 	globalJoint->clear();
 	// Derive root
-	globalJoint->emplace_back( localJointTransforms[0].getTRS() );
+	globalJoint->emplace_back( localJointTransforms[0] );
 	// Derive children
 	for( int i = 1, end = mJointArray.size(); i < end; i++ )
-		globalJoint->emplace_back( (*globalJoint)[mJointArray[i].getParentId()] * localJointTransforms[i].getTRS() );
+		globalJoint->emplace_back( (*globalJoint)[mJointArray[i].getParentId()] * localJointTransforms[i] );
 }
 
-inline void Skeleton::Anim::getLocal( double time, std::vector<Transform> *localJointTransforms ) const
+inline void Skeleton::Anim::getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const
 {
 	localJointTransforms->clear();
 	for( auto & jointClip : mJointClips )
-		localJointTransforms->emplace_back( jointClip.get( time ) );
+		localJointTransforms->emplace_back( jointClip.getMatrix( time ) );
 }
-inline void Skeleton::Anim::getLoopedLocal( double time, std::vector<Transform> *localJointTransforms  ) const
+inline void Skeleton::Anim::getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms  ) const
 {
 	localJointTransforms->clear();
 	for( auto & jointClip : mJointClips )
-		localJointTransforms->emplace_back( jointClip.getLooped( time ) );
+		localJointTransforms->emplace_back( jointClip.getMatrixLooped( time ) );
 }

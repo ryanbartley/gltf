@@ -114,6 +114,43 @@ inline T Clip<T>::getLooped( double absTime ) const
 	return lerp( mKeyFrameValues[dist - 1], mKeyFrameValues[dist], perTime );
 }
 
+struct TransformClip {
+	TransformClip() = default;
+	
+	ci::mat4 getMatrix( double time ) const
+	{
+		ci::mat4 ret;
+		ret *= ci::translate( mTrans.get( time ) );
+		ret *= ci::toMat4( mRot.get( time ) );
+		ret *= ci::scale( mScale.get( time ) );
+		return ret;
+	}
+	ci::mat4 getMatrixLooped( double time ) const
+	{
+		ci::mat4 ret;
+		ret *= ci::translate( mTrans.getLooped( time ) );
+		ret *= ci::toMat4( mRot.getLooped( time ) );
+		ret *= ci::scale( mScale.getLooped( time ) );
+		return ret;
+	}
+	
+	ci::vec3 getTranslation( double time ) const { return mTrans.get( time ); }
+	ci::vec3 getScale( double time ) const { return mScale.get( time ); }
+	ci::quat getRotation( double time ) const { return mRot.get( time ); }
+	
+	const Clip<ci::vec3>&	getTranslationClip() const { return mTrans; }
+	Clip<ci::vec3>&			getTranslationClip() { return mTrans; }
+	const Clip<ci::quat>&	getRotationClip() const { return mRot; }
+	Clip<ci::quat>&			getRotationClip() { return mRot; }
+	const Clip<ci::vec3>&	getScaleClip() const { return mScale; }
+	Clip<ci::vec3>&			getScaleClip() { return mScale; }
+	
+	
+	Clip<ci::vec3>	mTrans;
+	Clip<ci::vec3>	mScale;
+	Clip<ci::quat>	mRot;
+};
+
 template<>
 inline float Clip<float>::lerp( const float &begin, const float &end, double time ) const
 {
@@ -148,16 +185,6 @@ template<>
 inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat &begin, const ci::dquat &end, double time ) const
 {
 	return glm::slerp( begin, end, time );
-}
-
-template<>
-inline Transform Clip<Transform>::lerp( const Transform &begin, const Transform &end, double time ) const
-{
-	Transform ret;
-	ret.trans = glm::mix( begin.trans, end.trans, time );
-	ret.scale = glm::mix( begin.scale, end.scale, time );
-	ret.rot = glm::slerp( begin.rot, end.rot, static_cast<float>( time ) );
-	return ret;
 }
 
 inline std::ostream& operator<<( std::ostream &os, const Clip<ci::vec3> &clip )

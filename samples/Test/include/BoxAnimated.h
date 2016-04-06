@@ -35,17 +35,7 @@ BoxAnimated::BoxAnimated()
 			gltf::MeshLoader meshLoader( file, mesh );
 			auto batch = ci::gl::Batch::create( meshLoader, ci::gl::getStockShader( ci::gl::ShaderDef().color().lambert() ) );
 			Renderable rend{ node->name, ci::mat4(), batch };
-			
-			if( ! node->transformMatrix.empty() ) {
-				rend.modelMatrix = node->getTransformMatrix();
-			}
-			else {
-				Transform trans;
-				trans.setTranslation( node->getTranslation() );
-				trans.setRotation( node->getRotation() );
-				trans.setScale( node->getScale() );
-				rend.modelMatrix = trans.getTRS();
-			}
+			rend.modelMatrix = node->getTransformMatrix();
 			
 			mRenderables.emplace_back( std::move( rend ) );
 		}
@@ -70,11 +60,11 @@ void BoxAnimated::draw()
 		ci::gl::ScopedModelMatrix scopeModel;
 		ci::gl::setModelMatrix( rend.modelMatrix );
 		if( rend.nodeName == "inner_box" ) {
-			auto elapsedSeconds = ci::app::getElapsedFrames() / 60.0;
-			Transform trans;
-			trans.setTranslation( animTrans.get( elapsedSeconds ) );
-			trans.setRotation( animRot.get( elapsedSeconds ) );
-			ci::gl::multModelMatrix( trans.getTRS() );
+//			auto elapsedSeconds = ci::app::getElapsedFrames() / 60.0;
+//			Transform trans;
+//			trans.setTranslation( animTrans.get( elapsedSeconds ) );
+//			trans.setRotation( animRot.get( elapsedSeconds ) );
+//			ci::gl::multModelMatrix( trans.getTRS() );
 		}
 		rend.batch->draw();
 	}

@@ -6,7 +6,6 @@
 
 #include "gltf.h"
 #include "MeshLoader.h"
-#include "Transformation.hpp"
 #include "Animation.h"
 #include "Skeleton.h"
 #include "BoxAnimated.h"
@@ -38,11 +37,6 @@ class TestApp : public App {
 		ci::gl::BatchRef batch;
 	};
 	std::vector<Renderable> mRenderables;
-	struct AnimationWithTarget {
-		std::string target;
-		Clip<Transform> animTransform;
-	};
-	std::vector<AnimationWithTarget> animTransforms;
 	ci::TriMeshRef mTrimesh, mDrawable;
 };
 
@@ -91,10 +85,10 @@ void TestApp::draw()
 {
 	gl::clear();
 	auto time = getElapsedFrames() / 60.0;
-	std::vector<Transform> localTransforms;
+	std::vector<ci::mat4> localTransforms;
 	mSkeletonAnim->getLoopedLocal( time, &localTransforms );
 	std::vector<ci::mat4> offsets;
-	mSkeleton->calcMatrixPalette( localTransforms, &offsets );
+	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsets );
 	
 	gl::setMatrices( mCam );
 	gl::ScopedModelMatrix scopeModel;
