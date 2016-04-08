@@ -8,6 +8,14 @@
 
 #pragma once
 
+#include <vector>
+#include <algorithm>
+
+#include "cinder/CinderAssert.h"
+#include "cinder/Vector.h"
+#include "cinder/Matrix.h"
+#include "cinder/Quaternion.h"
+
 template <typename T>
 class Clip {
 public:
