@@ -11,19 +11,24 @@
 template <typename T>
 class Clip {
 public:
-	Clip()
-	: mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
+	Clip() : mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
 	Clip( std::vector<std::pair<double, T>> keyFrames );
-	
-	void	addKeyFrame( double time, T value );
-	
-	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
-	std::pair<double, T>		getKeyFrameAt( uint32_t keyframeId ) const;
-	size_t						getNumKeyFrames() { return mKeyFrameValues.size(); }
 	
 	T		get( double time ) const;
 	T		getLooped( double time ) const;
 	T		lerp( const T &begin, const T &end, double time ) const;
+	
+	void	addKeyFrame( double time, T value );
+	
+	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
+	
+	T&			getKeyFrameValueAt( uint32_t keyframeId );
+	const T&	getKeyFrameValueAt( uint32_t keyframeId ) const;
+	
+	bool	empty() const;
+	size_t	numKeyframes() const;
+	
+	void	optimize();
 	
 private:
 	
@@ -34,6 +39,44 @@ private:
 	friend std::ostream& operator<<( std::ostream &os, const Clip<T> &clip );
 };
 
+class TransformClip {
+public:
+	TransformClip() = default;
+	TransformClip( Clip<ci::vec3> translateClip,
+				   Clip<ci::quat> rotationClip,
+				   Clip<ci::vec3> scaleClip )
+	: mTrans( std::move( translateClip ) ), mRot( std::move( rotationClip ) ),
+		mScale( std::move( scaleClip ) )
+	{}
+	
+	TransformClip( std::vector<std::pair<double, ci::vec3>> translateKeyFrames,
+				   std::vector<std::pair<double, ci::quat>> rotationKeyFrames,
+				   std::vector<std::pair<double, ci::vec3>> scaleKeyFrames )
+	: mTrans( std::move( translateKeyFrames ) ), mRot( std::move( rotationKeyFrames ) ),
+		mScale( std::move( scaleKeyFrames ) )
+	{}
+	
+	ci::mat4 getMatrix( double time ) const;
+	ci::mat4 getMatrixLooped( double time ) const;
+	
+	ci::vec3 getTranslation( double time ) const { return mTrans.get( time ); }
+	ci::vec3 getScale( double time ) const { return mScale.get( time ); }
+	ci::quat getRotation( double time ) const { return mRot.get( time ); }
+	
+	const Clip<ci::vec3>&	getTranslationClip() const { return mTrans; }
+	Clip<ci::vec3>&			getTranslationClip() { return mTrans; }
+	const Clip<ci::quat>&	getRotationClip() const { return mRot; }
+	Clip<ci::quat>&			getRotationClip() { return mRot; }
+	const Clip<ci::vec3>&	getScaleClip() const { return mScale; }
+	Clip<ci::vec3>&			getScaleClip() { return mScale; }
+	
+private:
+	Clip<ci::vec3>	mTrans;
+	Clip<ci::vec3>	mScale;
+	Clip<ci::quat>	mRot;
+};
+
+
 template <typename T>
 Clip<T>::Clip( std::vector<std::pair<double, T>> keyFrames )
 {
@@ -41,9 +84,9 @@ Clip<T>::Clip( std::vector<std::pair<double, T>> keyFrames )
 	auto begIt = begin( keyFrames );
 	auto endIt = end( keyFrames );
 	std::sort( begIt, endIt,
-			  []( const std::pair<double, T> &lhs, const std::pair<double, T> &rhs ){
-				  return lhs.first < rhs.first;
-			  });
+	[]( const std::pair<double, T> &lhs, const std::pair<double, T> &rhs ){
+		return lhs.first < rhs.first;
+	});
 	begIt = begin( keyFrames );
 	endIt = end( keyFrames );
 	
@@ -59,6 +102,7 @@ Clip<T>::Clip( std::vector<std::pair<double, T>> keyFrames )
 		mKeyFrameValues.push_back( begIt->second );
 		++begIt;
 	}
+	int i = 0;
 }
 
 template <typename T>
@@ -80,7 +124,6 @@ template <typename T>
 inline T Clip<T>::get( double absTime ) const
 {
 	CI_ASSERT( mKeyFrameTimes.size() >= 2 && mKeyFrameValues.size() >= 2 );
-	T ret;
 	auto clamped = glm::clamp( absTime, mStartTime, mStartTime + mDuration );
 	auto begIt = begin( mKeyFrameTimes );
 	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, clamped );
@@ -91,18 +134,10 @@ inline T Clip<T>::get( double absTime ) const
 	return lerp( mKeyFrameValues[dist - 1], mKeyFrameValues[dist], perTime );
 }
 
-template<typename T>
-inline std::pair<double, T> Clip<T>::getKeyFrameAt( uint32_t keyframeId ) const
-{
-	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
-	return { mKeyFrameTimes[keyframeId], mKeyFrameValues[keyframeId] };
-}
-
 template <typename T>
 inline T Clip<T>::getLooped( double absTime ) const
 {
 	CI_ASSERT( mKeyFrameTimes.size() >= 2 && mKeyFrameValues.size() >= 2 );
-	T ret;
 	auto cyclicTime = glm::mod( absTime, mDuration ) + mStartTime;
 	auto begIt = begin( mKeyFrameTimes );
 	auto nextIt = std::upper_bound( begIt, end( mKeyFrameTimes ) - 1, cyclicTime );
@@ -114,42 +149,33 @@ inline T Clip<T>::getLooped( double absTime ) const
 	return lerp( mKeyFrameValues[dist - 1], mKeyFrameValues[dist], perTime );
 }
 
-struct TransformClip {
-	TransformClip() = default;
-	
-	ci::mat4 getMatrix( double time ) const
-	{
-		ci::mat4 ret;
-		ret *= ci::translate( mTrans.get( time ) );
-		ret *= ci::toMat4( mRot.get( time ) );
-		ret *= ci::scale( mScale.get( time ) );
-		return ret;
-	}
-	ci::mat4 getMatrixLooped( double time ) const
-	{
-		ci::mat4 ret;
-		ret *= ci::translate( mTrans.getLooped( time ) );
-		ret *= ci::toMat4( mRot.getLooped( time ) );
-		ret *= ci::scale( mScale.getLooped( time ) );
-		return ret;
-	}
-	
-	ci::vec3 getTranslation( double time ) const { return mTrans.get( time ); }
-	ci::vec3 getScale( double time ) const { return mScale.get( time ); }
-	ci::quat getRotation( double time ) const { return mRot.get( time ); }
-	
-	const Clip<ci::vec3>&	getTranslationClip() const { return mTrans; }
-	Clip<ci::vec3>&			getTranslationClip() { return mTrans; }
-	const Clip<ci::quat>&	getRotationClip() const { return mRot; }
-	Clip<ci::quat>&			getRotationClip() { return mRot; }
-	const Clip<ci::vec3>&	getScaleClip() const { return mScale; }
-	Clip<ci::vec3>&			getScaleClip() { return mScale; }
-	
-	
-	Clip<ci::vec3>	mTrans;
-	Clip<ci::vec3>	mScale;
-	Clip<ci::quat>	mRot;
-};
+template<typename T>
+inline T& Clip<T>::getKeyFrameValueAt( uint32_t keyframeId )
+{
+	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
+	return mKeyFrameValues[keyframeId];
+}
+
+template<typename T>
+inline const T& Clip<T>::getKeyFrameValueAt( uint32_t keyframeId ) const
+{
+	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
+	return mKeyFrameValues[keyframeId];
+}
+
+template<typename T>
+inline bool Clip<T>::empty() const
+{
+	CI_ASSERT( mKeyFrameTimes.size() == mKeyFrameValues.size() );
+	return mKeyFrameTimes.empty();
+}
+
+template<typename T>
+inline size_t Clip<T>::numKeyframes() const
+{
+	CI_ASSERT( mKeyFrameTimes.size() == mKeyFrameValues.size() );
+	return mKeyFrameTimes.size();
+}
 
 template<>
 inline float Clip<float>::lerp( const float &begin, const float &end, double time ) const
@@ -185,6 +211,30 @@ template<>
 inline ci::dquat Clip<ci::dquat>::lerp( const ci::dquat &begin, const ci::dquat &end, double time ) const
 {
 	return glm::slerp( begin, end, time );
+}
+
+inline ci::mat4 TransformClip::getMatrix( double time ) const
+{
+	ci::mat4 ret;
+	if( ! mTrans.empty() )
+		ret *= ci::translate( mTrans.get( time ) );
+	if( ! mRot.empty() )
+		ret *= ci::toMat4( mRot.get( time ) );
+	if( ! mScale.empty() )
+		ret *= ci::scale( mScale.get( time ) );
+	return ret;
+}
+
+inline ci::mat4 TransformClip::getMatrixLooped( double time ) const
+{
+	ci::mat4 ret;
+	if( ! mTrans.empty() )
+		ret *= ci::translate( mTrans.getLooped( time ) );
+	if( ! mRot.empty() )
+		ret *= ci::toMat4( mRot.getLooped( time ) );
+	if( ! mScale.empty() )
+		ret *= ci::scale( mScale.getLooped( time ) );
+	return ret;
 }
 
 inline std::ostream& operator<<( std::ostream &os, const Clip<ci::vec3> &clip )

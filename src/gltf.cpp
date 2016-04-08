@@ -1375,7 +1375,8 @@ std::vector<Animation::ParameterData> Animation::getParameters() const
 	
 TransformClip Animation::createTransformClip( const std::vector<ParameterData> &paramData )
 {
-	const std::vector<float> *timeData = nullptr, *scaleData = nullptr, *transData = nullptr, *rotData = nullptr;
+	const std::vector<float> *timeData = nullptr, *scaleData = nullptr,
+							 *transData = nullptr, *rotData = nullptr;
 	for( auto &param : paramData )
 		if( param.paramName == "TIME" )
 			timeData = &param.data;
@@ -1386,33 +1387,34 @@ TransformClip Animation::createTransformClip( const std::vector<ParameterData> &
 		else if( param.paramName == "translation" )
 			transData = &param.data;
 	
-	std::vector<std::pair<double, ci::vec3>> translationKeyframes( transData->size() ), scaleKeyframes( scaleData->size() );
-	std::vector<std::pair<double, ci::quat>> rotationKeyframes( rotData->size() );
+	auto totalKeyFrames = timeData->size();
 	
+	std::vector<std::pair<double, ci::quat>> rotationKeyframes( totalKeyFrames );
+	std::vector<std::pair<double, ci::vec3>> translationKeyframes( totalKeyFrames ),
+											 scaleKeyframes( totalKeyFrames, { 0.0, vec3( 1 ) } );
 	
-	for( int i = 0, end = timeData->size(); i < end; i++ ) {
+	for( int i = 0, end = totalKeyFrames; i < end; i++ ) {
 		auto time = (*timeData)[i];
+		translationKeyframes[i].first = time;
+		rotationKeyframes[i].first = time;
+		scaleKeyframes[i].first = time;
 		if( transData != nullptr ) {
 			auto translation = *reinterpret_cast<const ci::vec3*>( &(*transData)[i*3] );
-			translationKeyframes[i].first = time;
 			translationKeyframes[i].second = translation;
 		}
 		if( rotData != nullptr ) {
 			auto rotation = *reinterpret_cast<const ci::quat*>( &(*rotData)[i*4] );
-			rotationKeyframes[i].first = time;
 			rotationKeyframes[i].second = rotation;
 		}
 		if( scaleData != nullptr ) {
 			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
-			scaleKeyframes[i].first = time;
 			scaleKeyframes[i].second = scale;
 		}
 	}
 	
-	TransformClip ret;
-	ret.mTrans = std::move( Clip<ci::vec3>( std::move( translationKeyframes ) ) );
-	ret.mScale = std::move( Clip<ci::vec3>( std::move( scaleKeyframes ) ) );
-	ret.mRot = std::move( Clip<ci::quat>( std::move( rotationKeyframes ) ) );
+	TransformClip ret( std::move( translationKeyframes ),
+					   std::move( rotationKeyframes ),
+					   std::move( scaleKeyframes ) );
 	return ret;
 }
 	

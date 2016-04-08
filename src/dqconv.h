@@ -27,9 +27,6 @@
  
  */
 
-
-#include <math.h>
-
 namespace dualquat {
 
 // input: unit quaternion 'q0', translation vector 't'

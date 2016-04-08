@@ -86,6 +86,7 @@ void TestApp::draw()
 	gl::clear();
 	auto time = getElapsedFrames() / 60.0;
 	std::vector<ci::mat4> localTransforms;
+	
 	mSkeletonAnim->getLoopedLocal( time, &localTransforms );
 	std::vector<ci::mat4> offsets;
 	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsets );
