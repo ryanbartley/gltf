@@ -30,13 +30,10 @@ public:
 	
 	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
 	
-	T&			getKeyFrameValueAt( uint32_t keyframeId );
-	const T&	getKeyFrameValueAt( uint32_t keyframeId ) const;
+	std::pair<float, T> getKeyFrameValueAt( uint32_t keyframeId ) const;
 	
 	bool	empty() const;
 	size_t	numKeyframes() const;
-	
-	void	optimize();
 	
 private:
 	
@@ -110,7 +107,6 @@ Clip<T>::Clip( std::vector<std::pair<double, T>> keyFrames )
 		mKeyFrameValues.push_back( begIt->second );
 		++begIt;
 	}
-	int i = 0;
 }
 
 template <typename T>
@@ -158,17 +154,10 @@ inline T Clip<T>::getLooped( double absTime ) const
 }
 
 template<typename T>
-inline T& Clip<T>::getKeyFrameValueAt( uint32_t keyframeId )
+inline std::pair<float, T> Clip<T>::getKeyFrameValueAt( uint32_t keyframeId ) const
 {
 	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
-	return mKeyFrameValues[keyframeId];
-}
-
-template<typename T>
-inline const T& Clip<T>::getKeyFrameValueAt( uint32_t keyframeId ) const
-{
-	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
-	return mKeyFrameValues[keyframeId];
+	return { mKeyFrameTimes[keyframeId], mKeyFrameValues[keyframeId] };
 }
 
 template<typename T>

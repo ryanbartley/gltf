@@ -36,6 +36,97 @@ public:
 		friend class Skeleton;
 	};
 	
+	class JointClip {
+	public:
+		JointClip( const TransformClip &transform )
+		{
+			auto &transClip = transform.getTranslationClip();
+			auto &rotClip = transform.getRotationClip();
+			for( int i = 0, end = transClip.numKeyframes(); i < end; i++ ) {
+				auto translation = transClip.getKeyFrameValueAt( i );
+				auto rotation = rotClip.getKeyFrameValueAt( i );
+				jointAnim.emplace_back( translation.first, translation.second, rotation.second );
+			}
+		}
+		struct Value {
+			Value( float time, ci::vec3 trans, ci::quat rot )
+			: time( time ), trans( std::move( trans ) ),
+			rot( std::move( rot ) ) {}
+			float		time;
+			ci::vec3	trans;
+			ci::quat	rot;
+		};
+		
+		ci::mat4 get( float absTime ) const
+		{
+			CI_ASSERT( jointAnim.size() >= 2 && jointAnim.size() >= 2 );
+			auto clamped = glm::clamp( absTime, mStartTime, mStartTime + mDuration );
+			auto begIt = begin( jointAnim );
+			auto nextIt = std::upper_bound( begIt, end( jointAnim ) - 1, clamped,
+			[]( float time, const Value &val ){
+				return val.time < time;
+			});
+			
+			auto prevIt = nextIt - 1;
+			auto lerped = lerp( *prevIt, *nextIt, clamped );
+			return getMatrix( lerped.first, lerped.second );
+		}
+		
+		ci::mat4 getLooped( float absTime ) const
+		{
+			CI_ASSERT( jointAnim.size() >= 2 && jointAnim.size() >= 2 );
+			auto cyclicTime = glm::mod( absTime, mDuration ) + mStartTime;
+			auto begIt = begin( jointAnim );
+			auto nextIt = std::upper_bound( begIt, end( jointAnim ) - 1, cyclicTime,
+			[]( float time, const Value &val ){
+				return val.time < time;
+			});
+			
+			auto prevIt = nextIt - 1;
+			auto lerped = lerp( *prevIt, *nextIt, cyclicTime );
+			return getMatrix( lerped.first, lerped.second );
+		};
+		
+		std::pair<ci::vec3, ci::quat> lerp( const Value &prev, const Value &next, float clampedTime ) const
+		{
+			std::pair<ci::vec3, ci::quat> ret;
+			auto perTime = (clampedTime - prev.time) / (next.time - prev.time);
+			ret.first = glm::mix( prev.trans, next.trans, perTime );
+			ret.second = glm::slerp( prev.rot, next.rot, perTime );
+			return ret;
+		}
+		
+		ci::mat4 getMatrix( const ci::vec3 &trans, const ci::quat &rot ) const
+		{
+			glm::mat4 ret;
+			ret *= glm::translate( trans );
+			ret *= glm::toMat4( rot );
+			return ret;
+		}
+		
+	private:
+		
+		float				mStartTime, mDuration;
+		std::vector<Value>	jointAnim;
+	};
+	
+	class AnimTemp {
+	public:
+		AnimTemp( std::vector<TransformClip> transformClips )
+		{
+			joints.reserve( transformClips.size() );
+			for( int i = 0, end = joints.size(); i < end; ++i ) {
+				joints.emplace_back( std::move( JointClip( transformClips[i] ) ) );
+			}
+		}
+		
+		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
+		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
+		
+	private:
+		std::vector<JointClip> joints;
+	};
+	
 	class Anim {
 	public:
 		Anim( std::vector<TransformClip> jointClips ) : mJointClips( std::move( jointClips ) ) {}

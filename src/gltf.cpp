@@ -1408,6 +1408,7 @@ TransformClip Animation::createTransformClip( const std::vector<ParameterData> &
 		}
 		if( scaleData != nullptr ) {
 			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
+			cout << scale << endl;
 			scaleKeyframes[i].second = scale;
 		}
 	}
