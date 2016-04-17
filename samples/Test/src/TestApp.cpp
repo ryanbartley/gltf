@@ -26,6 +26,8 @@ class TestApp : public App {
 	std::shared_ptr<BoxAnimated> mBoxAnimated;
 	SkeletonRef mSkeleton;
 	Skeleton::AnimRef mSkeletonAnim;
+	Skeleton::AnimCombinedRef mSkeletonAnimCombined;
+	Skeleton::AnimSeparatedRef mSkeletonAnimSeparated;
 	
 	gl::BatchRef mBatch;
 	CameraPersp mCam;
@@ -49,6 +51,8 @@ void TestApp::setup()
 	const auto &skin = file->getSkinInfo( "Armature_Cesium_Man-skin" );
 	mSkeleton = skin.createSkeleton();
 	mSkeletonAnim = file->createSkeletonAnim( mSkeleton );
+	mSkeletonAnimCombined = file->createSkeletonAnimCombined( mSkeleton );
+	mSkeletonAnimSeparated = file->createSkeletonAnimSeparated( mSkeleton );
 	
 	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Cesium_Man-mesh" ) );
 	auto glsl = gl::GlslProg::create( gl::GlslProg::Format()
@@ -65,6 +69,111 @@ void TestApp::setup()
 	mCamUi.setCamera( &mCam );
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
+	
+	auto iterations = 1000000;
+	auto currentTime = 0.0;
+	std::vector<ci::mat4> placeholder( 19 );
+	
+	using std::chrono::high_resolution_clock;
+	
+	high_resolution_clock::duration originalDuration( 0 );
+	
+	{
+		for( int i = 0; i < iterations; i++ ) {
+			currentTime += 0.016;
+			auto start = high_resolution_clock::now();
+			mSkeletonAnim->getLocal( currentTime, &placeholder );
+			originalDuration += high_resolution_clock::now() - start;
+		}
+		
+		auto nanosecs = originalDuration.count();
+		auto average = nanosecs / iterations;
+		auto asSeconds = average * 0.000000001;
+		
+		cout << "Original took total: " << nanosecs << " average nanos: " << average << " average: " << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+		originalDuration = std::chrono::nanoseconds( 0 );
+	}
+	
+	{
+		for( int i = 0; i < iterations; i++ ) {
+			currentTime += 0.016;
+			auto start = high_resolution_clock::now();
+			mSkeletonAnimCombined->getLocal( currentTime, &placeholder );
+			originalDuration += high_resolution_clock::now() - start;
+		}
+		
+		auto nanosecs = originalDuration.count();
+		auto average = nanosecs / iterations;
+		auto asSeconds = average * 0.000000001;
+		
+		cout << "Combined took total: " << nanosecs << " average nanos: " << average << " average: "  << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+		originalDuration = std::chrono::nanoseconds( 0 );
+	}
+	
+	{
+		for( int i = 0; i < iterations; i++ ) {
+			currentTime += 0.016;
+			auto start = high_resolution_clock::now();
+			mSkeletonAnimSeparated->getLocal( currentTime, &placeholder );
+			originalDuration += high_resolution_clock::now() - start;
+		}
+		
+		auto nanosecs = originalDuration.count();
+		auto average = nanosecs / iterations;
+		auto asSeconds = average * 0.000000001;
+		
+		cout << "Separated took total: " << nanosecs << " average nanos: " << average << " average: " << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+		originalDuration = std::chrono::nanoseconds( 0 );
+	}
+	
+	{
+		for( int i = 0; i < iterations; i++ ) {
+			currentTime += 0.016;
+			auto start = high_resolution_clock::now();
+			mSkeletonAnim->getLoopedLocal( currentTime, &placeholder );
+			originalDuration += high_resolution_clock::now() - start;
+		}
+		
+		auto nanosecs = originalDuration.count();
+		auto average = nanosecs / iterations;
+		auto asSeconds = average * 0.000000001;
+		
+		cout << "Original Looped took total: " << nanosecs << " average nanos: " << average << " average: "  << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+		originalDuration = std::chrono::nanoseconds( 0 );
+	}
+	
+	{
+		for( int i = 0; i < iterations; i++ ) {
+			currentTime += 0.016;
+			auto start = high_resolution_clock::now();
+			mSkeletonAnimCombined->getLoopedLocal( currentTime, &placeholder );
+			originalDuration += high_resolution_clock::now() - start;
+		}
+		
+		auto nanosecs = originalDuration.count();
+		auto average = nanosecs / iterations;
+		auto asSeconds = average * 0.000000001;
+		
+		cout << "Combined Looped took total: " << nanosecs << " average nanos: " << average << " average: "  << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+		originalDuration = std::chrono::nanoseconds( 0 );
+	}
+	
+	{
+		for( int i = 0; i < iterations; i++ ) {
+			currentTime += 0.016;
+			auto start = high_resolution_clock::now();
+			mSkeletonAnimSeparated->getLoopedLocal( currentTime, &placeholder );
+			originalDuration += high_resolution_clock::now() - start;
+		}
+		
+		auto nanosecs = originalDuration.count();
+		auto average = nanosecs / iterations;
+		auto asSeconds = average * 0.000000001;
+		
+		cout << "Separated Looped took total: " << nanosecs << " average nanos: " << average << " average: " << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+		originalDuration = std::chrono::nanoseconds( 0 );
+	}
+	quit();
 }
 
 void TestApp::mouseDown( MouseEvent event )
@@ -85,11 +194,12 @@ void TestApp::draw()
 {
 	gl::clear();
 	auto time = getElapsedFrames() / 60.0;
-	std::vector<ci::mat4> localTransforms;
+	std::vector<ci::mat4> localTransformsComb, localTransforms;
 	
+	mSkeletonAnimCombined->getLoopedLocal( time, &localTransformsComb );
 	mSkeletonAnim->getLoopedLocal( time, &localTransforms );
 	std::vector<ci::mat4> offsets;
-	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsets );
+	mSkeleton->calcMatrixPaletteFromLocal( localTransformsComb, &offsets );
 	
 	gl::setMatrices( mCam );
 	gl::ScopedModelMatrix scopeModel;

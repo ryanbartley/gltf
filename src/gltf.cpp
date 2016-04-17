@@ -1183,6 +1183,49 @@ Skeleton::AnimRef File::createSkeletonAnim( const SkeletonRef &skeleton ) const
 	auto ret = make_shared<Skeleton::Anim>( std::move( skeletonClips ) );
 	return ret;
 }
+	
+Skeleton::AnimCombinedRef File::createSkeletonAnimCombined( const SkeletonRef &skeleton ) const
+{
+	std::vector<TransformClip> skeletonClips;
+	skeletonClips.reserve( skeleton->getNumJoints() );
+	for( auto &boneName : skeleton->getJointNames() ) {
+		auto found = std::find_if( mAnimations.begin(), mAnimations.end(),
+								  [boneName]( const std::pair<std::string, gltf::Animation> &animation ){
+									  return animation.second.target == boneName;
+								  });
+		if( found != mAnimations.end() ) {
+			auto params = found->second.getParameters();
+			skeletonClips.emplace_back( gltf::Animation::createTransformClip( params ) );
+		}
+		else {
+			CI_ASSERT_MSG( false, "Need to figure out how to handle this case" );
+		}
+	}
+	auto ret = make_shared<Skeleton::AnimCombined>( std::move( skeletonClips ) );
+	return ret;
+}
+	
+Skeleton::AnimSeparatedRef File::createSkeletonAnimSeparated( const SkeletonRef &skeleton ) const
+{
+	std::vector<TransformClip> skeletonClips;
+	skeletonClips.reserve( skeleton->getNumJoints() );
+	for( auto &boneName : skeleton->getJointNames() ) {
+		auto found = std::find_if( mAnimations.begin(), mAnimations.end(),
+								  [boneName]( const std::pair<std::string, gltf::Animation> &animation ){
+									  return animation.second.target == boneName;
+								  });
+		if( found != mAnimations.end() ) {
+			auto params = found->second.getParameters();
+			skeletonClips.emplace_back( gltf::Animation::createTransformClip( params ) );
+		}
+		else {
+			CI_ASSERT_MSG( false, "Need to figure out how to handle this case" );
+		}
+	}
+	auto ret = make_shared<Skeleton::AnimSeparated>( std::move( skeletonClips ) );
+	return ret;
+	
+}
 
 CameraOrtho File::getOrthoCameraByName( const std::string &name )
 {
@@ -1408,7 +1451,6 @@ TransformClip Animation::createTransformClip( const std::vector<ParameterData> &
 		}
 		if( scaleData != nullptr ) {
 			auto scale = *reinterpret_cast<const ci::vec3*>( &(*scaleData)[i*3] );
-			cout << scale << endl;
 			scaleKeyframes[i].second = scale;
 		}
 	}

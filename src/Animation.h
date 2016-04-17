@@ -30,10 +30,13 @@ public:
 	
 	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
 	
-	std::pair<float, T> getKeyFrameValueAt( uint32_t keyframeId ) const;
+	std::pair<double, T> getKeyFrameValueAt( uint32_t keyframeId ) const;
 	
 	bool	empty() const;
 	size_t	numKeyframes() const;
+	
+	double getStartTime() const { return mStartTime; }
+	double getDuration() const { return mDuration; }
 	
 private:
 	
@@ -154,7 +157,7 @@ inline T Clip<T>::getLooped( double absTime ) const
 }
 
 template<typename T>
-inline std::pair<float, T> Clip<T>::getKeyFrameValueAt( uint32_t keyframeId ) const
+inline std::pair<double, T> Clip<T>::getKeyFrameValueAt( uint32_t keyframeId ) const
 {
 	CI_ASSERT( keyframeId < mKeyFrameValues.size() );
 	return { mKeyFrameTimes[keyframeId], mKeyFrameValues[keyframeId] };

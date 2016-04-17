@@ -110,7 +110,9 @@ public:
 	
 	const std::map<std::string, Animation>& getAnimations() { return mAnimations; }
 	
-	Skeleton::AnimRef createSkeletonAnim( const SkeletonRef &skeleton ) const;
+	Skeleton::AnimRef		createSkeletonAnim( const SkeletonRef &skeleton ) const;
+	Skeleton::AnimCombinedRef	createSkeletonAnimCombined( const SkeletonRef &skeleton ) const;
+	Skeleton::AnimSeparatedRef	createSkeletonAnimSeparated( const SkeletonRef &skeleton ) const;
 	
 	ci::CameraPersp		getPerspCameraByName( const std::string &name );
 	ci::CameraOrtho		getOrthoCameraByName( const std::string &name );
