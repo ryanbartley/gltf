@@ -36,48 +36,7 @@ public:
 		friend class Skeleton;
 	};
 	
-	class AnimCombined {
-	public:
-		
-		class JointClip {
-		public:
-			JointClip( const TransformClip &transform );
-			struct Value {
-				Value( float time, ci::vec3 trans, ci::quat rot )
-				: time( time ), trans( std::move( trans ) ),
-				rot( std::move( rot ) ) {}
-				float		time;
-				ci::vec3	trans;
-				ci::quat	rot;
-			};
-			
-			ci::mat4 get( double absTime ) const;
-			ci::mat4 getLooped( double absTime ) const;
-			std::pair<ci::vec3, ci::quat> lerp( const Value &prev, const Value &next, float clampedTime ) const;
-			ci::mat4 getMatrix( const ci::vec3 &trans, const ci::quat &rot ) const;
-			
-		private:
-			
-			double				mStartTime, mDuration;
-			std::vector<Value>	jointAnim;
-		};
-		
-		AnimCombined( std::vector<TransformClip> transformClips )
-		{
-			joints.reserve( transformClips.size() );
-			for( int i = 0, end = transformClips.size(); i < end; ++i ) {
-				joints.emplace_back( std::move( JointClip( transformClips[i] ) ) );
-			}
-		}
-		
-		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
-		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
-		
-	private:
-		std::vector<JointClip> joints;
-	};
-	
-	class AnimSeparated {
+	class Anim {
 	public:
 		class JointClip {
 		public:
@@ -99,46 +58,42 @@ public:
 			
 			ci::mat4 get( double absTime ) const;
 			ci::mat4 getLooped( double absTime ) const;
-			ci::mat4 getMatrix( const ci::vec3 &trans, const ci::quat &rot ) const;
+			
+			std::pair<ci::vec3, ci::quat> getSeparated( double absTime ) const;
+			std::pair<ci::vec3, ci::quat> getSeparatedLooped( double absTime ) const;
+			
+			ci::vec3 getTrans( double absTime ) const;
+			ci::vec3 getTransLooped( double absTime ) const;
+			
+			ci::quat getRot( double absTime ) const;
+			ci::quat getRotLooped( double absTime ) const;
 			
 		private:
-			
 			double						mRotStartTime, mRotDuration;
 			double						mTransStartTime, mTransDuration;
 			std::vector<RotKeyframe>	jointRots;
 			std::vector<TransKeyframe>	jointTrans;
 		};
 		
-		AnimSeparated( std::vector<TransformClip> transformClips )
+		Anim( std::vector<TransformClip> transformClips )
 		{
 			joints.reserve( transformClips.size() );
-			for( int i = 0, end = transformClips.size(); i < end; ++i ) {
-				joints.emplace_back( std::move( JointClip( transformClips[i] ) ) );
+			for( auto &transformClip : transformClips ) {
+				joints.emplace_back( std::move( JointClip( transformClip ) ) );
 			}
 		}
 		
 		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
 		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
 		
+		void getLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const;
+		void getLoopedLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const;
+		
 	private:
 		std::vector<JointClip> joints;
 	};
-
-	
-	class Anim {
-	public:
-		Anim( std::vector<TransformClip> jointClips ) : mJointClips( std::move( jointClips ) ) {}
-		
-		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
-		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms  ) const;
-		
-	private:
-		std::vector<TransformClip> mJointClips;
-	};
 	
 	using AnimRef = std::shared_ptr<Anim>;
-	using AnimCombinedRef = std::shared_ptr<AnimCombined>;
-	using AnimSeparatedRef = std::shared_ptr<AnimSeparated>;
 	
 	Skeleton( std::vector<Joint> joints, std::vector<std::string> jointNames );
 	
@@ -200,4 +155,143 @@ inline void Skeleton::calcGlobalMatrices( const std::vector<ci::mat4> &localJoin
 	// Derive children
 	for( int i = 1, end = mJointArray.size(); i < end; i++ )
 		globalJoint->emplace_back( (*globalJoint)[mJointArray[i].getParentId()] * localJointTransforms[i] );
+}
+
+inline Skeleton::Anim::JointClip::JointClip( const TransformClip &transform )
+{
+	auto &transClip = transform.getTranslationClip();
+	auto &rotClip = transform.getRotationClip();
+	
+	mTransStartTime = transClip.getStartTime();
+	mTransDuration = transClip.getDuration();
+	for( int i = 0, end = transClip.numKeyframes(); i < end; i++ ) {
+		auto translation = transClip.getKeyFrameValueAt( i );
+		jointTrans.emplace_back( translation.first, translation.second );
+	}
+	
+	mRotStartTime = rotClip.getStartTime();
+	mRotDuration = rotClip.getDuration();
+	for( int i = 0, end = rotClip.numKeyframes(); i < end; i++ ) {
+		auto translation = rotClip.getKeyFrameValueAt( i );
+		jointRots.emplace_back( translation.first, translation.second );
+	}
+}
+
+inline ci::mat4 Skeleton::Anim::JointClip::get( double absTime ) const
+{
+	CI_ASSERT( jointTrans.size() >= 2 && jointRots.size() >= 2 );
+	auto lerpTrans = getTrans( absTime );
+	auto lerpRot = getRot( absTime );
+	glm::mat4 ret;
+	ret *= glm::translate( lerpTrans );
+	ret *= glm::toMat4( lerpRot );
+	return ret;
+}
+
+inline std::pair<ci::vec3, ci::quat> Skeleton::Anim::JointClip::getSeparated( double absTime ) const
+{
+	CI_ASSERT( jointTrans.size() >= 2 && jointRots.size() >= 2 );
+	auto lerpTrans = getTrans( absTime );
+	auto lerpRot = getRot( absTime );
+	
+	return { lerpTrans, lerpRot };
+}
+
+inline ci::vec3 Skeleton::Anim::JointClip::getTrans( double absTime ) const
+{
+	auto transClamped = glm::clamp( absTime, mTransStartTime, mTransStartTime + mTransDuration );
+	auto begItTrans = begin( jointTrans );
+	auto nextItTrans = std::upper_bound( begItTrans, end( jointTrans ) - 1, transClamped,
+	[]( float time, const TransKeyframe &val ){ return time < val.time; });
+	
+	auto prevItTrans = nextItTrans - 1;
+	auto perTimeTrans = ( transClamped - prevItTrans->time) /
+	( nextItTrans->time - prevItTrans->time);
+	return glm::mix( prevItTrans->trans, nextItTrans->trans, perTimeTrans );
+}
+
+inline ci::quat Skeleton::Anim::JointClip::getRot( double absTime ) const
+{
+	auto rotClamped = glm::clamp( absTime, mRotStartTime, mRotStartTime + mRotDuration );
+	auto begItRot = begin( jointRots );
+	auto nextItRot = std::upper_bound( begItRot, end( jointRots ) - 1, rotClamped,
+	[]( float time, const RotKeyframe &val ){ return time < val.time; });
+	
+	auto prevItRot = nextItRot - 1;
+	auto perTimeRot = ( rotClamped - prevItRot->time) /
+	( nextItRot->time - prevItRot->time);
+	return glm::slerp( prevItRot->rot, nextItRot->rot, (float)perTimeRot );
+}
+
+inline ci::mat4 Skeleton::Anim::JointClip::getLooped( double absTime ) const
+{
+	CI_ASSERT( jointTrans.size() >= 2 && jointRots.size() >= 2 );
+	auto lerpTrans = getTransLooped( absTime );
+	auto lerpRot = getRotLooped( absTime );
+	glm::mat4 ret;
+	ret *= glm::translate( lerpTrans );
+	ret *= glm::toMat4( lerpRot );
+	return ret;
+};
+
+inline std::pair<ci::vec3, ci::quat> Skeleton::Anim::JointClip::getSeparatedLooped( double absTime ) const
+{
+	CI_ASSERT( jointTrans.size() >= 2 && jointRots.size() >= 2 );
+	auto lerpTrans = getTransLooped( absTime );
+	auto lerpRot = getRotLooped( absTime );
+	return { lerpTrans, lerpRot };
+}
+
+inline ci::vec3 Skeleton::Anim::JointClip::getTransLooped( double absTime ) const
+{
+	auto cyclicTimeTrans = glm::mod( absTime, mTransDuration ) + mTransStartTime;
+	auto begItTrans = begin( jointTrans );
+	auto nextItTrans = std::upper_bound( begItTrans, end( jointTrans ) - 1, cyclicTimeTrans,
+	[]( float time, const TransKeyframe &val ){ return time < val.time; });
+	
+	auto prevItTrans = nextItTrans - 1;
+	auto perTimeTrans = ( cyclicTimeTrans - prevItTrans->time) /
+	( nextItTrans->time - prevItTrans->time);
+	return glm::mix( prevItTrans->trans, nextItTrans->trans, perTimeTrans );
+}
+
+inline ci::quat Skeleton::Anim::JointClip::getRotLooped( double absTime ) const
+{
+	auto cyclicTimeRot = glm::mod( absTime, mRotDuration ) + mRotStartTime;
+	auto begItRot = begin( jointRots );
+	auto nextItRot = std::upper_bound( begItRot, end( jointRots ) - 1, cyclicTimeRot,
+									  []( float time, const RotKeyframe &val ){ return time < val.time; });
+	
+	auto prevItRot = nextItRot - 1;
+	auto perTimeRot = ( cyclicTimeRot - prevItRot->time) /
+	( nextItRot->time - prevItRot->time);
+	return glm::slerp( prevItRot->rot, nextItRot->rot, (float)perTimeRot );
+}
+
+inline void Skeleton::Anim::getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const
+{
+	localJointTransforms->clear();
+	for( auto & jointClip : joints )
+		localJointTransforms->emplace_back( jointClip.get( time ) );
+}
+
+inline void Skeleton::Anim::getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const
+{
+	localJointTransforms->clear();
+	for( auto & jointClip : joints )
+		localJointTransforms->emplace_back( jointClip.getLooped( time ) );
+}
+
+void Skeleton::Anim::getLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const
+{
+	localSeparatedJointTransforms->clear();
+	for( auto & jointClip : joints )
+		localSeparatedJointTransforms->emplace_back( jointClip.getSeparated( time ) );
+}
+
+void Skeleton::Anim::getLoopedLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const
+{
+	localSeparatedJointTransforms->clear();
+	for( auto & jointClip : joints )
+		localSeparatedJointTransforms->emplace_back( jointClip.getSeparatedLooped( time ) );
 }
