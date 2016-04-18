@@ -43,19 +43,21 @@ class TestApp : public App {
 void TestApp::setup()
 {
 //	auto glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
-	auto filePath = loadAsset( ci::fs::path( "CesiumMan" ) / "glTF" / "Cesium_Man.gltf" );
+	auto filePath = loadAsset( ci::fs::path( "brainsteam" ) / "glTF" / "brainsteam.gltf" );
 	auto file = gltf::File::create( filePath );
 	
-	const auto &skin = file->getSkinInfo( "Armature_Cesium_Man-skin" );
+	const auto &skin = file->getSkinInfo( "Poser_scene_root_Figure_2_node-skin" );
 	mSkeleton = skin.createSkeleton();
 	mSkeletonAnim = file->createSkeletonAnim( mSkeleton );
 	
-	auto mesh = gltf::MeshLoader( file, &file->getMeshInfo( "Cesium_Man-mesh" ) );
+	auto mesh0 = gltf::MeshLoader( file, &file->getMeshInfo( "Figure_2_geometry-mesh" ) );
+	auto mesh1 = gltf::MeshLoader( file, &file->getMeshInfo( "Figure_2_geometry-meshsplit_0" ) );
+	auto mesh2 = gltf::MeshLoader( file, &file->getMeshInfo( "Figure_2_geometry-meshsplit_1" ) );
 	auto glsl = gl::GlslProg::create( gl::GlslProg::Format()
 									 .vertex( loadAsset( "Cesium_Man0VS.glsl" ) )
 									 .fragment( loadAsset( "Cesium_Man0FS.glsl" ) ) );
 	
-	mBatch = gl::Batch::create( mesh, glsl );
+	mBatch = gl::Batch::create( mesh0 & mesh1 & mesh2, glsl );
 //	mTrimesh = ci::TriMesh::create( mesh, TriMesh::Format().boneIndex().boneWeight().positions().normals() );
 //	mDrawable = ci::TriMesh::create( *mTrimesh, TriMesh::Format().positions().colors( 3 ) );
 //	mBoxAnimated.reset( new BoxAnimated );
@@ -66,47 +68,47 @@ void TestApp::setup()
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
 	
-	auto iterations = 10000000;
-	auto currentTime = 0.0;
-	std::vector<ci::mat4> placeholder( 19 );
-	
-	using std::chrono::high_resolution_clock;
-	
-	high_resolution_clock::duration originalDuration( 0 );
-	
-	{
-		for( int i = 0; i < iterations; i++ ) {
-			currentTime += 0.016;
-			auto start = high_resolution_clock::now();
-			mSkeletonAnim->getLocal( currentTime, &placeholder );
-			originalDuration += high_resolution_clock::now() - start;
-		}
-		
-		auto nanosecs = originalDuration.count();
-		auto average = nanosecs / iterations;
-		auto asSeconds = average * 0.000000001;
-		
-		cout << "Original took total: " << nanosecs << " average nanos: " << average << " average: " << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
-		originalDuration = std::chrono::nanoseconds( 0 );
-	}
-	
-	
-	{
-		for( int i = 0; i < iterations; i++ ) {
-			currentTime += 0.016;
-			auto start = high_resolution_clock::now();
-			mSkeletonAnim->getLoopedLocal( currentTime, &placeholder );
-			originalDuration += high_resolution_clock::now() - start;
-		}
-		
-		auto nanosecs = originalDuration.count();
-		auto average = nanosecs / iterations;
-		auto asSeconds = average * 0.000000001;
-		
-		cout << "Original Looped took total: " << nanosecs << " average nanos: " << average << " average: "  << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
-		originalDuration = std::chrono::nanoseconds( 0 );
-	}
-	quit();
+//	auto iterations = 10000000;
+//	auto currentTime = 0.0;
+//	std::vector<ci::mat4> placeholder( 19 );
+//	
+//	using std::chrono::high_resolution_clock;
+//	
+//	high_resolution_clock::duration originalDuration( 0 );
+//	
+//	{
+//		for( int i = 0; i < iterations; i++ ) {
+//			currentTime += 0.016;
+//			auto start = high_resolution_clock::now();
+//			mSkeletonAnim->getLocal( currentTime, &placeholder );
+//			originalDuration += high_resolution_clock::now() - start;
+//		}
+//		
+//		auto nanosecs = originalDuration.count();
+//		auto average = nanosecs / iterations;
+//		auto asSeconds = average * 0.000000001;
+//		
+//		cout << "Original took total: " << nanosecs << " average nanos: " << average << " average: " << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+//		originalDuration = std::chrono::nanoseconds( 0 );
+//	}
+//	
+//	
+//	{
+//		for( int i = 0; i < iterations; i++ ) {
+//			currentTime += 0.016;
+//			auto start = high_resolution_clock::now();
+//			mSkeletonAnim->getLoopedLocal( currentTime, &placeholder );
+//			originalDuration += high_resolution_clock::now() - start;
+//		}
+//		
+//		auto nanosecs = originalDuration.count();
+//		auto average = nanosecs / iterations;
+//		auto asSeconds = average * 0.000000001;
+//		
+//		cout << "Original Looped took total: " << nanosecs << " average nanos: " << average << " average: "  << std::fixed << std::setprecision( 9 ) << asSeconds << endl;
+//		originalDuration = std::chrono::nanoseconds( 0 );
+//	}
+//	quit();
 }
 
 void TestApp::mouseDown( MouseEvent event )

@@ -6,7 +6,7 @@ in vec2 ciTexCoord0;
 in vec4 ciBoneIndex;
 in vec4 ciBoneWeight;
 
-uniform mat4 uJointMat[19];
+uniform mat4 uJointMat[18];
 uniform mat3 ciNormalMatrix;
 uniform mat4 ciModelViewProjection;
 
