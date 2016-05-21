@@ -186,7 +186,7 @@ const Scene& File::getDefaultScene() const
 		return found->second;
 	}
 }
-
+	
 const Accessor& File::getAccessorInfo( const std::string& key ) const
 {
 	auto found = mAccessors.find( key );
@@ -770,6 +770,7 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 		auto cameraKey = nodeInfo["camera"].asString();
 		auto &camera = mCameras[cameraKey];
 		ret.camera = &camera;
+		camera.node = &ret;
 	}
 	else if( ! nodeInfo["jointName"].isNull() ) {
 		ret.jointName = nodeInfo["jointName"].asString();
@@ -1184,25 +1185,25 @@ Skeleton::AnimRef File::createSkeletonAnim( const SkeletonRef &skeleton ) const
 	return ret;
 }
 
-CameraOrtho File::getOrthoCameraByName( const std::string &name )
+CameraOrtho Camera::getOrthoCameraByName( const ci::mat4 &transformMatrix )
 {
-	Camera cam = getCameraInfo( name );
-	if( cam.type != Camera::Type::ORTHOGRAPHIC ) throw "This should be orthographic but it's not";
+	if( type != Camera::Type::ORTHOGRAPHIC ) throw "This should be orthographic but it's not";
 	
 	//TODO: This is most likely wrong need to change it.
-	CameraOrtho ret( -cam.xmag, cam.xmag, -cam.ymag, cam.ymag, cam.znear, cam.zfar);
-	
+	CameraOrtho ret( -xmag, xmag, -ymag, ymag, znear, zfar);
+	ret.setOrientation( glm::toQuat( transformMatrix ) );
+	ret.setEyePoint( ci::vec3( transformMatrix[3] ) );
 	return ret;
 }
 
-CameraPersp File::getPerspCameraByName( const std::string &name )
+CameraPersp Camera::getPerspCameraByName( const ci::mat4 &transformMatrix )
 {
-	Camera cam = getCameraInfo( name );
-	if( cam.type != Camera::Type::PERSPECTIVE ) throw "This should be perspective but it's not";
+	if( type != Camera::Type::PERSPECTIVE ) throw "This should be perspective but it's not";
 	
-	CameraPersp ret; //( app->getWindowWidth(), app->getWindowHeight(), cam.yfov, cam.znear, cam.zfar );
-	ret.setPerspective( cam.aspectRatio, cam.yfov, cam.znear, cam.zfar );
-
+	CameraPersp ret; //( app->getWindowWidth(), app->getWindowHeight(), yfov, znear, zfar );
+	ret.setPerspective( aspectRatio, yfov, znear, zfar );
+	ret.setOrientation( glm::toQuat( transformMatrix ) );
+	ret.setEyePoint( ci::vec3( transformMatrix[3] ) );
 	return ret;
 }
 	
@@ -1317,12 +1318,27 @@ const Node* Node::getChild( const std::string &nodeName ) const
 	return ret;
 }
 	
+ci::mat4 Node::getHeirarchyTransform() const
+{
+	ci::mat4 ret = getTransformMatrix();
+	
+	Node* tempParent = parent;
+	
+	while( tempParent != nullptr ) {
+		ret = tempParent->getTransformMatrix() * ret;
+		tempParent = tempParent->parent;
+	}
+	
+	return ret;
+}
+	
 SkeletonRef Skin::createSkeleton() const
 {
 	auto matricesPtr = reinterpret_cast<ci::mat4*>( inverseBindMatrices->getDataPtr() );
 	auto numJoints = joints.size();
 	std::vector<std::string> jointNames;
 	jointNames.reserve( numJoints );
+	
 	std::vector<Skeleton::Joint> jointsContainer;
 	jointsContainer.reserve( numJoints );
 	for( int i = 0; i < numJoints; i++ ) {
@@ -1341,6 +1357,25 @@ SkeletonRef Skin::createSkeleton() const
 		jointsContainer.emplace_back( parentId, jointNames.size() - 1, *matricesPtr++ );
 	}
 	auto ret = std::make_shared<Skeleton>( std::move( jointsContainer ), std::move( jointNames ) );
+	
+	// TODO: possibly faster way of holding jointNames, a little more complicated to keep clean
+	
+//	// Transfers joint's names: First computes name's buffer size, then allocate
+//	// and do the copy.
+//	size_t buffer_size = numJoints * sizeof(char*);
+//	for (int i = 0; i < numJoints; ++i) {
+//		buffer_size += (joints[i]->jointName.size() + 1) * sizeof(char);
+//	}
+//	ret->joint_names_ = reinterpret_cast<char**>( new char[buffer_size] );
+//	memset( ret->joint_names_, 0, buffer_size );
+//	char* cursor = reinterpret_cast<char*>(ret->joint_names_ + numJoints);
+//	for (int i = 0; i < numJoints; ++i) {
+//		auto& jointName = joints[i]->jointName;
+//		ret->joint_names_[i] = cursor;
+//		strcpy(cursor, jointName.c_str());
+//		cursor += (jointName.size() + 1) * sizeof(char);
+//	}
+	
 	return ret;
 }
 	

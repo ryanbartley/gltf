@@ -19,6 +19,7 @@
 template <typename T>
 class Clip {
 public:
+	
 	Clip() : mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
 	Clip( std::vector<std::pair<double, T>> keyFrames );
 	
@@ -68,7 +69,9 @@ public:
 	ci::mat4 getMatrixLooped( double time ) const;
 	
 	ci::vec3 getTranslation( double time ) const { return mTrans.get( time ); }
+	ci::vec3 getTranslationLooped( double time ) const { return mTrans.getLooped( time ); }
 	ci::vec3 getScale( double time ) const { return mScale.get( time ); }
+	ci::vec3 getScaleLooped( double time ) const { return mScale.getLooped( time ); }
 	ci::quat getRotation( double time ) const { return mRot.get( time ); }
 	
 	const Clip<ci::vec3>&	getTranslationClip() const { return mTrans; }

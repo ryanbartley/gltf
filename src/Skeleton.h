@@ -14,6 +14,34 @@ using SkeletonRef = std::shared_ptr<class Skeleton>;
 
 class Skeleton {
 public:
+	class Joint;
+
+	Skeleton( std::vector<Joint> joints, std::vector<std::string> jointNames );
+	
+	const Joint*	getRoot() const { return &mJointArray[0]; }
+	const Joint*	getJoint( const std::string& name ) const;
+	const Joint*	getJoint( uint8_t jointId ) const;
+	bool			hasJoint( const std::string& name ) const;
+	size_t			getNumJoints() const { return mJointArray.size(); }
+	
+	bool			jointIsChildOf( uint8_t childIndex, uint8_t parentIndex ) const;
+	
+	const std::string*	getJointName( const Joint &joint ) const;
+	const std::string*	getJointName( uint8_t nameId ) const;
+	
+	const std::vector<Joint>&		getJoints() const { return mJointArray; }
+	std::vector<Joint>&				getJoints() { return mJointArray; }
+	
+	const std::vector<std::string>& getJointNames() const { return mJointNames; }
+	std::vector<std::string>&		getJointNames() { return mJointNames; }
+	
+	void calcMatrixPaletteFromGlobal( const std::vector<ci::mat4> &globalCache,
+									 std::vector<ci::mat4> *offsetMatrices ) const;
+	void calcMatrixPaletteFromLocal( const std::vector<ci::mat4> &localJointTransforms,
+									std::vector<ci::mat4> *offsetMatrices ) const;
+	void calcGlobalMatrices( const std::vector<ci::mat4> &localJointTransforms,
+							std::vector<ci::mat4> *globalJointTransforms ) const;
+	
 	struct Joint {
 		Joint();
 		Joint( uint8_t parentId, uint8_t nameId, ci::mat4 inverseBindMatrix )
@@ -38,6 +66,13 @@ public:
 	
 	class Anim {
 	public:
+		
+		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
+		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
+		
+		void getLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const;
+		void getLoopedLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const;
+		
 		class JointClip {
 		public:
 			JointClip( const TransformClip &transform );
@@ -79,15 +114,9 @@ public:
 		{
 			joints.reserve( transformClips.size() );
 			for( auto &transformClip : transformClips ) {
-				joints.emplace_back( std::move( JointClip( transformClip ) ) );
+				joints.emplace_back( transformClip );
 			}
 		}
-		
-		void getLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
-		void getLoopedLocal( double time, std::vector<ci::mat4> *localJointTransforms ) const;
-		
-		void getLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const;
-		void getLoopedLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const;
 		
 	private:
 		std::vector<JointClip> joints;
@@ -95,35 +124,19 @@ public:
 	
 	using AnimRef = std::shared_ptr<Anim>;
 	
-	Skeleton( std::vector<Joint> joints, std::vector<std::string> jointNames );
-	
-	const Joint*	getRoot() const { return &mJointArray[0]; }
-	const Joint*	getJoint( const std::string& name ) const;
-	const Joint*	getJoint( uint8_t jointId ) const;
-	bool			hasJoint( const std::string& name ) const;
-	size_t			getNumJoints() { return mJointArray.size(); }
-	
-	bool			jointIsChildOf( uint8_t childIndex, uint8_t parentIndex ) const;
-	
-	const std::string*	getJointName( const Joint &joint ) const;
-	const std::string*	getJointName( uint8_t nameId ) const;
-	
-	const std::vector<Joint>&		getJoints() const { return mJointArray; }
-	std::vector<Joint>&				getJoints() { return mJointArray; }
-	
-	const std::vector<std::string>& getJointNames() const { return mJointNames; }
-	std::vector<std::string>&		getJointNames() { return mJointNames; }
-	
-	void calcMatrixPaletteFromGlobal( const std::vector<ci::mat4> &globalCache,
-							std::vector<ci::mat4> *offsetMatrices ) const;
-	void calcMatrixPaletteFromLocal( const std::vector<ci::mat4> &localJointTransforms,
-						    std::vector<ci::mat4> *offsetMatrices ) const;
-	void calcGlobalMatrices( const std::vector<ci::mat4> &localJointTransforms,
-							 std::vector<ci::mat4> *globalJointTransforms ) const;
-	
 private:
 	std::vector<Joint>			mJointArray;
 	std::vector<std::string>	mJointNames;
+};
+
+class SkeletonRenderer {
+public:
+	SkeletonRenderer();
+
+	void draw( const Skeleton &skeleton, const std::vector<ci::mat4> &finalPose );
+private:
+	std::array<ci::gl::BatchRef, 2> boneJointBatches;
+	ci::gl::VboRef					matrixPaletteVbo;
 };
 
 inline void Skeleton::calcMatrixPaletteFromGlobal( const std::vector<ci::mat4> &globalCache,

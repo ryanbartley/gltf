@@ -59,68 +59,69 @@ public:
 	
 	const ci::fs::path&	getGltfPath() const { return mGltfPath; }
 	const Json::Value&	getTree() const { return mGltfTree; }
-	
-	const Asset&		getAssetInfo() const;
-	void				setAssetInfo( const Json::Value &val );
-	
-	const Scene&		getDefaultScene() const;
-	
+
 	bool							hasExtension( const std::string &extension ) const;
 	const std::vector<std::string>& getExtensions() const { return mExtensions; }
 
 	template<typename T>
-	void				add( const std::string &key, T type );
+	void				get( const std::string &key, T &type );
 	template<typename T>
-	void				get( const std::string &key, T& type );
+	Json::Value			getExtrasFrom( T &type );
+	
+	const Asset&		getAssetInfo() const;
+	const Scene&		getDefaultScene() const;
 	
 	const Accessor&		getAccessorInfo( const std::string &key ) const;
-	void				addAccessorInfo( const std::string &key, const Json::Value &val );
 	const Animation&	getAnimationInfo( const std::string &key ) const;
-	void				addAnimationInfo( const std::string &key, const Json::Value &val );
 	const gltf::Buffer&	getBufferInfo( const std::string &key ) const;
-	void				addBufferInfo( const std::string &key, const Json::Value &val );
 	const BufferView&	getBufferViewInfo( const std::string &key ) const;
-	void				addBufferViewInfo( const std::string &key, const Json::Value &val );
 	const Camera&		getCameraInfo( const std::string &key ) const;
-	void				addCameraInfo( const std::string &key, const Json::Value &val );
 	const Image&		getImageInfo( const std::string &key ) const;
-	void				addImageInfo( const std::string &key, const Json::Value &val );
 	const Light&		getLightInfo( const std::string &key ) const;
-	void				addLightInfo( const std::string &key, const Json::Value &val );
 	const Material&		getMaterialInfo( const std::string &key ) const;
-	void				addMaterialInfo( const std::string &key, const Json::Value &val );
 	const Mesh &        getMeshInfo( const std::string &key ) const;
-	void				addMeshInfo( const std::string &key, const Json::Value &val );
 	const Node&			getNodeInfo( const std::string &key ) const;
-	void				addNodeInfo( const std::string &key, const Json::Value &val );
 	const Program&		getProgramInfo( const std::string &key ) const;
-	void				addProgramInfo( const std::string &key, const Json::Value &val );
 	const Sampler&		getSamplerInfo( const std::string &key ) const;
-	void				addSamplerInfo( const std::string &key, const Json::Value &val );
 	const Scene&		getSceneInfo( const std::string &key ) const;
-	void				addSceneInfo( const std::string &key, const Json::Value &val );
 	const Shader&		getShaderInfo( const std::string &key ) const;
-	void				addShaderInfo( const std::string &key, const Json::Value &val );
 	const Skin&			getSkinInfo( const std::string &key ) const;
-	void				addSkinInfo( const std::string &key, const Json::Value &val );
 	const Technique&	getTechniqueInfo( const std::string &key ) const;
-	void				addTechniqueInfo( const std::string &key, const Json::Value &val );
 	const Texture&		getTextureInfo( const std::string &key ) const;
-	void				addTextureInfo( const std::string &key, const Json::Value &val );
 	
-	const std::map<std::string, Animation>& getAnimations() { return mAnimations; }
+	template<typename T>
+	const std::map<std::string, T>& getCollectionOf() const;
 	
-	Skeleton::AnimRef		createSkeletonAnim( const SkeletonRef &skeleton ) const;
-	
-	ci::CameraPersp		getPerspCameraByName( const std::string &name );
-	ci::CameraOrtho		getOrthoCameraByName( const std::string &name );
+	Skeleton::AnimRef	createSkeletonAnim( const SkeletonRef &skeleton ) const;
 	
 private:
 	File( const ci::DataSourceRef &gltfFile );
+	
 	void load();
 	void loadExtensions();
+	void setAssetInfo( const Json::Value &val );
 	void verifyFile( const ci::DataSourceRef &data, std::string &gltfJson );
 	void setParentForChildren( Node *parent, const std::string &childKey );
+	
+	void addAccessorInfo( const std::string &key, const Json::Value &val );
+	void addAnimationInfo( const std::string &key, const Json::Value &val );
+	void addBufferInfo( const std::string &key, const Json::Value &val );
+	void addBufferViewInfo( const std::string &key, const Json::Value &val );
+	void addCameraInfo( const std::string &key, const Json::Value &val );
+	void addImageInfo( const std::string &key, const Json::Value &val );
+	void addLightInfo( const std::string &key, const Json::Value &val );
+	void addMaterialInfo( const std::string &key, const Json::Value &val );
+	void addMeshInfo( const std::string &key, const Json::Value &val );
+	void addNodeInfo( const std::string &key, const Json::Value &val );
+	void addProgramInfo( const std::string &key, const Json::Value &val );
+	void addSamplerInfo( const std::string &key, const Json::Value &val );
+	void addSceneInfo( const std::string &key, const Json::Value &val );
+	void addShaderInfo( const std::string &key, const Json::Value &val );
+	void addSkinInfo( const std::string &key, const Json::Value &val );
+	void addTechniqueInfo( const std::string &key, const Json::Value &val );
+	void addTextureInfo( const std::string &key, const Json::Value &val );
+	template<typename T>
+	void				add( const std::string &key, T type );
 	
 	Json::Value			mGltfTree;
 	cinder::fs::path	mGltfPath;
@@ -154,6 +155,7 @@ private:
 };
 
 struct Scene {
+	
 	std::vector<Node*>			nodes;
 	std::string					name;
 	Json::Value					extras;
@@ -202,12 +204,12 @@ struct Animation {
 		std::string parameter;
 		Accessor* accessor = nullptr;
 	};
+	
 	struct ParameterData {
 		std::string			paramName;
 		uint32_t			numComponents;
 		std::vector<float>	data;
 	};
-	
 	std::vector<ParameterData> getParameters() const;
 	
 	static TransformClip	createTransformClip( const std::vector<ParameterData> &paramData );
@@ -258,8 +260,12 @@ struct BufferView {
 struct Camera {
 	enum class Type { PERSPECTIVE, ORTHOGRAPHIC };
 
+	ci::CameraPersp		getPerspCameraByName( const ci::mat4 &transformBake = ci::mat4() );
+	ci::CameraOrtho		getOrthoCameraByName( const ci::mat4 &transformBack = ci::mat4() );
+	
 	std::string		name;
 	Type			type;
+	Node			*node;
 	float			zfar = 0.0f,
 					znear = 0.0f,
 					// only for perspective
@@ -272,7 +278,6 @@ struct Camera {
 };
 
 struct Image {
-	
 	ci::ImageSourceRef getImage() const;
 	
 	std::string			name;
@@ -345,17 +350,16 @@ struct Mesh {
 
 struct Node {
 	
-	void outputToConsole( std::ostream &os, uint8_t tabAmount ) const;
-	
-	ci::mat4 getTransformMatrix() const;
-	ci::vec3 getTranslation() const;
-	ci::quat getRotation() const;
-	ci::vec3 getScale() const;
-	
 	size_t getNumChildren() const { return children.size(); }
 	const Node* getChild( size_t index ) const;
 	const Node* getChild( const std::string &nodeName ) const;
 	const Node* getParent() const;
+	
+	ci::mat4 getHeirarchyTransform() const;
+	ci::mat4 getTransformMatrix() const;
+	ci::vec3 getTranslation() const;
+	ci::quat getRotation() const;
+	ci::vec3 getScale() const;
 	
 	bool isCamera() const { return camera != nullptr; }
 	bool isLight() const { return light != nullptr; }
@@ -365,6 +369,8 @@ struct Node {
 	bool isJoint() const { return ! jointName.empty(); }
 	bool hasChildren() const { return ! children.empty(); }
 	bool isRoot() const { return parent == nullptr; }
+	
+	void outputToConsole( std::ostream &os, uint8_t tabAmount ) const;
 	
 	Node					*parent = nullptr;
 	Camera					*camera = nullptr;
@@ -377,6 +383,7 @@ struct Node {
 							rotation,			// either 0 or 4
 							translation,		// either 0 or 3
 							scale;				// either 0 or 3
+	
 	std::string				name;
 	Json::Value				extras;
 };
@@ -499,5 +506,23 @@ std::ostream& operator<<( std::ostream &lhs, const Shader &rhs );
 std::ostream& operator<<( std::ostream &lhs, const Skin &rhs );
 std::ostream& operator<<( std::ostream &lhs, const Technique &rhs );
 std::ostream& operator<<( std::ostream &lhs, const Texture &rhs );
+	
+template<> const std::map<std::string, Animation>& File::getCollectionOf() const { return mAnimations; }
+template<> const std::map<std::string, Accessor>& File::getCollectionOf() const { return mAccessors; }
+template<> const std::map<std::string, BufferView>& File::getCollectionOf() const { return mBufferViews; }
+template<> const std::map<std::string, Buffer>& File::getCollectionOf() const { return mBuffers; }
+template<> const std::map<std::string, Camera>& File::getCollectionOf() const { return mCameras; }
+template<> const std::map<std::string, Image>& File::getCollectionOf() const { return mImages; }
+template<> const std::map<std::string, Light>& File::getCollectionOf() const { return mLights; }
+template<> const std::map<std::string, Material>& File::getCollectionOf() const { return mMaterials; }
+template<> const std::map<std::string, Mesh>& File::getCollectionOf() const { return mMeshes; }
+template<> const std::map<std::string, Node>& File::getCollectionOf() const { return mNodes; }
+template<> const std::map<std::string, Program>& File::getCollectionOf() const { return mPrograms; }
+template<> const std::map<std::string, Sampler>& File::getCollectionOf() const { return mSamplers; }
+template<> const std::map<std::string, Scene>& File::getCollectionOf() const { return mScenes; }
+template<> const std::map<std::string, Shader>& File::getCollectionOf() const { return mShaders; }
+template<> const std::map<std::string, Skin>& File::getCollectionOf() const { return mSkins; }
+template<> const std::map<std::string, Technique>& File::getCollectionOf() const { return mTechniques; }
+template<> const std::map<std::string, Texture>& File::getCollectionOf() const { return mTextures; }
 
 }  // namespace gltf

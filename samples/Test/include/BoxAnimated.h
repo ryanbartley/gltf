@@ -32,7 +32,7 @@ BoxAnimated::BoxAnimated()
 	for( auto & node : defaultScene.nodes ) {
 		if( node->hasMeshes() ) {
 			auto mesh = node->meshes[0];
-			gltf::MeshLoader meshLoader( file, mesh );
+			gltf::MeshLoader meshLoader( mesh );
 			auto batch = ci::gl::Batch::create( meshLoader, ci::gl::getStockShader( ci::gl::ShaderDef().color().lambert() ) );
 			Renderable rend{ node->name, ci::mat4(), batch };
 			rend.modelMatrix = node->getTransformMatrix();
@@ -40,7 +40,7 @@ BoxAnimated::BoxAnimated()
 			mRenderables.emplace_back( std::move( rend ) );
 		}
 	}
-	const auto &animations = file->getAnimations();
+	const auto &animations = file->getCollectionOf<gltf::Animation>();
 	for( const auto &animationKV : animations ) {
 		auto &animation = animationKV.second;
 		

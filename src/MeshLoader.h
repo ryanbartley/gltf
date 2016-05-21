@@ -7,7 +7,6 @@
 //
 
 #include "cinder/GeomIo.h"
-#include "cinder/ObjLoader.h"
 #include "cinder/CinderAssert.h"
 #include "gltf.h"
 
@@ -15,7 +14,7 @@ namespace gltf {
 
 class MeshLoader : public ci::geom::Source {
 public:
-	MeshLoader( const FileRef &gltfFile, const Mesh *mesh );
+	MeshLoader( const Mesh *mesh );
 	
 	~MeshLoader() = default;
 	
@@ -40,12 +39,9 @@ public:
 	const std::vector<MeshInstance>& getMeshInstances() { return mMeshInstances; }
 	
 private:
-	void scanMesh( Mesh &mesh );
-	
 	template<typename T>
 	void copyIndices( std::vector<uint32_t> &indices, const T* data, uint32_t count ) const;
 	
-	FileRef				mFile;
 	const Mesh			*mMesh;
 	ci::geom::AttribSet mAvailableAttribs;
 	size_t				mNumVertices, mNumIndices;
@@ -56,8 +52,8 @@ private:
 	
 };
 	
-inline MeshLoader::MeshLoader( const FileRef &gltfFile, const Mesh *mesh )
-: mFile( gltfFile ), mMesh( mesh ), mNumIndices( 0 ), mNumVertices( 0 ),
+inline MeshLoader::MeshLoader( const Mesh *mesh )
+: mMesh( mesh ), mNumIndices( 0 ), mNumVertices( 0 ),
 	mPrimitive( ci::geom::Primitive::NUM_PRIMITIVES )
 {
 	bool primitiveSet = false;
