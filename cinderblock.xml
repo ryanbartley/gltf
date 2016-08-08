@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cinder>
+<block
+	name="GLTF"
+	id="org.libcinder.GLTF"
+	author="Cinder Project, Ryan Bartley"
+	license="BSD, MIT"
+	summary="Implements the OpenGL Transfer Format (glTF). Also, has functionality for skeleton and animation"
+	core="true"
+	>
+	<sourcePattern>src/cinder/*.cpp</sourcePattern>
+	<sourcePattern>src/cinder/gltf/*.cpp</sourcePattern>
+	<headerPattern>src/cinder/*.h</headerPattern>
+	<headerPattern>src/cinder/gltf/*.h</headerPattern>
+	<includePath>src</includePath>
+</block>
+</cinder>

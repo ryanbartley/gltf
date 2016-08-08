@@ -1,0 +1,82 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Blocks">
+      <UniqueIdentifier>{FCBCF4AA-7C58-478A-A436-E97886AEBE0B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\GLTF">
+      <UniqueIdentifier>{841B3CD3-196A-4677-959C-3F92CEE4895B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\GLTF\src">
+      <UniqueIdentifier>{D9393E70-E13E-4453-814C-BDD4BF7EF03A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\GLTF\src\cinder">
+      <UniqueIdentifier>{59081770-A8EE-4FC6-AC9A-CA6C0956BAFD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\GLTF\src\cinder\gltf">
+      <UniqueIdentifier>{92EED9E1-BEF7-4815-BA56-D522A9414229}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\SkeletalAnimationApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SkeletalAnimationApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\..\src\cinder\Skeleton.cpp">
+      <Filter>Blocks\GLTF\src\cinder</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\cinder\gltf\File.cpp">
+      <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\cinder\gltf\MeshLoader.cpp">
+      <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\cinder\gltf\Types.cpp">
+      <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\..\src\cinder\Animation.h">
+      <Filter>Blocks\GLTF\src\cinder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\dqconv.h">
+      <Filter>Blocks\GLTF\src\cinder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\Skeleton.h">
+      <Filter>Blocks\GLTF\src\cinder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\gltf\File.h">
+      <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\gltf\MeshLoader.h">
+      <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\gltf\Types.h">
+      <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
