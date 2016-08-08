@@ -175,7 +175,7 @@ struct Camera {
 };
 
 struct Image {
-	ci::ImageSourceRef getImage() const;
+	ci::ImageSourceRef getImage() const { return imageSource; }
 	
 	std::string			name, key;
 	std::string			uri; // path
