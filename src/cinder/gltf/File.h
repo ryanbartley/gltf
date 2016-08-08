@@ -176,23 +176,23 @@ private:
 	friend std::ostream& operator<<( std::ostream &lhs, const File &rhs );
 };
 	
-template<> const std::map<std::string, Animation>& File::getCollectionOf() const { return mAnimations; }
-template<> const std::map<std::string, Accessor>& File::getCollectionOf() const { return mAccessors; }
-template<> const std::map<std::string, BufferView>& File::getCollectionOf() const { return mBufferViews; }
-template<> const std::map<std::string, Buffer>& File::getCollectionOf() const { return mBuffers; }
-template<> const std::map<std::string, Camera>& File::getCollectionOf() const { return mCameras; }
-template<> const std::map<std::string, Image>& File::getCollectionOf() const { return mImages; }
-template<> const std::map<std::string, Light>& File::getCollectionOf() const { return mLights; }
-template<> const std::map<std::string, Material>& File::getCollectionOf() const { return mMaterials; }
-template<> const std::map<std::string, Mesh>& File::getCollectionOf() const { return mMeshes; }
-template<> const std::map<std::string, Node>& File::getCollectionOf() const { return mNodes; }
-template<> const std::map<std::string, Program>& File::getCollectionOf() const { return mPrograms; }
-template<> const std::map<std::string, Sampler>& File::getCollectionOf() const { return mSamplers; }
-template<> const std::map<std::string, Scene>& File::getCollectionOf() const { return mScenes; }
-template<> const std::map<std::string, Shader>& File::getCollectionOf() const { return mShaders; }
-template<> const std::map<std::string, Skin>& File::getCollectionOf() const { return mSkins; }
-template<> const std::map<std::string, Technique>& File::getCollectionOf() const { return mTechniques; }
-template<> const std::map<std::string, Texture>& File::getCollectionOf() const { return mTextures; }
+template<> inline const std::map<std::string, Animation>& File::getCollectionOf() const { return mAnimations; }
+template<> inline const std::map<std::string, Accessor>& File::getCollectionOf() const { return mAccessors; }
+template<> inline const std::map<std::string, BufferView>& File::getCollectionOf() const { return mBufferViews; }
+template<> inline const std::map<std::string, Buffer>& File::getCollectionOf() const { return mBuffers; }
+template<> inline const std::map<std::string, Camera>& File::getCollectionOf() const { return mCameras; }
+template<> inline const std::map<std::string, Image>& File::getCollectionOf() const { return mImages; }
+template<> inline const std::map<std::string, Light>& File::getCollectionOf() const { return mLights; }
+template<> inline const std::map<std::string, Material>& File::getCollectionOf() const { return mMaterials; }
+template<> inline const std::map<std::string, Mesh>& File::getCollectionOf() const { return mMeshes; }
+template<> inline const std::map<std::string, Node>& File::getCollectionOf() const { return mNodes; }
+template<> inline const std::map<std::string, Program>& File::getCollectionOf() const { return mPrograms; }
+template<> inline const std::map<std::string, Sampler>& File::getCollectionOf() const { return mSamplers; }
+template<> inline const std::map<std::string, Scene>& File::getCollectionOf() const { return mScenes; }
+template<> inline const std::map<std::string, Shader>& File::getCollectionOf() const { return mShaders; }
+template<> inline const std::map<std::string, Skin>& File::getCollectionOf() const { return mSkins; }
+template<> inline const std::map<std::string, Technique>& File::getCollectionOf() const { return mTechniques; }
+template<> inline const std::map<std::string, Texture>& File::getCollectionOf() const { return mTextures; }
 
 }  // namespace gltf
 }

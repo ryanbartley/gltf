@@ -8,6 +8,10 @@
 
 #pragma once
 
+#include <memory>
+#include <array>
+// need this to define the GL constants, possibly figure out something else
+#include "cinder/gl/gl.h"
 // need this because of materials, possibly figure out something else
 #include "jsoncpp/json.h"
 
@@ -40,7 +44,7 @@ struct Texture;
 
 struct Asset {
 	struct Profile {
-		std::string api{"WebGL"}, version{"1.0.3"};
+		std::string api = "WebGL", version = "1.0.3";
 	};
 	std::string		copyright, generator, version;
 	Profile			profile;
@@ -132,7 +136,7 @@ struct Buffer {
 	
 	uint32_t		byteLength{0};
 	std::string		uri; // path
-	std::string		type{"arrayBuffer"};
+	std::string		type = "arrayBuffer";
 	std::string		name, key;
 	
 private:
@@ -195,8 +199,8 @@ struct Light {
 				constantAttenuation{0.0f},
 				linearAttenuation{1.0f},
 				quadraticAttenuation{1.0f},
-				falloffAngle{M_PI / 2.0},
-				falloffExponent{0};
+				falloffAngle{float( M_PI ) / 2.0f},
+				falloffExponent{0.0f};
 	Type		type;
 	std::string name, key;
 };
@@ -335,19 +339,20 @@ struct Technique {
 	
 	struct State {
 		struct Functions {
-			std::array<float, 4>	blendColor{ 0.0f, 0.0f, 0.0f, 0.0f };
-			std::array<uint32_t, 2>	blendEquationSeparate{ 32774, 32774 };
-			std::array<int32_t, 4>	blendFuncSeparate{ 1, 1, 0, 0 };
-			std::array<bool, 4>		colorMask{ true, true, true, true };
-			std::array<float, 2>	depthRange{ 0.0f, 1.0f };
-			std::array<float, 2>	polygonOffset{ 0.0f, 0.0f };
-			std::array<float, 4>	scissor{ 0.0f, 0.0f, 0.0f, 0.0f };
+			Functions();
+			std::array<float, 4>	blendColor;
+			std::array<uint32_t, 2>	blendEquationSeparate;
+			std::array<int32_t, 4>	blendFuncSeparate;
+			std::array<bool, 4>		colorMask;
+			std::array<float, 2>	depthRange;
+			std::array<float, 2>	polygonOffset;
+			std::array<float, 4>	scissor;
 			
-			float		lineWidth{1.0f};
-			GLenum		cullFace{GL_BACK};
-			GLenum		depthFunc{GL_LESS};
-			GLenum		frontFace{GL_CCW};
-			bool		depthMask{true};
+			float		lineWidth = 1.0f;
+			GLenum		cullFace = GL_BACK;
+			GLenum		depthFunc = GL_LESS;
+			GLenum		frontFace = GL_CCW;
+			bool		depthMask = true;
 		};
 		std::vector<GLenum>	enables;
 		Functions			functions;

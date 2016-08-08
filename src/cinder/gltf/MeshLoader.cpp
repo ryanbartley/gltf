@@ -43,7 +43,7 @@ mPrimitive( ci::geom::Primitive::NUM_PRIMITIVES )
 			if( prim.indices != nullptr ) {
 				auto count = prim.indices->count;
 				mIndexAccessors.emplace_back( prim.indices );
-				mMeshInstances.emplace_back( prim.material, mNumIndices, count );
+				mMeshInstances.emplace_back( prim.material, static_cast<uint32_t>(mNumIndices), count );
 				mNumIndices += count;
 			}
 			else {
@@ -71,9 +71,9 @@ mPrimitive( ci::geom::Primitive::NUM_PRIMITIVES )
 template<typename T>
  void MeshLoader::copyIndices( std::vector<uint32_t> &indices, const T *data, uint32_t count ) const
 {
-	auto sizeOffset = indices.size();
+	auto sizeOffset = static_cast<uint32_t>( indices.size() );
 	indices.resize( sizeOffset + count );
-	for( int i = 0; i < count; i++ ) {
+	for( uint32_t i = 0; i < count; i++ ) {
 		indices[sizeOffset+i] = (*data++);
 	}
 }
