@@ -216,18 +216,18 @@ void File::addAccessorInfo( const std::string &key, const Json::Value &accessorI
 	ret.count = accessorInfo["count"].asUInt();
 	
 	auto type = accessorInfo["type"].asString();
-	if( type == "SCALAR" )	  ret.dataType = Accessor::DataType::SCALAR;
-	else if( type == "VEC2" ) ret.dataType = Accessor::DataType::VEC2;
-	else if( type == "VEC3" ) ret.dataType = Accessor::DataType::VEC3;
-	else if( type == "VEC4" ) ret.dataType = Accessor::DataType::VEC4;
-	else if( type == "MAT2" ) ret.dataType = Accessor::DataType::MAT2;
-	else if( type == "MAT3" ) ret.dataType = Accessor::DataType::MAT3;
-	else if( type == "MAT4" ) ret.dataType = Accessor::DataType::MAT4;
+	if( type == "SCALAR" )	  ret.dataType = Accessor::Type::SCALAR;
+	else if( type == "VEC2" ) ret.dataType = Accessor::Type::VEC2;
+	else if( type == "VEC3" ) ret.dataType = Accessor::Type::VEC3;
+	else if( type == "VEC4" ) ret.dataType = Accessor::Type::VEC4;
+	else if( type == "MAT2" ) ret.dataType = Accessor::Type::MAT2;
+	else if( type == "MAT3" ) ret.dataType = Accessor::Type::MAT3;
+	else if( type == "MAT4" ) ret.dataType = Accessor::Type::MAT4;
 	else					  CI_ASSERT_MSG( false, "Unknown data type" );
 	
 	ret.componentType = static_cast<Accessor::ComponentType>( accessorInfo["componentType"].asUInt() );
 	ret.name = accessorInfo["name"].asString();
-	ret.extras = accessorInfo["extras"];
+	ret.key = key;
 
 	if( !accessorInfo["byteStride"].isNull() )
 		ret.byteStride = accessorInfo["byteStride"].asUInt();
@@ -303,6 +303,7 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 	}
 
 	ret.name = animationInfo["name"].asString();
+	ret.key = key;
 	auto &params = animationInfo["parameters"];
 	auto paramKeys = params.getMemberNames();
 	for( auto & key : paramKeys ) {
@@ -320,7 +321,6 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 			ret.parameters.emplace_back( move( param ) );
 		}
 	}
-	ret.extras = animationInfo["extras"];
 
 	add( key, move( ret ) );
 }
@@ -382,8 +382,8 @@ void File::addBufferInfo( const std::string &key, const Json::Value &bufferInfo 
 	
 	ret.type = bufferInfo["type"].asString();
 	ret.byteLength = bufferInfo["byteLength"].asUInt();
-	ret.extras = bufferInfo["extras"];
 	ret.name = bufferInfo["name"].asString();
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -413,7 +413,7 @@ void File::addBufferViewInfo( const std::string &key, const Json::Value &bufferV
 	ret.byteLength = bufferViewInfo["byteLength"].asUInt();
 	ret.target = static_cast<BufferView::Target>( bufferViewInfo["target"].asUInt() );
 	ret.name = bufferViewInfo["name"].asString();
-	ret.extras = bufferViewInfo["extras"];
+	ret.key = key;
 	
 	add( key, ret );
 }
@@ -448,7 +448,6 @@ void File::addCameraInfo( const std::string &key, const Json::Value &cameraInfo 
 		ret.yfov = perspectiveInfo["yfov"].asFloat();
 		ret.znear = perspectiveInfo["znear"].asFloat();
 		ret.zfar = perspectiveInfo["zfar"].asFloat();
-		ret.camSpecificExtras = perspectiveInfo["extras"];
 	}
 	else if( ret.type == Camera::Type::ORTHOGRAPHIC ) {
 		auto &orthographicInfo = cameraInfo["orthographic"];
@@ -462,10 +461,9 @@ void File::addCameraInfo( const std::string &key, const Json::Value &cameraInfo 
 		ret.ymag = orthographicInfo["ymag"].asFloat();
 		ret.znear = orthographicInfo["znear"].asFloat();
 		ret.zfar = orthographicInfo["zfar"].asFloat();
-		ret.camSpecificExtras = orthographicInfo["extras"];
 	}
 	ret.name = cameraInfo["name"].asString();
-	ret.extras = cameraInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -489,6 +487,7 @@ void File::addImageInfo( const std::string &key, const Json::Value &imageInfo )
 	Image ret;
 	ret.uri = imageInfo["uri"].asString();
 	ret.name = imageInfo["name"].asString();
+	ret.key = key;
 	
 	// in embedded use this to look at type
 	size_t dataUri = ret.uri.find( "data:" );
@@ -576,6 +575,8 @@ void File::addLightInfo( const std::string &key, const Json::Value &val )
 		}
 	}
 	ret.name = key;
+	ret.key = key;
+	
 	add( key, move( ret ) );
 }
 	
@@ -661,7 +662,7 @@ void File::addMaterialInfo( const std::string &key, const Json::Value &materialI
 	}
 	
 	ret.name = materialInfo["name"].asString();
-	ret.extras = material["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -709,7 +710,7 @@ void File::addMeshInfo( const std::string &key, const Json::Value &meshInfo )
 		ret.primitives.emplace_back( move( meshPrim ) );
 	}
 	ret.name = meshInfo["name"].asString();
-	ret.extras = meshInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -804,7 +805,7 @@ void File::addNodeInfo( const std::string &key, const Json::Value &nodeInfo )
 //	}
 	
 	ret.name = nodeInfo["name"].asString();
-	ret.extras = nodeInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -839,7 +840,7 @@ void File::addProgramInfo( const std::string &key, const Json::Value &programInf
 		ret.attributes.push_back( attribute.asString() );
 	
 	ret.name = programInfo["name"].asString();
-	ret.extras = programInfo["extras"].asString();
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -870,7 +871,7 @@ void File::addSamplerInfo( const std::string &key, const Json::Value &samplerInf
 		ret.wrapT = samplerInfo["wrapT"].asUInt();
 	
 	ret.name = samplerInfo["name"].asString();
-	ret.extras = samplerInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -901,7 +902,7 @@ void File::addSceneInfo( const std::string &key, const Json::Value &sceneInfo )
 	}
 	
 	ret.name = sceneInfo["names"].asString();
-	ret.extras = sceneInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -952,7 +953,7 @@ void File::addShaderInfo( const std::string &key, const Json::Value &shaderInfo 
 	ret.type = static_cast<Shader::Type>( shaderInfo["type"].asUInt() );
 	ret.uri = shaderInfo["uri"].asString();
 	ret.name = shaderInfo["name"].asString();
-	ret.extras = shaderInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -993,7 +994,7 @@ void File::addSkinInfo( const std::string &key, const Json::Value &skinInfo )
 	}
 	
 	ret.name = skinInfo["name"].asString();
-	ret.extras = skinInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -1120,7 +1121,7 @@ void File::addTechniqueInfo( const std::string &key, const Json::Value &techniqu
 	}
 	
 	ret.name = techniqueInfo["name"].asString();
-	ret.extras = techniqueInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
@@ -1159,20 +1160,25 @@ void File::addTextureInfo( const std::string &key, const Json::Value &textureInf
 		ret.type = textureInfo["type"].asUInt();
 	
 	ret.name = textureInfo["name"].asString();
-	ret.extras = textureInfo["extras"];
+	ret.key = key;
 	
 	add( key, move( ret ) );
 }
 	
 Skeleton::AnimRef File::createSkeletonAnim( const SkeletonRef &skeleton ) const
 {
+	return make_shared<Skeleton::Anim>( std::move( createSkeletonTransformClip( skeleton ) ) );
+}
+	
+std::vector<TransformClip> File::createSkeletonTransformClip( const SkeletonRef &skeleton ) const
+{
 	std::vector<TransformClip> skeletonClips;
 	skeletonClips.reserve( skeleton->getNumJoints() );
 	for( auto &boneName : skeleton->getJointNames() ) {
 		auto found = std::find_if( mAnimations.begin(), mAnimations.end(),
-		[boneName]( const std::pair<std::string, gltf::Animation> &animation ){
-			  return animation.second.target == boneName;
-		});
+								  [boneName]( const std::pair<std::string, gltf::Animation> &animation ){
+									  return animation.second.target == boneName;
+								  });
 		if( found != mAnimations.end() ) {
 			auto params = found->second.getParameters();
 			skeletonClips.emplace_back( gltf::Animation::createTransformClip( params ) );
@@ -1181,8 +1187,7 @@ Skeleton::AnimRef File::createSkeletonAnim( const SkeletonRef &skeleton ) const
 			CI_ASSERT_MSG( false, "Need to figure out how to handle this case" );
 		}
 	}
-	auto ret = make_shared<Skeleton::Anim>( std::move( skeletonClips ) );
-	return ret;
+	return skeletonClips;
 }
 
 CameraOrtho Camera::getOrthoCameraByName( const ci::mat4 &transformMatrix )
@@ -1261,13 +1266,13 @@ ci::gl::UniformSemantic Technique::getUniformEnum( const std::string &uniform )
 uint8_t Accessor::getNumComponents() const
 {
 	switch( dataType ) {
-		case Accessor::DataType::SCALAR: return 1;
-		case Accessor::DataType::VEC2: return 2;
-		case Accessor::DataType::VEC3: return 3;
-		case Accessor::DataType::VEC4:
-		case Accessor::DataType::MAT2: return 4;
-		case Accessor::DataType::MAT3: return 9;
-		case Accessor::DataType::MAT4: return 12;
+		case Accessor::Type::SCALAR: return 1;
+		case Accessor::Type::VEC2: return 2;
+		case Accessor::Type::VEC3: return 3;
+		case Accessor::Type::VEC4:
+		case Accessor::Type::MAT2: return 4;
+		case Accessor::Type::MAT3: return 9;
+		case Accessor::Type::MAT4: return 12;
 	}
 }
 
@@ -1299,6 +1304,29 @@ void* Accessor::getDataPtr() const
 	return reinterpret_cast<uint8_t*>(buffer->getBuffer()->getData()) + bufferView->byteOffset + byteOffset;
 }
 	
+ci::AxisAlignedBox Mesh::getPositionAABB()
+{
+	ci::AxisAlignedBox ret;
+	for ( auto &prim : primitives ) {
+		auto end = prim.attributes.end();
+		auto attrib = find_if( prim.attributes.begin(), end,
+		[]( const Primitive::AttribAccessor &a ) { return a.attrib == geom::Attrib::POSITION; });
+		if( attrib != end ) {
+			auto accessor = attrib->accessor;
+			vec3 min, max;
+			int i = 0;
+			for ( auto val : accessor->min )
+				min[i++] = val;
+			ret.include( min );
+			i = 0;
+			for ( auto val : accessor->max )
+				max[i++] = val;
+			ret.include( max );
+		}
+	}
+	return ret;
+}
+	
 const Node* Node::getChild( size_t index ) const
 {
 	return children[index];
@@ -1321,11 +1349,10 @@ const Node* Node::getChild( const std::string &nodeName ) const
 ci::mat4 Node::getHeirarchyTransform() const
 {
 	ci::mat4 ret = getTransformMatrix();
-	
 	Node* tempParent = parent;
 	
 	while( tempParent != nullptr ) {
-		ret = tempParent->getTransformMatrix() * ret;
+		ret = tempParent->getHeirarchyTransform() * ret;
 		tempParent = tempParent->parent;
 	}
 	
@@ -1356,7 +1383,7 @@ SkeletonRef Skin::createSkeleton() const
 		jointNames.emplace_back(  joints[i]->jointName );
 		jointsContainer.emplace_back( parentId, jointNames.size() - 1, *matricesPtr++ );
 	}
-	auto ret = std::make_shared<Skeleton>( std::move( jointsContainer ), std::move( jointNames ) );
+	auto ret = std::make_shared<Skeleton>( std::move( jointsContainer ), std::move( jointNames ), bindShapeMatrix );
 	
 	// TODO: possibly faster way of holding jointNames, a little more complicated to keep clean
 	
@@ -1379,17 +1406,17 @@ SkeletonRef Skin::createSkeleton() const
 	return ret;
 }
 	
-std::vector<Animation::ParameterData> Animation::getParameters() const
+std::vector<Animation::Parameter::Data> Animation::getParameters() const
 {
-	std::vector<Animation::ParameterData> ret;
+	std::vector<Animation::Parameter::Data> ret;
 	ret.reserve( parameters.size() + 1 );
 	
 	// Initialize times for keyframes
-	CI_ASSERT( timeAccessor->dataType == Accessor::DataType::SCALAR );
+	CI_ASSERT( timeAccessor->dataType == Accessor::Type::SCALAR );
 	auto totalKeyFrames = timeAccessor->count;
 	auto dataPtr = timeAccessor->getDataPtr();
 	
-	Animation::ParameterData time{ "TIME", 1, std::vector<float>( totalKeyFrames ) };
+	Animation::Parameter::Data time{ "TIME", 1, std::vector<float>( totalKeyFrames ) };
 	memcpy( time.data.data(), dataPtr, totalKeyFrames * sizeof( float ) );
 	ret.emplace_back( move( time ) );
 	
@@ -1400,7 +1427,7 @@ std::vector<Animation::ParameterData> Animation::getParameters() const
 		CI_ASSERT( totalKeyFrames == accessor->count );
 		auto dataPtr = accessor->getDataPtr();
 		
-		Animation::ParameterData parameter{ param.parameter, numComponents, std::vector<float>( totalKeyFrames * numComponents ) };
+		Animation::Parameter::Data parameter{ param.parameter, numComponents, std::vector<float>( totalKeyFrames * numComponents ) };
 		memcpy( parameter.data.data(), dataPtr, accessor->count * numComponents * sizeof( float ) );
 		ret.emplace_back( move( parameter ) );
 	}
@@ -1408,7 +1435,7 @@ std::vector<Animation::ParameterData> Animation::getParameters() const
 	return ret;
 }
 	
-TransformClip Animation::createTransformClip( const std::vector<ParameterData> &paramData )
+TransformClip Animation::createTransformClip( const std::vector<Parameter::Data> &paramData )
 {
 	const std::vector<float> *timeData = nullptr, *scaleData = nullptr,
 							 *transData = nullptr, *rotData = nullptr;
@@ -1453,7 +1480,7 @@ TransformClip Animation::createTransformClip( const std::vector<ParameterData> &
 	return ret;
 }
 	
-Clip<ci::vec3>	Animation::createTranslationClip( const std::vector<ParameterData> &paramData )
+Clip<ci::vec3>	Animation::createTranslationClip( const std::vector<Parameter::Data> &paramData )
 {
 	const std::vector<float> *timeData = nullptr, *transData = nullptr;
 	for( auto &param : paramData )
@@ -1476,7 +1503,7 @@ Clip<ci::vec3>	Animation::createTranslationClip( const std::vector<ParameterData
 	return ret;
 }
 
-Clip<ci::vec3>	Animation::createScaleClip( const std::vector<ParameterData> &paramData )
+Clip<ci::vec3>	Animation::createScaleClip( const std::vector<Parameter::Data> &paramData )
 {
 	const std::vector<float> *timeData = nullptr, *scaleData = nullptr;
 	for( auto &param : paramData )
@@ -1499,7 +1526,7 @@ Clip<ci::vec3>	Animation::createScaleClip( const std::vector<ParameterData> &par
 	return ret;
 }
 
-Clip<ci::quat>	Animation::createRotationClip( const std::vector<ParameterData> &paramData )
+Clip<ci::quat>	Animation::createRotationClip( const std::vector<Parameter::Data> &paramData )
 {
 	const std::vector<float> *timeData = nullptr, *rotData = nullptr;
 	for( auto &param : paramData )

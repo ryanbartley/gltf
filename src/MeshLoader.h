@@ -12,22 +12,30 @@
 
 namespace gltf {
 
+//! Represents a Mesh Geom for gltf::Mesh(s). Note: gltf::File associated with Mesh used to build
+//! this, needs to outlive this loader.
 class MeshLoader : public ci::geom::Source {
 public:
+	//! Constructor taking a gltf Mesh pointer.
 	MeshLoader( const Mesh *mesh );
-	
 	~MeshLoader() = default;
 	
-	virtual size_t		getNumVertices() const { return mNumVertices; }
-	virtual size_t		getNumIndices() const { return mNumIndices; }
+	//! Returns the number of vertices contained within the Mesh.
+	virtual size_t	getNumVertices() const { return mNumVertices; }
+	//! Returns the number of indices contained within the Mesh.
+	virtual size_t	getNumIndices() const { return mNumIndices; }
+	//! Returns the geom::Primitive that this mesh will be represented as.
 	virtual ci::geom::Primitive	getPrimitive() const { return mPrimitive; }
-	virtual uint8_t		getAttribDims( ci::geom::Attrib attr ) const;
-	virtual void		loadInto( ci::geom::Target *target, const ci::geom::AttribSet &requestedAttribs ) const;
-	
+	//! Returns the number of dimensions contained in this /a attr.
+	virtual uint8_t	getAttribDims( ci::geom::Attrib attr ) const;
+	//! Loads attibutes into /a target.
+	virtual void	loadInto( ci::geom::Target *target, const ci::geom::AttribSet &requestedAttribs ) const;
+	//! Returns the set of available attributes available in this mesh.
 	virtual ci::geom::AttribSet	getAvailableAttribs() const { return mAvailableAttribs; }
-	
+	//! Clones this source and returns a copy of this MeshLodader.
 	virtual Source*		clone() const { return new MeshLoader( *this ); }
 	
+	//! Represents a beginning and ending vert or index and the Material associated with this.
 	struct MeshInstance {
 		MeshInstance( Material *material, uint32_t first, uint32_t count )
 		: material( material ), first( first ), count( count ) {}
@@ -35,7 +43,7 @@ public:
 		uint32_t first;
 		uint32_t count;
 	};
-	
+	//! Returns Mesh Instance for this mesh.
 	const std::vector<MeshInstance>& getMeshInstances() { return mMeshInstances; }
 	
 private:
@@ -46,6 +54,7 @@ private:
 	ci::geom::AttribSet mAvailableAttribs;
 	size_t				mNumVertices, mNumIndices;
 	ci::geom::Primitive mPrimitive;
+	
 	std::map<ci::geom::Attrib, const Accessor*> mAttribAccessors;
 	std::vector<const Accessor*>	mIndexAccessors;
 	std::vector<MeshInstance>		mMeshInstances;

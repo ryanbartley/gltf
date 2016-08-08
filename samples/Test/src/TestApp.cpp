@@ -1,4 +1,4 @@
-#include "cinder/app/App.h"
+//#include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 
@@ -18,152 +18,152 @@ struct Object {
 	
 };
 
-
 class TestApp : public App {
   public:
 	void setup() override;
-	void mouseDown( MouseEvent event ) override;
-	void mouseDrag( MouseEvent event ) override;
-	void keyDown( KeyEvent event ) override { pause = !pause; }
+	void keyDown( KeyEvent event ) override;
 	void update() override;
 	void draw() override;
 	
-	void setupDancingRobot();
-	void drawDancingRobot();
+	void loadFromFile( const fs::path &path, const string &nodeName );
 	
-	void setupMan();
-	void drawMan();
+	vector<pair<fs::path, string>> gltf;
 	
-	std::shared_ptr<BoxAnimated> mBoxAnimated;
-	SkeletonRef mSkeleton;
-	Skeleton::AnimRef mSkeletonAnim;
+	CameraPersp		mCam;
+	CameraUi		mCamUi;
 	
-	std::shared_ptr<SkeletonRenderer> mSkelRend;
+	SkeletonRef						mSkeleton;
+	Skeleton::AnimRef				mSkeletonAnim;
+	std::vector<TransformClip>		mSkeletonTransClip;
 	
-	gl::BatchRef mBatch;
-	CameraPersp mCam;
-	CameraUi mCamUi;
-	bool pause = false;
-	uint32_t frameNum = 0;
+	shared_ptr<SkeletonRenderer>	mSkelRend;
 	
-	struct Renderable {
-		std::string nodeName;
-		ci::mat4	modelMatrix;
-		ci::gl::BatchRef batch;
-	};
-	std::vector<Renderable> mRenderables;
+	ci::mat4		modelMatrix, armatureMatrix;
+	gl::BatchRef	mBatch, pose;
+	gl::GlslProgRef mGlsl;
+	std::vector<ci::mat4> localTransforms, offsetsSkel, offsetsRend;
+	
+	bool		pause = false, renderMesh = true, renderSkel = false, renderPose = false;
+	int32_t		index = 0;
+	uint32_t	frameNum = 0;
 };
 
 void TestApp::setup()
 {
-	//setupDancingRobot();
-	setupMan();
-	mSkelRend = make_shared<SkeletonRenderer>();
+	mSkelRend.reset( new SkeletonRenderer() );
+	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), .01f, 10000.0f );
 	mCam.lookAt( vec3( 0, 0, -5 ), vec3( 0 ) );
+	mCam.setPivotDistance( 5 );
 	mCamUi.setCamera( &mCam );
+	mCamUi.connect( getWindow() );
+	
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
+	
+	mGlsl = gl::GlslProg::create( gl::GlslProg::Format()
+								 .vertex( loadAsset( "Cesium_Man0VS.glsl" ) )
+								 .fragment( loadAsset( "Cesium_Man0FS.glsl" ) ) );
+	
+	gltf.emplace_back( fs::path( "monster" ) / "glTF" / "monster.gltf", string( "monster" ) );
+	gltf.emplace_back( fs::path( "CesiumMan" ) / "glTF" / "Cesium_Man.gltf", string( "Cesium_Man" ) );
+	gltf.emplace_back( fs::path( "brainsteam" ) / "glTF" / "brainsteam.gltf", string( "Figure_2_node" ) );
+	
+	auto &initial = gltf[0];
+	loadFromFile( initial.first, initial.second );
 }
 
-void TestApp::mouseDown( MouseEvent event )
+void TestApp::loadFromFile( const fs::path &path, const std::string &nodeName )
 {
-	mCamUi.mouseDown( event );
+	auto fileAsset = loadAsset( path );
+	auto file = gltf::File::create( fileAsset );
+	
+	auto &node = file->getNodeInfo( nodeName );
+	auto &meshes = node.meshes;
+	
+	
+	const auto &skin = node.skin;
+	mSkeleton = skin->createSkeleton();
+	mSkeletonTransClip = file->createSkeletonTransformClip( mSkeleton );
+	mSkeletonAnim = make_shared<Skeleton::Anim>( mSkeletonTransClip );
+	
+	geom::SourceMods geomCombo;
+	ci::AxisAlignedBox aabb;
+	for( auto mesh : meshes ) {
+		auto geomSource = gltf::MeshLoader( mesh );
+		aabb.include( mesh->getPositionAABB() );
+		geomCombo &= geomSource;
+	}
+	
+	mBatch = gl::Batch::create( geomCombo, mGlsl );
+	pose = gl::Batch::create( geomCombo, gl::getStockShader( gl::ShaderDef() ) );
+	
+	modelMatrix = node.getHeirarchyTransform();
+	
+	if( nodeName == "monster" )
+		modelMatrix = modelMatrix * (ci::translate( vec3( -1, 0, .3 ) ) * ci::scale( vec3( 0.001 ) ) );
+	else if( nodeName == "Figure_2_node" )
+		modelMatrix = mat4();
+	// need to address the armature heirarchical transform
+	armatureMatrix = skin->joints[0]->getHeirarchyTransform();
+	
+	aabb.transform( modelMatrix );
 }
 
-void TestApp::mouseDrag( MouseEvent event )
+void TestApp::keyDown( KeyEvent event )
 {
-	mCamUi.mouseDrag( event );
+	switch ( event.getCode() ) {
+		case KeyEvent::KEY_SPACE: pause = !pause; return;
+		case KeyEvent::KEY_RIGHT: index = (index + 1) % gltf.size(); break;
+		case KeyEvent::KEY_LEFT: index = (index - 1) % gltf.size(); break;
+		case KeyEvent::KEY_p: renderPose = !renderPose; return;
+		case KeyEvent::KEY_m: renderMesh = !renderMesh; return;
+		case KeyEvent::KEY_s: renderSkel = !renderSkel; return;
+		case KeyEvent::KEY_r: mCam.lookAt( vec3( 0, 0, -10 ), vec3( 0 ) ); return;
+		default: return;
+	}
+	
+	const auto &next = gltf[index];
+	loadFromFile( next.first, next.second );
 }
 
 void TestApp::update()
 {
+	if( ! pause )
+		frameNum++;
+	auto time = frameNum / 180.0;
+	
+	localTransforms.clear();
+	for( auto &transClip : mSkeletonTransClip )
+		localTransforms.emplace_back( transClip.getMatrixLooped( time ) );
+	
+	mSkeleton->calcGlobalMatrices( localTransforms, &offsetsSkel );
+	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsetsRend );
 }
 
 void TestApp::draw()
 {
 	gl::clear();
-//	drawDancingRobot();
-	drawMan();
-}
 
-void TestApp::setupMan()
-{
-	auto filePath = loadAsset( ci::fs::path( "CesiumMan" ) / "glTF" / "Cesium_Man.gltf" );
-	auto file = gltf::File::create( filePath );
-	
-	const auto &skin = file->getSkinInfo( "Armature_Cesium_Man-skin" );
-	mSkeleton = skin.createSkeleton();
-	mSkeletonAnim = file->createSkeletonAnim( mSkeleton );
-	
-	auto mesh0 = gltf::MeshLoader( &file->getMeshInfo( "Cesium_Man-mesh" ) );
-	auto glsl = gl::GlslProg::create( gl::GlslProg::Format()
-									 .vertex( loadAsset( "Cesium_Man0VS.glsl" ) )
-									 .fragment( loadAsset( "Cesium_Man0FS.glsl" ) ) );
-	
-	mBatch = gl::Batch::create( mesh0, glsl );
-}
-
-void TestApp::drawMan()
-{
-	if( ! pause )
-		frameNum++;
-	auto time = frameNum / 60.0;
-	std::vector<ci::mat4> localTransformsComb, localTransforms;
-	
-	mSkeletonAnim->getLoopedLocal( time, &localTransforms );
-	std::vector<ci::mat4> offsetsSkel, offsetsRend;
-	mSkeleton->calcGlobalMatrices( localTransforms, &offsetsSkel );
-	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsetsRend );
-	
 	gl::setMatrices( mCam );
-	gl::ScopedModelMatrix scopeModel;
 	
-	auto &glsl = mBatch->getGlslProg();
-	glsl->uniform( "uJointMat", offsetsRend.data(), offsetsRend.size() );
-	//	mBatch->draw();
-	mSkelRend->draw( *mSkeleton, offsetsSkel );
-}
-
-void TestApp::setupDancingRobot()
-{
-	auto filePath = loadAsset( ci::fs::path( "brainsteam" ) / "glTF" / "brainsteam.gltf" );
-	auto file = gltf::File::create( filePath );
-	
-	const auto &skin = file->getSkinInfo( "Poser_scene_root_Figure_2_node-skin" );
-	mSkeleton = skin.createSkeleton();
-	mSkeletonAnim = file->createSkeletonAnim( mSkeleton );
-	
-	auto mesh0 = gltf::MeshLoader( &file->getMeshInfo( "Figure_2_geometry-mesh" ) );
-	auto mesh1 = gltf::MeshLoader( &file->getMeshInfo( "Figure_2_geometry-meshsplit_0" ) );
-	auto mesh2 = gltf::MeshLoader( &file->getMeshInfo( "Figure_2_geometry-meshsplit_1" ) );
-	auto glsl = gl::GlslProg::create( gl::GlslProg::Format()
-									 .vertex( loadAsset( "Cesium_Man0VS.glsl" ) )
-									 .fragment( loadAsset( "Cesium_Man0FS.glsl" ) ) );
-	
-	mBatch = gl::Batch::create( mesh0 & mesh1 & mesh2, glsl );
-}
-
-void TestApp::drawDancingRobot()
-{
-	if( ! pause )
-		frameNum++;
-	auto time = frameNum / 60.0;
-	std::vector<ci::mat4> localTransformsComb, localTransforms;
-	
-	mSkeletonAnim->getLoopedLocal( time, &localTransforms );
-	std::vector<ci::mat4> offsetsSkel, offsetsRend;
-	mSkeleton->calcGlobalMatrices( localTransforms, &offsetsSkel );
-	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsetsRend );
-	
-	gl::setMatrices( mCam );
-	gl::ScopedModelMatrix scopeModel;
-	
-	auto &glsl = mBatch->getGlslProg();
-	glsl->uniform( "uJointMat", offsetsRend.data(), offsetsRend.size() );
-//	mBatch->draw();
-	mSkelRend->draw( *mSkeleton, offsetsSkel );
-	
+	if( ! renderPose ) {
+		gl::ScopedModelMatrix scopeModel;
+		gl::setModelMatrix( modelMatrix );
+		if( renderMesh ) {
+			auto &glsl = mBatch->getGlslProg();
+			glsl->uniform( "uJointMat", offsetsRend.data(), offsetsRend.size() );
+			mBatch->draw();
+		}
+		if( renderSkel )
+			mSkelRend->draw( *mSkeleton, offsetsSkel );
+	}
+	else {
+		if( renderMesh )
+			pose->draw();
+		if( renderSkel )
+			mSkelRend->draw( *mSkeleton );
+	}
 }
 
 CINDER_APP( TestApp, RendererGl )

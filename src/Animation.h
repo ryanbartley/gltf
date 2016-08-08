@@ -19,66 +19,84 @@
 template <typename T>
 class Clip {
 public:
-	
+	//! Constructor
 	Clip() : mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
+	//! Constructor Taking a vector of pairs representing time/value.
 	Clip( std::vector<std::pair<double, T>> keyFrames );
 	
+	//! Returns value of type T at time /a time.
 	T		get( double time ) const;
+	//! Returns value of type T at time /a time modulo-ed against the duration of the clip
+	//! to derive the position in the key frames.
 	T		getLooped( double time ) const;
-	T		lerp( const T &begin, const T &end, double time ) const;
-	
+	//! Adds a keyframe of /a value at /a time.
 	void	addKeyFrame( double time, T value );
-	
+	//! Returns a pair representing the start and end time of the clip.
 	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
-	
+	//! Returns a pair representing the time and value of the index /a keyframeId.
 	std::pair<double, T> getKeyFrameValueAt( uint32_t keyframeId ) const;
 	
+	//! Returns whether there are no keyFrames.
 	bool	empty() const;
+	//! Returns number of key frames currently
 	size_t	numKeyframes() const;
 	
+	//! Returns double representing start time of the clip.
 	double getStartTime() const { return mStartTime; }
+	//! Returns double representing duration of the clip.
 	double getDuration() const { return mDuration; }
 	
 private:
+	//! Returns a lerped value using /a time, with /a begin to /a end.
+	T		lerp( const T &begin, const T &end, double time ) const;
 	
 	double				mStartTime, mDuration;
 	std::vector<double> mKeyFrameTimes;
 	std::vector<T>		mKeyFrameValues;
 	
+	//! Helper friend for output.
 	friend std::ostream& operator<<( std::ostream &os, const Clip<T> &clip );
 };
 
 class TransformClip {
 public:
+	//! Constructor
 	TransformClip() = default;
+	//! Constructor
 	TransformClip( Clip<ci::vec3> translateClip,
 				   Clip<ci::quat> rotationClip,
 				   Clip<ci::vec3> scaleClip )
-	: mTrans( std::move( translateClip ) ), mRot( std::move( rotationClip ) ),
+	: mTrans( std::move( translateClip ) ),
+		mRot( std::move( rotationClip ) ),
 		mScale( std::move( scaleClip ) )
 	{}
-	
+	//! Constructor
 	TransformClip( std::vector<std::pair<double, ci::vec3>> translateKeyFrames,
 				   std::vector<std::pair<double, ci::quat>> rotationKeyFrames,
 				   std::vector<std::pair<double, ci::vec3>> scaleKeyFrames )
-	: mTrans( std::move( translateKeyFrames ) ), mRot( std::move( rotationKeyFrames ) ),
+	: mTrans( std::move( translateKeyFrames ) ),
+		mRot( std::move( rotationKeyFrames ) ),
 		mScale( std::move( scaleKeyFrames ) )
 	{}
-	
+	//! Returns a ci::mat4 representing the transformation at time /a time. The transformation
+	//! is built as Translation * Rotation * Scale.
 	ci::mat4 getMatrix( double time ) const;
+	//! Returns a ci::mat4 representing the transformation at time /a time modulo-ed against
+	//! the duration of the underlying clips to derive the transformation. The transformation
+	//! is built as Translation * Rotation * Scale.
 	ci::mat4 getMatrixLooped( double time ) const;
 	
-	ci::vec3 getTranslation( double time ) const { return mTrans.get( time ); }
-	ci::vec3 getTranslationLooped( double time ) const { return mTrans.getLooped( time ); }
-	ci::vec3 getScale( double time ) const { return mScale.get( time ); }
-	ci::vec3 getScaleLooped( double time ) const { return mScale.getLooped( time ); }
-	ci::quat getRotation( double time ) const { return mRot.get( time ); }
-	
+	//! Returns a const ref to the underlying translation clip.
 	const Clip<ci::vec3>&	getTranslationClip() const { return mTrans; }
+	//! Returns a ref to the underlying translation clip.
 	Clip<ci::vec3>&			getTranslationClip() { return mTrans; }
+	//! Returns a const ref to the underlying rotation clip.
 	const Clip<ci::quat>&	getRotationClip() const { return mRot; }
+	//! Returns a ref to the underlying rotation clip.
 	Clip<ci::quat>&			getRotationClip() { return mRot; }
+	//! Returns a const ref to the underlying scale clip.
 	const Clip<ci::vec3>&	getScaleClip() const { return mScale; }
+	//! Returns a ref to the underlying scale clip
 	Clip<ci::vec3>&			getScaleClip() { return mScale; }
 	
 private:
