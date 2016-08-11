@@ -70,15 +70,11 @@ public:
 				   Clip<ci::vec3> scaleClip )
 	: mTrans( std::move( translateClip ) ),
 		mRot( std::move( rotationClip ) ),
-		mScale( std::move( scaleClip ) )
+		mScale( std::move( scaleClip ) ),
+		mStartTime( std::numeric_limits<double>::max() ),
+		mDuration( 0.0 )
 	{
-		auto transStartDur = mTrans.getTimeBounds();
-		auto rotStartDur = mRot.getTimeBounds();
-		auto scaleStartDur = mScale.getTimeBounds();;
-		auto startMin = glm::min( transStartDur.first, glm::min( rotStartDur.first, scaleStartDur.first ) );
-		auto endMax = glm::max( transStartDur.second, glm::max( rotStartDur.second, scaleStartDur.second ) );
-		mStartTime = startMin;
-		mDuration = endMax - startMin;
+		deriveStartDuration();
 	}
 	//! Constructor
 	TransformClip( std::vector<std::pair<double, ci::vec3>> translateKeyFrames,
@@ -86,15 +82,11 @@ public:
 				   std::vector<std::pair<double, ci::vec3>> scaleKeyFrames )
 	: mTrans( std::move( translateKeyFrames ) ),
 		mRot( std::move( rotationKeyFrames ) ),
-		mScale( std::move( scaleKeyFrames ) )
+		mScale( std::move( scaleKeyFrames ) ),
+		mStartTime( std::numeric_limits<double>::max() ),
+		mDuration( 0.0 )
 	{
-		auto transStartDur = mTrans.getTimeBounds();
-		auto rotStartDur = mRot.getTimeBounds();
-		auto scaleStartDur = mScale.getTimeBounds();;
-		auto startMin = glm::min( transStartDur.first, glm::min( rotStartDur.first, scaleStartDur.first ) );
-		auto endMax = glm::max( transStartDur.second, glm::max( rotStartDur.second, scaleStartDur.second ) );
-		mStartTime = startMin;
-		mDuration = endMax - startMin;
+		deriveStartDuration();
 	}
 	//! Returns a ci::mat4 representing the transformation at time /a time. The transformation
 	//! is built as Translation * Rotation * Scale.
@@ -120,6 +112,29 @@ public:
 	Clip<ci::vec3>&			getScaleClip() { return mScale; }
 	
 private:
+	void deriveStartDuration()
+	{
+		auto start = mStartTime;
+		auto end = 0.0;
+		if( ! mTrans.empty() ) {
+			auto transStartDur = mTrans.getTimeBounds();
+			start = glm::min( start, transStartDur.first );
+			end = glm::max( end, transStartDur.second );
+		}
+		if( ! mRot.empty() ) {
+			auto rotStartDur = mRot.getTimeBounds();
+			start = glm::min( start, rotStartDur.first );
+			end = glm::max( end, rotStartDur.second );
+		}
+		if( ! mScale.empty() ) {
+			auto scaleStartDur = mScale.getTimeBounds();
+			start = glm::min( start, scaleStartDur.first );
+			end = glm::max( end, scaleStartDur.second );
+		}
+		mStartTime = start;
+		mDuration = end - start;
+	}
+	
 	Clip<ci::vec3>	mTrans;
 	Clip<ci::vec3>	mScale;
 	Clip<ci::quat>	mRot;

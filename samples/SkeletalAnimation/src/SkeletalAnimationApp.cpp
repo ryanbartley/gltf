@@ -11,7 +11,7 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-#define USE_SKELETON_ANIM 1
+#define USE_SKELETON_ANIM 0
 
 class SkeletalAnimationApp : public App {
   public:
