@@ -8,7 +8,10 @@
 
 #pragma once
 
-#include "Animation.h"
+#include <array>
+#include "cinder/gl/gl.h"
+
+#include "cinder/Animation.h"
 
 namespace cinder {
 
@@ -16,7 +19,7 @@ using SkeletonRef = std::shared_ptr<class Skeleton>;
 
 class Skeleton {
 public:
-	class Joint;
+	struct Joint;
 	//! Constructor
 	Skeleton( std::vector<Joint> joints,
 			  std::vector<std::string> jointNames,
@@ -212,7 +215,7 @@ inline void Skeleton::calcMatrixPaletteFromGlobal( const std::vector<ci::mat4> &
 	// Derive root
 	offset->emplace_back( globalCache[0] * mJointArray[0].getInverseBindMatrix() * mBindShapeMatrix );
 	// Derive children
-	for( int i = 1, end = mJointArray.size(); i < end; i++ )
+	for( size_t i = 1, end = mJointArray.size(); i < end; i++ )
 		offset->emplace_back( globalCache[i] * mJointArray[i].getInverseBindMatrix() * mBindShapeMatrix );
 }
 
@@ -232,7 +235,7 @@ inline void Skeleton::calcGlobalMatrices( const std::vector<ci::mat4> &localJoin
 	// Derive root
 	globalJoint->emplace_back( localJointTransforms[0] );
 	// Derive children
-	for( int i = 1, end = mJointArray.size(); i < end; i++ )
+	for( size_t i = 1, end = mJointArray.size(); i < end; i++ )
 		globalJoint->emplace_back( (*globalJoint)[mJointArray[i].getParentId()] * localJointTransforms[i] );
 }
 
@@ -243,16 +246,18 @@ inline Skeleton::Anim::JointClip::JointClip( const TransformClip &transform )
 	
 	mTransStartTime = transClip.getStartTime();
 	mTransDuration = transClip.getDuration();
-	for( int i = 0, end = transClip.numKeyframes(); i < end; i++ ) {
+	auto transSize = static_cast<uint32_t>( transClip.numKeyframes() );
+	for( uint32_t i = 0; i < transSize; i++ ) {
 		auto translation = transClip.getKeyFrameValueAt( i );
-		jointTrans.emplace_back( translation.first, translation.second );
+		jointTrans.emplace_back( static_cast<float>( translation.first ), translation.second );
 	}
 	
 	mRotStartTime = rotClip.getStartTime();
 	mRotDuration = rotClip.getDuration();
-	for( int i = 0, end = rotClip.numKeyframes(); i < end; i++ ) {
-		auto translation = rotClip.getKeyFrameValueAt( i );
-		jointRots.emplace_back( translation.first, translation.second );
+	auto rotSize = static_cast< uint32_t >( rotClip.numKeyframes() );
+	for( uint32_t i = 0; i < rotSize; i++ ) {
+		auto translation = rotClip.getKeyFrameValueAt( i ); 
+		jointRots.emplace_back( static_cast<float>( translation.first ), translation.second );
 	}
 }
 
@@ -361,14 +366,14 @@ inline void Skeleton::Anim::getLoopedLocal( double time, std::vector<ci::mat4> *
 		localJointTransforms->emplace_back( jointClip.getLooped( time ) );
 }
 
-void Skeleton::Anim::getLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const
+inline void Skeleton::Anim::getLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const
 {
 	localSeparatedJointTransforms->clear();
 	for( auto & jointClip : joints )
 		localSeparatedJointTransforms->emplace_back( jointClip.getSeparated( time ) );
 }
 
-void Skeleton::Anim::getLoopedLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const
+inline void Skeleton::Anim::getLoopedLocalSeparated( double time, std::vector<std::pair<ci::vec3, ci::quat>> *localSeparatedJointTransforms ) const
 {
 	localSeparatedJointTransforms->clear();
 	for( auto & jointClip : joints )

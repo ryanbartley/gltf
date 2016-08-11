@@ -92,13 +92,14 @@ ci::gl::UniformSemantic Technique::getUniformEnum( const std::string &uniform )
 uint8_t Accessor::getNumComponents() const
 {
 	switch( dataType ) {
-		case Accessor::Type::SCALAR: return 1;
-		case Accessor::Type::VEC2: return 2;
-		case Accessor::Type::VEC3: return 3;
-		case Accessor::Type::VEC4:
-		case Accessor::Type::MAT2: return 4;
-		case Accessor::Type::MAT3: return 9;
-		case Accessor::Type::MAT4: return 12;
+		case Accessor::Type::SCALAR: return 1; break;
+		case Accessor::Type::VEC2: return 2; break;
+		case Accessor::Type::VEC3: return 3; break;
+		case Accessor::Type::VEC4: return 4; break;
+		case Accessor::Type::MAT2: return 4; break;
+		case Accessor::Type::MAT3: return 9; break;
+		case Accessor::Type::MAT4: return 12; break;
+		default: CI_LOG_E( "Component not recognized." ); return 1; break;
 	}
 }
 
@@ -185,6 +186,16 @@ ci::mat4 Node::getHeirarchyTransform() const
 	return ret;
 }
 
+using Functions = Technique::State::Functions;
+
+Functions::Functions()
+: blendColor( { 0.0f, 0.0f, 0.0f, 0.0f } ), blendEquationSeparate( { 32774, 32774 } ),
+	blendFuncSeparate( { 1, 1, 0, 0 }  ), colorMask( { true, true, true, true } ), depthRange( { 0.0f, 1.0f } ),
+	polygonOffset( { 0.0f, 0.0f } ), scissor( { 0.0f, 0.0f, 0.0f, 0.0f } )
+{
+
+}
+
 SkeletonRef Skin::createSkeleton() const
 {
 	auto matricesPtr = reinterpret_cast<ci::mat4*>( inverseBindMatrices->getDataPtr() );
@@ -203,11 +214,13 @@ SkeletonRef Skin::createSkeleton() const
 			auto begIt = begin( jointNames );
 			auto foundIt = std::find( begIt, end( jointNames ), joints[i]->parent->name );
 			auto distance = std::distance( begIt, foundIt );
-			parentId = distance;
+			parentId = static_cast<uint8_t>( distance );
 		}
 		CI_ASSERT( !  joints[i]->jointName.empty() );
 		jointNames.emplace_back(  joints[i]->jointName );
-		jointsContainer.emplace_back( parentId, jointNames.size() - 1, *matricesPtr++ );
+		jointsContainer.emplace_back( static_cast<uint8_t>( parentId ), 
+									  static_cast<uint8_t>( jointNames.size() - 1 ), 
+									  *matricesPtr++ );
 	}
 	auto ret = std::make_shared<Skeleton>( std::move( jointsContainer ), std::move( jointNames ), bindShapeMatrix );
 	
@@ -275,13 +288,13 @@ TransformClip Animation::createTransformClip( const std::vector<Parameter::Data>
 		else if( param.paramName == "translation" )
 			transData = &param.data;
 	
-	auto totalKeyFrames = timeData->size();
+	auto totalKeyFrames = static_cast<uint32_t>( timeData->size() );
 	
 	std::vector<std::pair<double, ci::quat>> rotationKeyframes( totalKeyFrames );
 	std::vector<std::pair<double, ci::vec3>> translationKeyframes( totalKeyFrames ),
 	scaleKeyframes( totalKeyFrames, { 0.0, vec3( 1 ) } );
 	
-	for( int i = 0, end = totalKeyFrames; i < end; i++ ) {
+	for( uint32_t i = 0; i < totalKeyFrames; i++ ) {
 		auto time = (*timeData)[i];
 		translationKeyframes[i].first = time;
 		rotationKeyframes[i].first = time;

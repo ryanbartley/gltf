@@ -236,12 +236,12 @@ void File::addAccessorInfo( const std::string &key, const Json::Value &accessorI
 	auto &maxElem = accessorInfo["max"];
 	auto &minElem = accessorInfo["min"];
 	if( !maxElem.isNull() && !minElem.isNull() ) {
-		auto maxSize = maxElem.size();
-		auto minSize = minElem.size();
+		uint32_t maxSize = maxElem.size();
+		uint32_t minSize = minElem.size();
 		CI_ASSERT( maxSize == minSize );
 		ret.max.resize( maxSize );
 		ret.min.resize( minSize );
-		for( int i = 0; i < maxSize; i++ ) {
+		for( uint32_t i = 0; i < maxSize; i++ ) {
 			ret.max[i] = maxElem[i].asFloat();
 			ret.min[i] = minElem[i].asFloat();
 		}

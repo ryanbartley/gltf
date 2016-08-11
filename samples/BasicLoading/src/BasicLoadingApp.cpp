@@ -36,7 +36,7 @@ void BasicLoadingApp::setup()
 	auto image = mFile->getImageInfo("file2").getImage();
 	mTex = gl::Texture2d::create( image, gl::Texture2d::Format().loadTopDown() );
 	
-	mCam.setPerspective( 60.0f, getWindowAspectRatio(), 0.01, 1000.0 );
+	mCam.setPerspective( 60.0f, getWindowAspectRatio(), 0.01f, 1000.0f );
 	mCam.lookAt( vec3( 0, 0, -5 ), vec3( 0 ) );
 	mCamUi.setCamera( &mCam );
 	mCamUi.connect( getWindow() );

@@ -28,7 +28,7 @@ const Skeleton::Joint* Skeleton::getJoint( const std::string &name ) const
 	auto jointIt = std::find( begIt, endIt, name );
 	if( jointIt != endIt ) {
 		auto dist = std::distance( begIt, jointIt );
-		return getJoint( dist );
+		return getJoint( static_cast<uint8_t>( dist ) );
 	}
 	else
 		return nullptr;
@@ -281,7 +281,7 @@ SkeletonRenderer::SkeletonRenderer()
 	std::array<JointMesh, kNumPoints> joints;
 	
 	// Fills vertices.
-	float angleIncrement = (M_PI * 2) / kNumSlices;
+	float angleIncrement = static_cast<float>(M_PI * 2) / kNumSlices;
 	int index = 0;
 	for (int j = 0; j < kNumPointsYZ; ++j) { // YZ plan.
 		float angle = j * angleIncrement;
@@ -349,7 +349,8 @@ void SkeletonRenderer::draw( const Skeleton &skeleton, const std::vector<ci::mat
 	auto uniforms = matrixBuffer.get();
 	
 	int instances = 0;
-	for (int i = 1, end = joints.size(); i < end; ++i) {
+	auto jointSize = static_cast< uint32_t >( joints.size() );
+	for (uint32_t i = 1; i < jointSize; ++i) {
 		
 		// Selects joint matrices.
 		const ci::mat4& parent = finalPose[joints[i].getParentId()];

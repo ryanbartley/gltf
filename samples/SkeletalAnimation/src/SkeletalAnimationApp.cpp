@@ -96,8 +96,8 @@ void SkeletalAnimationApp::loadFromFile( const fs::path &path, const std::string
 	mModelMatrix = node.getHeirarchyTransform();
 	
 	if( nodeName == "monster" )
-		mModelMatrix = mModelMatrix * (ci::translate( vec3( -1, 0, .3 ) ) *
-									   ci::scale( vec3( 0.001 ) ) );
+		mModelMatrix = mModelMatrix * (ci::translate( vec3( -1.0f, 0.0f, 0.3f ) ) *
+									   ci::scale( vec3( 0.001f ) ) );
 	else if( nodeName == "Figure_2_node" )
 		mModelMatrix = mat4();
 }
@@ -105,7 +105,7 @@ void SkeletalAnimationApp::loadFromFile( const fs::path &path, const std::string
 void SkeletalAnimationApp::keyDown( KeyEvent event )
 {
 	switch ( event.getCode() ) {
-		case KeyEvent::KEY_SPACE: mPause = !pause; return;
+		case KeyEvent::KEY_SPACE: mPause = !mPause; return;
 		case KeyEvent::KEY_RIGHT: mGltfIndex = (mGltfIndex + 1) % gltf.size(); break;
 		case KeyEvent::KEY_LEFT: mGltfIndex = (mGltfIndex - 1) % gltf.size(); break;
 		case KeyEvent::KEY_p: mRenderPose = !mRenderPose; return;
@@ -145,7 +145,7 @@ void SkeletalAnimationApp::draw()
 	if( ! mRenderPose ) {
 		if( mRenderMesh ) {
 			auto &glsl = mBatch->getGlslProg();
-			glsl->uniform( "uJointMat", offsetsRend.data(), offsetsRend.size() );
+			glsl->uniform( "uJointMat", offsetsRend.data(), static_cast<int>( offsetsRend.size() ) );
 			mBatch->draw();
 		}
 		if( mRenderSkel )
