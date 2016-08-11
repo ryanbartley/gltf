@@ -93,6 +93,8 @@ public:
 	//! Creates and returns a vector of TransformClips based on /a skeleton.
 	std::vector<TransformClip>	createSkeletonTransformClip( const SkeletonRef &skeleton ) const;
 	
+	TransformClip collectTransformClipFor( const Node *node ) const;
+	
 private:
 	//! Constructor.
 	File( const ci::DataSourceRef &gltfFile );

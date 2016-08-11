@@ -11,6 +11,8 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
+#define USE_SKELETON_ANIM 1
+
 class SkeletalAnimationApp : public App {
   public:
 	void setup() override;
@@ -120,8 +122,12 @@ void SkeletalAnimationApp::keyDown( KeyEvent event )
 void SkeletalAnimationApp::update()
 {
 	localTransforms.clear();
+#if USE_SKELETON_ANIM
+	mSkeletonAnim->getLoopedLocal( getElapsedSeconds(), &localTransforms );
+#else
 	for( auto &transClip : mSkeletonTransClip )
 		localTransforms.emplace_back( transClip.getMatrixLooped( getElapsedSeconds() ) );
+#endif
 	
 	mSkeleton->calcGlobalMatrices( localTransforms, &offsetsSkel );
 	mSkeleton->calcMatrixPaletteFromLocal( localTransforms, &offsetsRend );

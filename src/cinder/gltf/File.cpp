@@ -1184,6 +1184,99 @@ std::vector<TransformClip> File::createSkeletonTransformClip( const SkeletonRef 
 	}
 	return skeletonClips;
 }
+	
+TransformClip File::collectTransformClipFor( const cinder::gltf::Node *node ) const
+{
+	TransformClip ret;
+	Clip<ci::vec3> translationClip;
+	Clip<ci::quat> rotationClip;
+	Clip<ci::vec3> scaleClip;
+	
+	for( auto &animationInfo : mAnimations ) {
+		auto &animation = animationInfo.second;
+		// TODO: this is no bueno but works, but probably not for long
+		if( animation.target == node->key ) {
+			auto params = animation.getParameters();
+			auto begIt = begin( params );
+			auto endIt = end( params );
+			auto timeIt = std::find_if( begIt, endIt,
+			[]( const Animation::Parameter::Data &data ){
+				return data.paramName == "TIME";
+			});
+			CI_ASSERT( timeIt != endIt );
+			uint32_t numKeyFramesTotal = static_cast<uint32_t>( timeIt->data.size() );
+			auto &timeData = timeIt->data;
+			{
+				auto transIt = std::find_if( begIt, endIt,
+											[]( const Animation::Parameter::Data &data ){
+												return data.paramName == "translation";
+											});
+				if( transIt != endIt ) {
+					vector<pair<double, vec3>> keyFrameData;
+					keyFrameData.reserve( numKeyFramesTotal );
+					auto transData = reinterpret_cast<vec3*>(transIt->data.data());
+					for( uint32_t i{0}; i < numKeyFramesTotal; ++i ) {
+						keyFrameData.emplace_back( timeData[i], transData[i] );
+					}
+					if( translationClip.empty() ) {
+						translationClip = move( Clip<ci::vec3>( move( keyFrameData ) ) );
+					}
+					else {
+						for( auto &keyFrame : keyFrameData ) {
+							translationClip.addKeyFrame( keyFrame.first, keyFrame.second );
+						}
+					}
+				}
+			}
+			{
+				auto scaleIt = std::find_if( begIt, endIt,
+											[]( const Animation::Parameter::Data &data ){
+												return data.paramName == "scale";
+											});
+				if( scaleIt != endIt ) {
+					vector<pair<double, vec3>> keyFrameData;
+					keyFrameData.reserve( numKeyFramesTotal );
+					auto transData = reinterpret_cast<vec3*>(scaleIt->data.data());
+					for( uint32_t i{0}; i < numKeyFramesTotal; ++i ) {
+						keyFrameData.emplace_back( timeData[i], transData[i] );
+					}
+					if( scaleClip.empty() ) {
+						scaleClip = move( Clip<ci::vec3>( move( keyFrameData ) ) );
+					}
+					else {
+						for( auto &keyFrame : keyFrameData ) {
+							scaleClip.addKeyFrame( keyFrame.first, keyFrame.second );
+						}
+					}
+				}
+			}
+			{
+				auto rotIt = std::find_if( begIt, endIt,
+											[]( const Animation::Parameter::Data &data ){
+												return data.paramName == "rotation";
+											});
+				if( rotIt != endIt ) {
+					vector<pair<double, quat>> keyFrameData;
+					keyFrameData.reserve( numKeyFramesTotal );
+					auto transData = reinterpret_cast<quat*>(rotIt->data.data());
+					for( uint32_t i{0}; i < numKeyFramesTotal; ++i ) {
+						keyFrameData.emplace_back( timeData[i], transData[i] );
+					}
+					if( rotationClip.empty() ) {
+						rotationClip = move( Clip<ci::quat>( move( keyFrameData ) ) );
+					}
+					else {
+						for( auto &keyFrame : keyFrameData ) {
+							rotationClip.addKeyFrame( keyFrame.first, keyFrame.second );
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return TransformClip( move( translationClip ), move( rotationClip ), move( scaleClip ) );
+}
 
 
 } // namespace gltf

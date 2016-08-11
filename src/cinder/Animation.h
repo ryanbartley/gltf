@@ -63,7 +63,7 @@ private:
 class TransformClip {
 public:
 	//! Constructor
-	TransformClip() = default;
+	TransformClip() : mStartTime( std::numeric_limits<double>::max() ), mDuration( 0.0 ) {}
 	//! Constructor
 	TransformClip( Clip<ci::vec3> translateClip,
 				   Clip<ci::quat> rotationClip,
@@ -71,7 +71,15 @@ public:
 	: mTrans( std::move( translateClip ) ),
 		mRot( std::move( rotationClip ) ),
 		mScale( std::move( scaleClip ) )
-	{}
+	{
+		auto transStartDur = mTrans.getTimeBounds();
+		auto rotStartDur = mRot.getTimeBounds();
+		auto scaleStartDur = mScale.getTimeBounds();;
+		auto startMin = glm::min( transStartDur.first, glm::min( rotStartDur.first, scaleStartDur.first ) );
+		auto endMax = glm::max( transStartDur.second, glm::max( rotStartDur.second, scaleStartDur.second ) );
+		mStartTime = startMin;
+		mDuration = endMax - startMin;
+	}
 	//! Constructor
 	TransformClip( std::vector<std::pair<double, ci::vec3>> translateKeyFrames,
 				   std::vector<std::pair<double, ci::quat>> rotationKeyFrames,
@@ -79,7 +87,15 @@ public:
 	: mTrans( std::move( translateKeyFrames ) ),
 		mRot( std::move( rotationKeyFrames ) ),
 		mScale( std::move( scaleKeyFrames ) )
-	{}
+	{
+		auto transStartDur = mTrans.getTimeBounds();
+		auto rotStartDur = mRot.getTimeBounds();
+		auto scaleStartDur = mScale.getTimeBounds();;
+		auto startMin = glm::min( transStartDur.first, glm::min( rotStartDur.first, scaleStartDur.first ) );
+		auto endMax = glm::max( transStartDur.second, glm::max( rotStartDur.second, scaleStartDur.second ) );
+		mStartTime = startMin;
+		mDuration = endMax - startMin;
+	}
 	//! Returns a ci::mat4 representing the transformation at time /a time. The transformation
 	//! is built as Translation * Rotation * Scale.
 	ci::mat4 getMatrix( double time ) const;
@@ -87,6 +103,8 @@ public:
 	//! the duration of the underlying clips to derive the transformation. The transformation
 	//! is built as Translation * Rotation * Scale.
 	ci::mat4 getMatrixLooped( double time ) const;
+	
+	bool empty() const { return mTrans.empty() && mScale.empty() && mRot.empty(); }
 	
 	//! Returns a const ref to the underlying translation clip.
 	const Clip<ci::vec3>&	getTranslationClip() const { return mTrans; }
@@ -105,6 +123,7 @@ private:
 	Clip<ci::vec3>	mTrans;
 	Clip<ci::vec3>	mScale;
 	Clip<ci::quat>	mRot;
+	double			mStartTime, mDuration;
 };
 
 
@@ -250,13 +269,14 @@ inline ci::mat4 TransformClip::getMatrix( double time ) const
 
 inline ci::mat4 TransformClip::getMatrixLooped( double time ) const
 {
+	auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
 	ci::mat4 ret;
 	if( ! mTrans.empty() )
-		ret *= ci::translate( mTrans.getLooped( time ) );
+		ret *= ci::translate( mTrans.get( cyclicTime ) );
 	if( ! mRot.empty() )
-		ret *= ci::toMat4( mRot.getLooped( time ) );
+		ret *= ci::toMat4( mRot.get( cyclicTime ) );
 	if( ! mScale.empty() )
-		ret *= ci::scale( mScale.getLooped( time ) );
+		ret *= ci::scale( mScale.get( cyclicTime ) );
 	return ret;
 }
 
