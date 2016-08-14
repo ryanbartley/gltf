@@ -164,13 +164,18 @@ const Node* Node::getChild( const std::string &nodeName ) const
 	const Node* ret = nullptr;
 	auto endIt = end( children );
 	auto found = std::find_if( begin( children ), endIt,
-							  [nodeName]( const Node *node ){
-								  return nodeName == node->name;
-							  });
+	[nodeName]( const Node *node ){
+		return nodeName == node->name;
+	});
 	if( found != endIt ) {
 		ret = *found;
 	}
 	return ret;
+}
+	
+const Node* Node::getParent() const
+{
+	return parent;
 }
 
 ci::mat4 Node::getHeirarchyTransform() const
@@ -393,6 +398,12 @@ ci::mat4 Node::getTransformMatrix() const
 	ci::mat4 ret;
 	if( ! transformMatrix.empty() )
 		ret = glm::make_mat4( transformMatrix.data() );
+	else {
+		ret *= glm::translate( getTranslation() );
+		ret *= glm::toMat4( getRotation() );
+		ret *= glm::scale( getScale() );
+	}
+		
 	return ret;
 }
 

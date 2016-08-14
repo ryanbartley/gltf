@@ -43,7 +43,7 @@ public:
 	template<typename T>
 	void				get( const std::string &key, T &type );
 	template<typename T>
-	Json::Value			getExtrasFrom( T &type );
+	Json::Value			getExtrasFrom( const std::string &key );
 	
 	//! Returns the Asset info associated with this glTF File.
 	const Asset&		getAssetInfo() const;

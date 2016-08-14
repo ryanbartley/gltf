@@ -96,6 +96,13 @@ public:
 	//! is built as Translation * Rotation * Scale.
 	ci::mat4 getMatrixLooped( double time ) const;
 	
+	ci::vec3 getTranslation( double time ) const;
+	ci::vec3 getTranslationLooped( double time ) const;
+	ci::quat getRotation( double time ) const;
+	ci::quat getRotationLooped( double time ) const;
+	ci::vec3 getScale( double time ) const;
+	ci::vec3 getScaleLooped( double time ) const;
+	
 	bool empty() const { return mTrans.empty() && mScale.empty() && mRot.empty(); }
 	
 	//! Returns a const ref to the underlying translation clip.
@@ -139,6 +146,8 @@ private:
 	Clip<ci::vec3>	mScale;
 	Clip<ci::quat>	mRot;
 	double			mStartTime, mDuration;
+	
+	friend std::ostream& operator<<( std::ostream &os, const TransformClip &clip );
 };
 
 
@@ -294,6 +303,54 @@ inline ci::mat4 TransformClip::getMatrixLooped( double time ) const
 		ret *= ci::scale( mScale.get( cyclicTime ) );
 	return ret;
 }
+	
+inline ci::vec3 TransformClip::getTranslation( double time ) const
+{
+	if( ! mTrans.empty() )
+		return mTrans.get( time );
+	
+	return ci::vec3();
+}
+	
+inline ci::vec3 TransformClip::getTranslationLooped( double time ) const
+{
+	if( ! mTrans.empty() ) {
+		auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
+		return mTrans.get( cyclicTime );
+	}
+	return ci::vec3();
+}
+	
+inline ci::quat TransformClip::getRotation( double time ) const
+{
+	if( ! mRot.empty() )
+		return mRot.get( time );
+	return ci::quat();
+}
+	
+inline ci::quat TransformClip::getRotationLooped( double time ) const
+{
+	if( ! mRot.empty() ) {
+		auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
+		return mRot.get( cyclicTime );
+	}
+	return ci::quat();
+}
+	
+inline ci::vec3 TransformClip::getScale( double time ) const
+{
+	if( ! mScale.empty() )
+		return mScale.get( time );
+	return ci::vec3( 1.0f );
+}
+inline ci::vec3 TransformClip::getScaleLooped( double time ) const
+{
+	if( ! mScale.empty() ) {
+		auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
+		return mScale.get( cyclicTime );
+	}
+	return ci::vec3( 1.0f );
+}
 
 inline std::ostream& operator<<( std::ostream &os, const Clip<ci::vec3> &clip )
 {
@@ -310,6 +367,17 @@ inline std::ostream& operator<<( std::ostream &os, const Clip<ci::quat> &clip )
 	for( int i = 0; i < numKeyFrames; i++ ) {
 		os << clip.mKeyFrameTimes[i] << " = " << clip.mKeyFrameValues[i] << std::endl;
 	}
+	return os;
+}
+	
+inline std::ostream& operator<<( std::ostream &os, const TransformClip &transform )
+{
+	os << std::setprecision( 9 ) << std::fixed;
+	os << "Translation: " << std::endl;
+	os << transform.getTranslationClip();
+	os << "Rotation: " << std::endl;
+	os << transform.getRotationClip();
+	os << "Scale: " << std::endl;
 	return os;
 }
 

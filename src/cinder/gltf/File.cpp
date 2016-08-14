@@ -282,7 +282,8 @@ void File::addAnimationInfo( const std::string &key, const Json::Value &animatio
 		animChannel.path = target["path"].asString();
 		ret.channels.emplace_back( move( animChannel ) );
 	}
-	
+	if( ret.channels.empty() )
+		return;
 	// This isn't good but I don't know any quicker way.
 	ret.target = ret.channels[0].targetId;
 
@@ -687,10 +688,13 @@ void File::addMeshInfo( const std::string &key, const Json::Value &meshInfo )
 		Mesh::Primitive meshPrim;
 		auto materialKey = primitive["material"].asString();
 		auto &material = mMaterials[materialKey];
+		
 		meshPrim.material = &material;
 		auto indicesAccessor = primitive["indices"].asString();
-		auto &accessor = mAccessors[indicesAccessor];
-		meshPrim.indices = &accessor;
+		if( ! indicesAccessor.empty() ) {
+			auto &accessor = mAccessors[indicesAccessor];
+			meshPrim.indices = &accessor;
+		}
 		meshPrim.primitive = primitive["mode"].asUInt();
 		
 		auto &attributes = primitive["attributes"];
