@@ -1,0 +1,503 @@
+{
+  "accessors": {
+    "accessor_16": {
+      "bufferView": "bufferView_2",
+      "byteOffset": 0,
+      "byteStride": 0,
+      "componentType": 5123,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        35
+      ]
+    },
+    "accessor_18": {
+      "bufferView": "bufferView_0",
+      "byteOffset": 0,
+      "byteStride": 0,
+      "componentType": 5126,
+      "count": 32,
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "type": "VEC3"
+    },
+    "accessor_20": {
+      "bufferView": "bufferView_0",
+      "byteOffset": 384,
+      "byteStride": 0,
+      "componentType": 5126,
+      "count": 32,
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "type": "VEC3"
+    },
+    "animAccessor_0": {
+      "bufferView": "bufferView_1",
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 4,
+      "type": "SCALAR",
+      "byteStride": 0,
+      "min": [
+        0.04166660085320473
+      ],
+      "max": [
+        1.6666699647903442
+      ]
+    },
+    "animAccessor_1": {
+      "bufferView": "bufferView_1",
+      "byteOffset": 16,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "byteStride": 0,
+      "min": [
+        -8.3360595703125,
+        -4.39454984664917,
+        0
+      ],
+      "max": [
+        4.824820041656494,
+        5.7222700119018555,
+        2.5152900218963623
+      ]
+    },
+    "animAccessor_2": {
+      "bufferView": "bufferView_1",
+      "byteOffset": 64,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC4",
+      "byteStride": 0,
+      "min": [
+        -0.5672421455383301,
+        -0.35133540630340576,
+        -0.3088131248950958,
+        -0.9810044765472412
+      ],
+      "max": [
+        0.7954397797584534,
+        0.2505430579185486,
+        0.43304571509361267,
+        1
+      ]
+    }
+  },
+  "animations": {
+    "animation_0": {
+      "channels": [
+        {
+          "sampler": "animation_0_translation_sampler",
+          "target": {
+            "id": "Cube",
+            "path": "translation"
+          }
+        }
+      ],
+      "parameters": {
+        "TIME": "animAccessor_0",
+        "translation": "animAccessor_1"
+      },
+      "samplers": {
+        "animation_0_translation_sampler": {
+          "input": "TIME",
+          "interpolation": "LINEAR",
+          "output": "translation"
+        }
+      }
+    },
+    "animation_1": {
+      "channels": [],
+      "parameters": {
+        "TIME": "animAccessor_0"
+      },
+      "samplers": {}
+    },
+    "animation_2": {
+      "channels": [],
+      "parameters": {
+        "TIME": "animAccessor_0"
+      },
+      "samplers": {}
+    },
+    "animation_3": {
+      "channels": [
+        {
+          "sampler": "animation_3_rotation_sampler",
+          "target": {
+            "id": "Cube",
+            "path": "rotation"
+          }
+        }
+      ],
+      "parameters": {
+        "TIME": "animAccessor_0",
+        "rotation": "animAccessor_2"
+      },
+      "samplers": {
+        "animation_3_rotation_sampler": {
+          "input": "TIME",
+          "interpolation": "LINEAR",
+          "output": "rotation"
+        }
+      }
+    },
+    "animation_4": {
+      "channels": [],
+      "parameters": {
+        "TIME": "animAccessor_0"
+      },
+      "samplers": {}
+    },
+    "animation_5": {
+      "channels": [],
+      "parameters": {
+        "TIME": "animAccessor_0"
+      },
+      "samplers": {}
+    }
+  },
+  "asset": {
+    "generator": "collada2gltf@",
+    "premultipliedAlpha": true,
+    "profile": {
+      "api": "WebGL",
+      "version": "1.0.2"
+    },
+    "version": "1.0"
+  },
+  "bufferViews": {
+    "bufferView_0": {
+      "buffer": "buffer_0",
+      "byteLength": 768,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    "bufferView_1": {
+      "buffer": "buffer_0",
+      "byteLength": 128,
+      "byteOffset": 768
+    },
+    "bufferView_2": {
+      "buffer": "buffer_0",
+      "byteLength": 72,
+      "byteOffset": 896,
+      "target": 34963
+    }
+  },
+  "buffers": {
+    "buffer_0": {
+      "type": "arraybuffer",
+      "byteLength": 968,
+      "uri": "data:application/octet-stream;base64,AACAPwAAgD8AAIC/AACAvwAAgL8AAIC/AACAvwAAgD8AAIC/AACAPwAAgL8AAIC/AACAvwAAgD8AAIA/7/9/PwAAgL8AAIA/AACAPwAAgD8AAIA/AACAvwAAgL8AAIA/AACAPwAAgD8AAIA/AACAPwAAgL8AAIC/AACAPwAAgD8AAIC/7/9/PwAAgL8AAIA/AACAvwAAgL8AAIC/AACAPwAAgL8AAIC/AACAvwAAgL8AAIC/AACAvwAAgD8AAIA/AACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/7/9/PwAAgL8AAIA/AACAPwAAgL8AAIC/7/9/PwAAgL8AAIA/AACAvwAAgL8AAIA/AACAvwAAgL8AAIC/AACAvwAAgL8AAIC/AACAvwAAgL8AAIA/AACAvwAAgD8AAIA/AACAPwAAgD8AAIC/AACAvwAAgD8AAIC/AACAvwAAgD8AAIA/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAPAIC0AACAPwAAAAAPAIC0AACAPwAAAAAPAIC0AAAAAAAAgL/6//+0AAAAAAAAgL/6//+0AAAAAAAAgL/6//+0AACAvw8AgDQbACC0AACAvw8AgDQbACC0AACAvw8AgDQbACC0AwCQNAAAgD8PAIA0AwCQNAAAgD8PAIA0AwCQNAAAgD8PAIA0AACAP/j/H7Xt/680AACAP/j/H7Xt/680AACAP/j/H7Xt/680+v//tAAAgL8AAAAA+v//tAAAgL8AAAAA+v//tAAAgL8AAAAAAACAvw8AgDTX//+zAACAvw8AgDTX//+zAACAvw8AgDTX//+z7v9fNAAAgD8AAAAA7v9fNAAAgD8AAAAA7v9fNAAAgD8AAAAAmaoqPbCqCj+Oqoo/cVXVPwAAAAAAAAAAAAAAAO1kmkDymJdAAAAAAIBgBcEnoIzAg/ogQNqsVsDWHLdAg/ogQAAAAAAAAAAAAAAAAAAAgD/INhG/LkeAPsEcnr4unzg/8aFLPzzis74ruN0+Tf5yPv6mIj7Hro+9zxmxPRwje78AAAEAAgAAAAMAAQAEAAUABgAEAAcABQAIAAkACgALAAwADQAOAA8AEAARABIAEwAUABUAFgAXABgAGQAaABsAHAAdAB4AHwA="
+    }
+  },
+  "cameras": {
+    "Camera-camera": {
+      "name": "Camera",
+      "perspective": {
+        "aspectRatio": 1.7777799367904663,
+        "yfov": 0.48237427870788735,
+        "zfar": 100,
+        "znear": 0.10000000149011612
+      },
+      "type": "perspective"
+    }
+  },
+  "materials": {
+    "Material-effect": {
+      "name": "Material",
+      "technique": "technique0",
+      "values": {
+        "ambient": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "diffuse": [
+          0.6399999856948853,
+          0.6399999856948853,
+          0.6399999856948853,
+          1
+        ],
+        "emission": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "shininess": 50,
+        "specular": [
+          0.5,
+          0.5,
+          0.5,
+          1
+        ]
+      }
+    }
+  },
+  "meshes": {
+    "Cube-mesh": {
+      "name": "Cube",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": "accessor_20",
+            "POSITION": "accessor_18"
+          },
+          "indices": "accessor_16",
+          "material": "Material-effect",
+          "mode": 4
+        }
+      ]
+    }
+  },
+  "nodes": {
+    "Camera": {
+      "camera": "Camera-camera",
+      "children": [],
+      "matrix": [
+        0.6858811378479004,
+        0.7276331782341003,
+        -0.010816781781613827,
+        0,
+        -0.31736981868743896,
+        0.31246882677078247,
+        0.8953433036804199,
+        0,
+        0.6548614501953125,
+        -0.6106661558151245,
+        0.44524529576301575,
+        0,
+        7.4811296463012695,
+        -6.5076398849487305,
+        5.3436598777771,
+        1
+      ],
+      "name": "Camera"
+    },
+    "Cube": {
+      "children": [],
+      "meshes": [
+        "Cube-mesh"
+      ],
+      "name": "Cube",
+      "rotation": [
+        -0.158840149641037,
+        0.07015758007764816,
+        -0.08647500723600388,
+        0.9810044765472412
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "translation": [
+        -3.354300022125244,
+        5.7222700119018555,
+        2.5152900218963623
+      ]
+    },
+    "Lamp": {
+      "children": [],
+      "matrix": [
+        -0.2908594310283661,
+        0.9551727175712585,
+        -0.055189099162817,
+        0,
+        -0.7711024284362793,
+        -0.19987930357456207,
+        0.6045240759849548,
+        0,
+        0.5663937330245972,
+        0.21838797628879547,
+        0.7946727871894836,
+        0,
+        4.076250076293945,
+        1.0054500102996826,
+        5.903859615325928,
+        1
+      ],
+      "name": "Lamp"
+    },
+    "node_3": {
+      "children": [
+        "Camera",
+        "Lamp",
+        "Cube"
+      ],
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "name": "Y_UP_Transform"
+    }
+  },
+  "programs": {
+    "program_0": {
+      "attributes": [
+        "a_normal",
+        "a_position"
+      ],
+      "fragmentShader": "input0FS",
+      "vertexShader": "input0VS"
+    }
+  },
+  "scene": "defaultScene",
+  "scenes": {
+    "defaultScene": {
+      "nodes": [
+        "node_3"
+      ]
+    }
+  },
+  "shaders": {
+    "input0FS": {
+      "type": 35632,
+      "uri": "data:text/plain;base64,cHJlY2lzaW9uIGhpZ2hwIGZsb2F0Owp2YXJ5aW5nIHZlYzMgdl9ub3JtYWw7CnVuaWZvcm0gdmVjNCB1X2FtYmllbnQ7CnVuaWZvcm0gdmVjNCB1X2RpZmZ1c2U7CnVuaWZvcm0gdmVjNCB1X2VtaXNzaW9uOwp1bmlmb3JtIHZlYzQgdV9zcGVjdWxhcjsKdW5pZm9ybSBmbG9hdCB1X3NoaW5pbmVzczsKdmFyeWluZyB2ZWMzIHZfbGlnaHQwRGlyZWN0aW9uOwp2YXJ5aW5nIHZlYzMgdl9wb3NpdGlvbjsKdW5pZm9ybSBmbG9hdCB1X2xpZ2h0MENvbnN0YW50QXR0ZW51YXRpb247CnVuaWZvcm0gZmxvYXQgdV9saWdodDBMaW5lYXJBdHRlbnVhdGlvbjsKdW5pZm9ybSBmbG9hdCB1X2xpZ2h0MFF1YWRyYXRpY0F0dGVudWF0aW9uOwp1bmlmb3JtIHZlYzMgdV9saWdodDBDb2xvcjsKdm9pZCBtYWluKHZvaWQpIHsKdmVjMyBub3JtYWwgPSBub3JtYWxpemUodl9ub3JtYWwpOwp2ZWM0IGNvbG9yID0gdmVjNCgwLiwgMC4sIDAuLCAwLik7CnZlYzQgZGlmZnVzZSA9IHZlYzQoMC4sIDAuLCAwLiwgMS4pOwp2ZWMzIGRpZmZ1c2VMaWdodCA9IHZlYzMoMC4sIDAuLCAwLik7CnZlYzQgZW1pc3Npb247CnZlYzQgYW1iaWVudDsKdmVjNCBzcGVjdWxhcjsKYW1iaWVudCA9IHVfYW1iaWVudDsKZGlmZnVzZSA9IHVfZGlmZnVzZTsKZW1pc3Npb24gPSB1X2VtaXNzaW9uOwpzcGVjdWxhciA9IHVfc3BlY3VsYXI7CnZlYzMgc3BlY3VsYXJMaWdodCA9IHZlYzMoMC4sIDAuLCAwLik7CnsKZmxvYXQgc3BlY3VsYXJJbnRlbnNpdHkgPSAwLjsKZmxvYXQgYXR0ZW51YXRpb24gPSAxLjA7CmZsb2F0IHJhbmdlID0gbGVuZ3RoKHZfbGlnaHQwRGlyZWN0aW9uKTsKYXR0ZW51YXRpb24gPSAxLjAgLyAoIHVfbGlnaHQwQ29uc3RhbnRBdHRlbnVhdGlvbiArICh1X2xpZ2h0MExpbmVhckF0dGVudWF0aW9uICogcmFuZ2UpICsgKHVfbGlnaHQwUXVhZHJhdGljQXR0ZW51YXRpb24gKiByYW5nZSAqIHJhbmdlKSApIDsKdmVjMyBsID0gbm9ybWFsaXplKHZfbGlnaHQwRGlyZWN0aW9uKTsKdmVjMyB2aWV3RGlyID0gLW5vcm1hbGl6ZSh2X3Bvc2l0aW9uKTsKZmxvYXQgcGhvbmdUZXJtID0gbWF4KDAuMCwgZG90KHJlZmxlY3QoLWwsbm9ybWFsKSwgdmlld0RpcikpOwpzcGVjdWxhckludGVuc2l0eSA9IG1heCgwLiwgcG93KHBob25nVGVybSAsIHVfc2hpbmluZXNzKSkgKiBhdHRlbnVhdGlvbjsKc3BlY3VsYXJMaWdodCArPSB1X2xpZ2h0MENvbG9yICogc3BlY3VsYXJJbnRlbnNpdHk7CmRpZmZ1c2VMaWdodCArPSB1X2xpZ2h0MENvbG9yICogbWF4KGRvdChub3JtYWwsbCksIDAuKSAqIGF0dGVudWF0aW9uOwp9CnNwZWN1bGFyLnh5eiAqPSBzcGVjdWxhckxpZ2h0Owpjb2xvci54eXogKz0gc3BlY3VsYXIueHl6OwpkaWZmdXNlLnh5eiAqPSBkaWZmdXNlTGlnaHQ7CmNvbG9yLnh5eiArPSBkaWZmdXNlLnh5ejsKY29sb3IueHl6ICs9IGVtaXNzaW9uLnh5ejsKY29sb3IgPSB2ZWM0KGNvbG9yLnJnYiAqIGRpZmZ1c2UuYSwgZGlmZnVzZS5hKTsKZ2xfRnJhZ0NvbG9yID0gY29sb3I7Cn0K"
+    },
+    "input0VS": {
+      "type": 35633,
+      "uri": "data:text/plain;base64,cHJlY2lzaW9uIGhpZ2hwIGZsb2F0OwphdHRyaWJ1dGUgdmVjMyBhX3Bvc2l0aW9uOwphdHRyaWJ1dGUgdmVjMyBhX25vcm1hbDsKdmFyeWluZyB2ZWMzIHZfbm9ybWFsOwp1bmlmb3JtIG1hdDMgdV9ub3JtYWxNYXRyaXg7CnVuaWZvcm0gbWF0NCB1X21vZGVsVmlld01hdHJpeDsKdW5pZm9ybSBtYXQ0IHVfcHJvamVjdGlvbk1hdHJpeDsKdmFyeWluZyB2ZWMzIHZfbGlnaHQwRGlyZWN0aW9uOwp2YXJ5aW5nIHZlYzMgdl9wb3NpdGlvbjsKdW5pZm9ybSBtYXQ0IHVfbGlnaHQwVHJhbnNmb3JtOwp2b2lkIG1haW4odm9pZCkgewp2ZWM0IHBvcyA9IHVfbW9kZWxWaWV3TWF0cml4ICogdmVjNChhX3Bvc2l0aW9uLDEuMCk7CnZfbm9ybWFsID0gdV9ub3JtYWxNYXRyaXggKiBhX25vcm1hbDsKdl9wb3NpdGlvbiA9IHBvcy54eXo7CnZfbGlnaHQwRGlyZWN0aW9uID0gdV9saWdodDBUcmFuc2Zvcm1bM10ueHl6IC0gcG9zLnh5ejsKZ2xfUG9zaXRpb24gPSB1X3Byb2plY3Rpb25NYXRyaXggKiBwb3M7Cn0K"
+    }
+  },
+  "skins": {},
+  "techniques": {
+    "technique0": {
+      "attributes": {
+        "a_normal": "normal",
+        "a_position": "position"
+      },
+      "parameters": {
+        "ambient": {
+          "type": 35666
+        },
+        "diffuse": {
+          "type": 35666
+        },
+        "emission": {
+          "type": 35666
+        },
+        "light0Color": {
+          "type": 35665,
+          "value": [
+            1,
+            1,
+            1
+          ]
+        },
+        "light0ConstantAttenuation": {
+          "type": 5126,
+          "value": 1
+        },
+        "light0LinearAttenuation": {
+          "type": 5126,
+          "value": 0
+        },
+        "light0QuadraticAttenuation": {
+          "type": 5126,
+          "value": 0.001111089950427413
+        },
+        "light0Transform": {
+          "node": "Lamp",
+          "semantic": "MODELVIEW",
+          "type": 35676
+        },
+        "modelViewMatrix": {
+          "semantic": "MODELVIEW",
+          "type": 35676
+        },
+        "normal": {
+          "semantic": "NORMAL",
+          "type": 35665
+        },
+        "normalMatrix": {
+          "semantic": "MODELVIEWINVERSETRANSPOSE",
+          "type": 35675
+        },
+        "position": {
+          "semantic": "POSITION",
+          "type": 35665
+        },
+        "projectionMatrix": {
+          "semantic": "PROJECTION",
+          "type": 35676
+        },
+        "shininess": {
+          "type": 5126
+        },
+        "specular": {
+          "type": 35666
+        }
+      },
+      "program": "program_0",
+      "states": {
+        "enable": [
+          2929,
+          2884
+        ],
+        "disable": []
+      },
+      "uniforms": {
+        "u_ambient": "ambient",
+        "u_diffuse": "diffuse",
+        "u_emission": "emission",
+        "u_light0Color": "light0Color",
+        "u_light0ConstantAttenuation": "light0ConstantAttenuation",
+        "u_light0LinearAttenuation": "light0LinearAttenuation",
+        "u_light0QuadraticAttenuation": "light0QuadraticAttenuation",
+        "u_light0Transform": "light0Transform",
+        "u_modelViewMatrix": "modelViewMatrix",
+        "u_normalMatrix": "normalMatrix",
+        "u_projectionMatrix": "projectionMatrix",
+        "u_shininess": "shininess",
+        "u_specular": "specular"
+      }
+    }
+  },
+  "extensionsUsed": [],
+  "images": {},
+  "extensions": {
+    "KHR_materials_common": {
+      "lights": {}
+    }
+  },
+  "samplers": {},
+  "textures": {}
+}
