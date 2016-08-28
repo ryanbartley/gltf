@@ -1094,8 +1094,12 @@ void File::addTechniqueInfo( const std::string &key, const Json::Value &techniqu
 				ret.states.functions.depthFunc = functions["depthFunc"].asUInt();
 			if( ! functions["frontFace"].isNull() )
 				ret.states.functions.frontFace = functions["frontFace"].asUInt();
-			if( ! functions["depthMask"].isNull() )
-				ret.states.functions.depthMask = functions["depthMask"].asBool();
+			if( ! functions["depthMask"].isNull() ) {
+				if( functions["depthMask"].isArray() )
+					ret.states.functions.depthMask = functions["depthMask"][0].asBool();
+				else if( functions["depthMask"].isBool() )
+					ret.states.functions.depthMask = functions["depthMask"].asBool();
+			}
 		}
 	}
 	
@@ -1212,67 +1216,58 @@ TransformClip File::collectTransformClipFor( const cinder::gltf::Node *node ) co
 			auto &timeData = timeIt->data;
 			{
 				auto transIt = std::find_if( begIt, endIt,
-											[]( const Animation::Parameter::Data &data ){
-												return data.paramName == "translation";
-											});
+				[]( const Animation::Parameter::Data &data ){
+					return data.paramName == "translation";
+				});
 				if( transIt != endIt ) {
 					vector<pair<double, vec3>> keyFrameData;
 					keyFrameData.reserve( numKeyFramesTotal );
 					auto transData = reinterpret_cast<vec3*>(transIt->data.data());
-					for( uint32_t i{0}; i < numKeyFramesTotal; ++i ) {
+					for( uint32_t i{0}; i < numKeyFramesTotal; ++i )
 						keyFrameData.emplace_back( timeData[i], transData[i] );
-					}
-					if( translationClip.empty() ) {
+					if( translationClip.empty() )
 						translationClip = move( Clip<ci::vec3>( move( keyFrameData ) ) );
-					}
 					else {
-						for( auto &keyFrame : keyFrameData ) {
+						for( auto &keyFrame : keyFrameData )
 							translationClip.addKeyFrame( keyFrame.first, keyFrame.second );
-						}
 					}
 				}
 			}
 			{
 				auto scaleIt = std::find_if( begIt, endIt,
-											[]( const Animation::Parameter::Data &data ){
-												return data.paramName == "scale";
-											});
+				[]( const Animation::Parameter::Data &data ){
+					return data.paramName == "scale";
+				});
 				if( scaleIt != endIt ) {
 					vector<pair<double, vec3>> keyFrameData;
 					keyFrameData.reserve( numKeyFramesTotal );
-					auto transData = reinterpret_cast<vec3*>(scaleIt->data.data());
-					for( uint32_t i{0}; i < numKeyFramesTotal; ++i ) {
-						keyFrameData.emplace_back( timeData[i], transData[i] );
-					}
-					if( scaleClip.empty() ) {
+					auto scaleData = reinterpret_cast<vec3*>(scaleIt->data.data());
+					for( uint32_t i{0}; i < numKeyFramesTotal; ++i )
+						keyFrameData.emplace_back( timeData[i], scaleData[i] );
+					if( scaleClip.empty() )
 						scaleClip = move( Clip<ci::vec3>( move( keyFrameData ) ) );
-					}
 					else {
-						for( auto &keyFrame : keyFrameData ) {
+						for( auto &keyFrame : keyFrameData )
 							scaleClip.addKeyFrame( keyFrame.first, keyFrame.second );
-						}
 					}
 				}
 			}
 			{
 				auto rotIt = std::find_if( begIt, endIt,
-											[]( const Animation::Parameter::Data &data ){
-												return data.paramName == "rotation";
-											});
+				[]( const Animation::Parameter::Data &data ){
+					return data.paramName == "rotation";
+				});
 				if( rotIt != endIt ) {
 					vector<pair<double, quat>> keyFrameData;
 					keyFrameData.reserve( numKeyFramesTotal );
-					auto transData = reinterpret_cast<quat*>(rotIt->data.data());
-					for( uint32_t i{0}; i < numKeyFramesTotal; ++i ) {
-						keyFrameData.emplace_back( timeData[i], transData[i] );
-					}
-					if( rotationClip.empty() ) {
+					auto rotData = reinterpret_cast<quat*>(rotIt->data.data());
+					for( uint32_t i{0}; i < numKeyFramesTotal; i++ )
+						keyFrameData.emplace_back( timeData[i], rotData[i] );
+					if( rotationClip.empty() )
 						rotationClip = move( Clip<ci::quat>( move( keyFrameData ) ) );
-					}
 					else {
-						for( auto &keyFrame : keyFrameData ) {
+						for( auto &keyFrame : keyFrameData )
 							rotationClip.addKeyFrame( keyFrame.first, keyFrame.second );
-						}
 					}
 				}
 			}
@@ -1281,7 +1276,7 @@ TransformClip File::collectTransformClipFor( const cinder::gltf::Node *node ) co
 	
 	return TransformClip( move( translationClip ), move( rotationClip ), move( scaleClip ) );
 }
-
+#include "cinder/Quaternion.h"
 
 } // namespace gltf
 } // namespace cinder

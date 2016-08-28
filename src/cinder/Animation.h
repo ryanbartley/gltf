@@ -103,6 +103,9 @@ public:
 	ci::vec3 getScale( double time ) const;
 	ci::vec3 getScaleLooped( double time ) const;
 	
+	//! Returns a pair representing the start and end time of the clip.
+	std::pair<double, double>	getTimeBounds() const { return { mStartTime, mStartTime + mDuration }; }
+	
 	bool empty() const { return mTrans.empty() && mScale.empty() && mRot.empty(); }
 	
 	//! Returns a const ref to the underlying translation clip.

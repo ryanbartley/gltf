@@ -22,6 +22,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		91B3314E6BA44B9FAE3A7CFC /* Skeleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AD16AE3E10934C44A0543713 /* Skeleton.cpp */; };
 		A653BD54FBD6400697C230EB /* MeshLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 16385EA548C742E092A64674 /* MeshLoader.cpp */; };
+		B312E7DD1D7284C000D9D77B /* SimpleScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B312E7DB1D7284C000D9D77B /* SimpleScene.cpp */; };
 		CF97606D60AA4BA59AFB0FC8 /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 17A6ADE5642A449C9011A6D0 /* File.cpp */; };
 		E74042EA96AE42C0B8ABD874 /* BasicAnimationApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1BF966A7A4E545B883AC3309 /* BasicAnimationApp.cpp */; };
 /* End PBXBuildFile section */
@@ -53,6 +54,8 @@
 		8D2CB1882A704A91A156038C /* dqconv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = dqconv.h; path = ../../../src/cinder/dqconv.h; sourceTree = "<group>"; };
 		A3DD926EB7A64FE9AA362C77 /* File.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = File.h; path = ../../../src/cinder/gltf/File.h; sourceTree = "<group>"; };
 		AD16AE3E10934C44A0543713 /* Skeleton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = Skeleton.cpp; path = ../../../src/cinder/Skeleton.cpp; sourceTree = "<group>"; };
+		B312E7DB1D7284C000D9D77B /* SimpleScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleScene.cpp; path = ../../../src/cinder/gltf/SimpleScene.cpp; sourceTree = "<group>"; };
+		B312E7DC1D7284C000D9D77B /* SimpleScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SimpleScene.h; path = ../../../src/cinder/gltf/SimpleScene.h; sourceTree = "<group>"; };
 		C5826BC016014EBBA8888888 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../resources/CinderApp.icns; sourceTree = "<group>"; };
 		CECEBB79CBCC4D85946CF9B9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F1F50F8FC9C242D69D458B1C /* Skeleton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Skeleton.h; path = ../../../src/cinder/Skeleton.h; sourceTree = "<group>"; };
@@ -180,6 +183,8 @@
 				04E79901AD3C4F5583585281 /* MeshLoader.h */,
 				09CFC00BD57E4A0E8418E114 /* Types.cpp */,
 				2977655CC5FB44489BA9407E /* Types.h */,
+				B312E7DB1D7284C000D9D77B /* SimpleScene.cpp */,
+				B312E7DC1D7284C000D9D77B /* SimpleScene.h */,
 			);
 			name = gltf;
 			sourceTree = "<group>";
@@ -275,6 +280,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B312E7DD1D7284C000D9D77B /* SimpleScene.cpp in Sources */,
 				E74042EA96AE42C0B8ABD874 /* BasicAnimationApp.cpp in Sources */,
 				91B3314E6BA44B9FAE3A7CFC /* Skeleton.cpp in Sources */,
 				CF97606D60AA4BA59AFB0FC8 /* File.cpp in Sources */,
