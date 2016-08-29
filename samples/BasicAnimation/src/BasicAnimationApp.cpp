@@ -29,7 +29,7 @@ class BasicAnimationApp : public App {
 
 void BasicAnimationApp::setup()
 {
-	mFile = gltf::File::create( loadAsset( "animationTest_01-1_c4d/animationTest_01-1_c4d.gltf" ) );
+	mFile = gltf::File::create( loadAsset( "VC/glTF/VC.gltf" ) );
 	mScene = make_shared<gltf::simple::Scene>( mFile, &mFile->getDefaultScene() );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), 0.01, 100000.0 );
@@ -40,8 +40,23 @@ void BasicAnimationApp::setup()
 
 void BasicAnimationApp::keyDown( KeyEvent event )
 {
+	static uint32_t currentCamera = 0;
+	bool chooseCamera = false;
 	if( event.getCode() == KeyEvent::KEY_SPACE )
 		mScene->toggleAnimation();
+	else if( event.getCode() == KeyEvent::KEY_LEFT ) {
+		int32_t camera = currentCamera;
+		currentCamera = glm::clamp( --camera, 0, (int32_t)mScene->numCameras() - 1 );
+		chooseCamera = true;
+	}
+	else if( event.getCode() == KeyEvent::KEY_RIGHT ) {
+		int32_t camera = currentCamera;
+		currentCamera = glm::clamp( ++camera, 0, (int32_t)mScene->numCameras() - 1 );
+		chooseCamera = true;
+	}
+	
+	if( chooseCamera )
+		mScene->selectCamera( currentCamera );
 }
 
 void BasicAnimationApp::update()

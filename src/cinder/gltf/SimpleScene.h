@@ -20,6 +20,8 @@ public:
 	void update();
 	void renderScene();
 	void toggleAnimation() { mAnimate = !mAnimate; }
+	void selectCamera( uint32_t selection ) { mCurrentCameraInfoId = glm::clamp( selection, (uint32_t)0, numCameras() - 1 ); }
+	uint32_t numCameras() const { return mCameras.size();}
 	
 	
 	class Node {
@@ -28,7 +30,7 @@ public:
 		static std::unique_ptr<Node> create( const gltf::Node *node,
 											 simple::Scene::Node *parent,
 											 simple::Scene *scene );
-		
+		Node* getParent() { return mParent; }
 		void update( float globalTime );
 		
 		const ci::vec3& getLocalTranslation() const { return mTranslation; }
