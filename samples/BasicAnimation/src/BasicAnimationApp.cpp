@@ -29,7 +29,7 @@ class BasicAnimationApp : public App {
 
 void BasicAnimationApp::setup()
 {
-	mFile = gltf::File::create( loadAsset( "kickingTires_c4d/kickingTires_c4d.gltf" ) );
+	mFile = gltf::File::create( loadAsset( "animationTest_01-1_c4d/animationTest_01-1_c4d.gltf" ) );
 	mScene = make_shared<gltf::simple::Scene>( mFile, &mFile->getDefaultScene() );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), 0.01, 100000.0 );

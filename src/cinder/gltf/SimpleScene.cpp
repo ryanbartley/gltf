@@ -14,10 +14,21 @@ using namespace std;
 namespace cinder { namespace gltf { namespace simple {
 	
 Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
-: mFile( file ), mAnimate( false )
+: mFile( file ), mAnimate( false ), mCurrentCameraInfoId( 0 )
 {
+	mMeshes.reserve( 100 );
 	for ( auto &node : scene->nodes ) {
-		mNodes.emplace_back( node, nullptr, this );
+		mNodes.emplace_back( Scene::Node::create( node, nullptr, this ) );
+	}
+	
+	// setup camera
+	if ( ! mCameras.empty() ) {
+		auto &camInfo = mCameras[mCurrentCameraInfoId];
+		mCamera.setPerspective( camInfo.yfov, camInfo.aspectRatio, camInfo.znear, camInfo.zfar );
+	}
+	else {
+		mCamera.setPerspective( 45.0, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
+		mCamera.lookAt( vec3( 0, 0, -5 ), vec3( 0 ) );
 	}
 	
 	double  begin = std::numeric_limits<double>::max(),
@@ -39,7 +50,7 @@ void Scene::update()
 	auto time = ci::app::getElapsedSeconds();
 	auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
 	for ( auto &node : mNodes )
-		node.update( cyclicTime );
+		node->update( cyclicTime );
 	
 	for( auto i = 0; i < mTransforms.size(); i++ ) {
 		auto &trans = mTransforms[i];
@@ -52,8 +63,35 @@ void Scene::update()
 
 void Scene::renderScene()
 {
-	for ( auto &node : mNodes )
-		node.render();
+	gl::ScopedMatrices scopeMat;
+//	gl::setMatrices( mCamera );
+	if( ! mCameras.empty() ) {
+//		auto node = mCameras[mCurrentCameraInfoId].node;
+//		mCamera.setEyePoint( node->getLocalTranslation() );
+//		mCamera.setOrientation( node->getLocalRotation() );
+//		gl::setViewMatrix( mCamera.getViewMatrix() );
+//		gl::setViewMatrix( mCamera.getViewMatrix() );
+	}
+	else {}
+//		gl::setViewMatrix( mCamera.getViewMatrix() );
+
+	for( auto &mesh : mMeshes ) {
+		auto ctx = gl::context();
+		auto &difTex = mesh.mDiffuseTex;
+		if( difTex ) {
+			gl::color( 1, 1, 1 );
+			ctx->pushTextureBinding( difTex->getTarget(), difTex->getId(), 0 );
+		}
+		else {
+			gl::color( mesh.mDiffuseColor );
+		}
+		
+		gl::setModelMatrix( getWorldTransform( mesh.node->getTransformIndex() ) );
+		mesh.mBatch->draw();
+		
+		if( difTex )
+			ctx->popTextureBinding( difTex->getTarget(), 0 );
+	}
 }
 	
 uint32_t Scene::setupTransform( uint32_t parentTransId, ci::mat4 localTransform )
@@ -139,14 +177,15 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 	mTransformIndex = mScene->setupTransform( parentIndex, modelMatrix );
 	
 	// cache the children
-	for ( auto &node : node->children ) {
-		mChildren.emplace_back( node, this, scene );
-	}
+	for ( auto &node : node->children )
+		mChildren.emplace_back( Node::create( node, this, scene ) );
 	
 	// check if there's meshes
-	if( ! node->meshes.empty() ) {
+	if( node->hasMeshes() ) {
 		geom::SourceMods meshCombo;
 		// there may be multiple meshes, so combine them for now
+		gl::Texture2dRef diffuseTex;
+		ci::ColorA diffuseCol;
 		for( auto mesh : node->meshes ) {
 			meshCombo &= gltf::MeshLoader( mesh );
 			// this is rough.
@@ -154,28 +193,40 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 			if( ! sources.empty() ) {
 				if( sources[0].texture ) {
 					auto image = sources[0].texture->image->getImage();
-					mDiffuseTex = gl::Texture2d::create( image, gl::Texture2d::Format().loadTopDown() );
+					diffuseTex = gl::Texture2d::create( image, gl::Texture2d::Format().loadTopDown() );
 				}
 				else
-					mDiffuseColor = sources[0].color;
+					diffuseCol = sources[0].color;
 			}
 		}
 		// quick rendering decision
 		gl::GlslProgRef glsl;
-		if( mDiffuseTex )
+		if( diffuseTex )
 			glsl = gl::getStockShader( gl::ShaderDef().lambert().texture() );
 		else
 			glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
 		// finally create the batch
-		mBatch = gl::Batch::create( meshCombo, glsl );
+		auto batch = gl::Batch::create( meshCombo, glsl );
+		mType = Type::MESH;
+		mTypeId = mScene->mMeshes.size();
+		mScene->mMeshes.emplace_back( move( batch ), move( diffuseTex ), diffuseCol, this );
 	}
+	else if( node->isCamera() ) {
+		mType = Type::CAMERA;
+		mTypeId = mScene->mCameras.size();
+		mScene->mCameras.emplace_back( node->camera->aspectRatio, node->camera->yfov, node->camera->znear, node->camera->zfar, this );
+	}
+}
+	
+Scene::UniqueNode Node::create( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
+{
+	return std::unique_ptr<simple::Scene::Node>( new Node( node, parent, scene ) );
 }
 	
 void Node::update( float globalTime )
 {
-	for( auto &child : mChildren ) {
-		child.update( globalTime );
-	}
+	for( auto &child : mChildren )
+		child->update( globalTime );
 	
 	if ( mAnimationIndex < 0 )
 		return;
@@ -194,30 +245,87 @@ void Node::update( float globalTime )
 	// update the scene's modelmatrix
 	mScene->updateTransform( mTransformIndex, modelMatrix );
 }
-
-void Node::render()
+	
+Scene::Mesh::Mesh( gl::BatchRef batch, gl::Texture2dRef difTex, ColorA difColor, Node *node )
+: mBatch( std::move( batch ) ), mDiffuseTex( std::move( difTex ) ),
+	mDiffuseColor( difColor ), node( node )
 {
-	for ( auto &node : mChildren ) {
-		node.render();
-	}
-	
-	if ( ! mBatch )
-		return;
-	
-	auto ctx = gl::context();
-	if( mDiffuseTex ) {
-		gl::color( 1, 1, 1 );
-		ctx->pushTextureBinding( mDiffuseTex->getTarget(), mDiffuseTex->getId(), 0 );
-	}
-	else {
-		gl::color( mDiffuseColor );
-	}
-	
-	gl::setModelMatrix( mScene->getWorldTransform( mTransformIndex ) );
-	mBatch->draw();
-	
-	if( mDiffuseTex )
-		ctx->popTextureBinding( mDiffuseTex->getTarget(), 0 );
 }
+
+Scene::Mesh::Mesh( const Mesh & mesh )
+: mBatch( mesh.mBatch ), mDiffuseTex( mesh.mDiffuseTex ),
+	mDiffuseColor( mesh.mDiffuseColor ), node( mesh.node )
+{
+}
+
+Scene::Mesh& Scene::Mesh::operator=( const Mesh & mesh )
+{
+	if( this != &mesh ) {
+		mBatch = mesh.mBatch;
+		mDiffuseTex = mesh.mDiffuseTex;
+		mDiffuseColor = mesh.mDiffuseColor;
+		node = mesh.node;
+	}
+	return *this;
+}
+
+Scene::Mesh::Mesh( Mesh &&mesh ) noexcept
+: mBatch( move( mesh.mBatch ) ), mDiffuseTex( move(mesh.mDiffuseTex ) ),
+mDiffuseColor( move(mesh.mDiffuseColor) ), node( mesh.node )
+{
+}
+
+Scene::Mesh& Scene::Mesh::operator=( Mesh &&mesh ) noexcept
+{
+	if( this != &mesh ) {
+		mBatch = move(mesh.mBatch);
+		mDiffuseTex = move(mesh.mDiffuseTex);
+		mDiffuseColor = mesh.mDiffuseColor;
+		node = mesh.node;
+	}
+	return *this;
+}
+	
+Scene::CameraInfo::CameraInfo( float aspectRatio, float yfov, float znear, float zfar, Node *node )
+: aspectRatio( aspectRatio ), yfov( yfov ), znear( znear ), zfar( zfar ), node( node )
+{
+}
+
+Scene::CameraInfo::CameraInfo( const CameraInfo & info )
+: aspectRatio( info.aspectRatio ), yfov( info.yfov ), znear( info.znear ),
+	zfar( info.zfar ), node( info.node )
+{
+}
+
+Scene::CameraInfo& Scene::CameraInfo::operator=( const CameraInfo &info )
+{
+	if( this != &info ) {
+		aspectRatio = info.aspectRatio;
+		yfov = info.yfov;
+		znear = info.znear;
+		zfar = info.zfar;
+		node = info.node;
+	}
+	return *this;
+}
+
+Scene::CameraInfo::CameraInfo( CameraInfo &&info ) noexcept
+: aspectRatio( info.aspectRatio ), yfov( info.yfov ), znear( info.znear ),
+	zfar( info.zfar ), node( info.node )
+{
+}
+
+Scene::CameraInfo& Scene::CameraInfo::operator=( CameraInfo &&info ) noexcept
+{
+	if( this != &info ) {
+		aspectRatio = info.aspectRatio;
+		yfov = info.yfov;
+		znear = info.znear;
+		zfar = info.zfar;
+		node = info.node;
+	}
+	return *this;
+}
+	
 	
 }}}
