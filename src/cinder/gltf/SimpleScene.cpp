@@ -8,6 +8,7 @@
 
 #include "SimpleScene.h"
 #include "cinder/gltf/MeshLoader.h"
+#include "cinder/app/App.h"
 
 using namespace std;
 
@@ -174,8 +175,8 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 	mTransformIndex = mScene->setupTransform( parentIndex, modelMatrix );
 	
 	// cache the children
-	for ( auto &node : node->children )
-		mChildren.emplace_back( Node::create( node, this, scene ) );
+	for ( auto &children : node->children )
+		mChildren.emplace_back( Node::create( children, this, scene ) );
 	
 	// check if there's meshes
 	if( node->hasMeshes() ) {

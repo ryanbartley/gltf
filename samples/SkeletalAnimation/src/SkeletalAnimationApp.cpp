@@ -61,9 +61,9 @@ void SkeletalAnimationApp::setup()
 								 .vertex( loadAsset( "skeletal.vert" ) )
 								 .fragment( loadAsset( "skeletal.frag" ) ) );
 	
-	gltf.emplace_back( fs::path( "monster" ) / "glTF" / "monster.gltf", "monster" );
+	gltf.emplace_back( fs::path( "monster" ) / "glTF" / "Monster.gltf", "monster" );
 	gltf.emplace_back( fs::path( "CesiumMan" ) / "glTF" / "Cesium_Man.gltf", "Cesium_Man" );
-	gltf.emplace_back( fs::path( "brainsteam" ) / "glTF" / "brainsteam.gltf", "Figure_2_node" );
+	gltf.emplace_back( fs::path( "brainsteam" ) / "glTF" / "Brainsteam.gltf", "Figure_2_node" );
 	
 	auto &initial = gltf[0];
 	loadFromFile( initial.first, initial.second );
