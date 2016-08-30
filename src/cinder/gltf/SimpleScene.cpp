@@ -22,14 +22,14 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	}
 	
 	// setup camera
-//	if ( ! mCameras.empty() ) {
-//		auto &camInfo = mCameras[mCurrentCameraInfoId];
-//		mCamera.setPerspective( camInfo.yfov, camInfo.aspectRatio, camInfo.znear, camInfo.zfar );
-//	}
-//	else {
+	if ( ! mCameras.empty() ) {
+		auto &camInfo = mCameras[mCurrentCameraInfoId];
+		mCamera.setPerspective( 60.0f, ci::app::getWindowAspectRatio(), camInfo.znear, camInfo.zfar );
+	}
+	else {
 		mCamera.setPerspective( 45.0, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
-//		mCamera.lookAt( vec3( 0, 10, -5 ), vec3( 0 ) );
-//	}
+		mCamera.lookAt( vec3( 0, 10, -5 ), vec3( 0 ) );
+	}
 	
 	double  begin = std::numeric_limits<double>::max(),
 			end = std::numeric_limits<double>::min();
@@ -66,17 +66,11 @@ void Scene::renderScene()
 	gl::ScopedMatrices scopeMat;
 	gl::setMatrices( mCamera );
 	if( ! mCameras.empty() ) {
-		auto worldTrans = getWorldTransform( mCameras[mCurrentCameraInfoId].node->getTransformIndex() );
-//		cout << cameraMat << endl;
+		auto &worldTrans = getWorldTransform( mCameras[mCurrentCameraInfoId].node->getTransformIndex() );
 		gl::setViewMatrix( ci::inverse( worldTrans ) );
-//		auto node = mCameras[mCurrentCameraInfoId].node;
-//		mCamera.setEyePoint( node->getLocalTranslation() );
-//		mCamera.setOrientation( node->getLocalRotation() );
-//		gl::setViewMatrix( mCamera.getViewMatrix() );
-//		gl::setViewMatrix( mCamera.getViewMatrix() );
 	}
-	else {}
-//		gl::setViewMatrix( mCamera.getViewMatrix() );
+	else
+		gl::setViewMatrix( mCamera.getViewMatrix() );
 
 	for( auto &mesh : mMeshes ) {
 		auto ctx = gl::context();
@@ -115,7 +109,7 @@ void Scene::updateTransform( uint32_t transId, ci::mat4 localTransform )
 	mTransforms[transId].localTransform = localTransform;
 }
 
-ci::mat4 Scene::getWorldTransform( uint32_t transId )
+ci::mat4& Scene::getWorldTransform( uint32_t transId )
 {
 	CI_ASSERT( transId < mTransforms.size() );
 	return mTransforms[transId].worldTransform;

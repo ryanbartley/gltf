@@ -21,7 +21,7 @@ public:
 	void renderScene();
 	void toggleAnimation() { mAnimate = !mAnimate; }
 	void selectCamera( uint32_t selection ) { mCurrentCameraInfoId = glm::clamp( selection, (uint32_t)0, numCameras() - 1 ); }
-	uint32_t numCameras() const { return mCameras.size();}
+	uint32_t numCameras() const { return mCameras.size(); }
 	
 	
 	class Node {
@@ -70,7 +70,7 @@ public:
 private:
 	uint32_t	setupTransform( uint32_t parentTransId, ci::mat4 localTransform );
 	void		updateTransform( uint32_t transId, ci::mat4 localTransform );
-	ci::mat4	getWorldTransform( uint32_t transId );
+	ci::mat4&	getWorldTransform( uint32_t transId );
 	
 	int32_t		addTransformClip( TransformClip clip );
 	void		getClipComponentsAtTime( int32_t animationId, float globalTime,
