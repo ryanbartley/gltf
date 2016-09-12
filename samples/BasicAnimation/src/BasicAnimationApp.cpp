@@ -29,11 +29,14 @@ class BasicAnimationApp : public App {
 
 void BasicAnimationApp::setup()
 {
-	mFile = gltf::File::create( loadAsset( "VC/glTF/VC.gltf" ) );
+	auto kicking = "test/test.gltf";
+	mFile = gltf::File::create( loadAsset( kicking ) );
 	mScene = make_shared<gltf::simple::Scene>( mFile, &mFile->getDefaultScene() );
 	
 	mCam.setPerspective( 60.0f, getWindowAspectRatio(), 0.01, 100000.0 );
-	mCam.lookAt( vec3( 0, 0, -40 ), vec3( 0 ) );
+	mCam.lookAt( vec3( 0, 0, -6.0 ), vec3( 0 ) );
+	cout << "View Matrix: " << mCam.getViewMatrix() << endl;
+	
 	mCamUi.setCamera( &mCam );
 	mCamUi.connect( getWindow() );
 }
@@ -68,6 +71,7 @@ void BasicAnimationApp::draw()
 {
 	gl::clear( Color( 0, 0, 0 ) );
 	gl::setMatrices( mCam );
+	
 	gl::ScopedDepth scopeDepth( true );
 	mScene->renderScene();
 }

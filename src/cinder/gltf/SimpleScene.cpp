@@ -15,7 +15,7 @@ using namespace std;
 namespace cinder { namespace gltf { namespace simple {
 	
 Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
-: mFile( file ), mAnimate( false ), mCurrentCameraInfoId( 0 )
+: mFile( file ), mAnimate( false ), mCurrentCameraInfoId( 0 ), mUsingDebugCamera( false )
 {
 	mMeshes.reserve( 100 );
 	for ( auto &node : scene->nodes ) {
@@ -25,10 +25,11 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	// setup camera
 	if ( ! mCameras.empty() ) {
 		auto &camInfo = mCameras[mCurrentCameraInfoId];
-		mCamera.setPerspective( 60.0f, ci::app::getWindowAspectRatio(), camInfo.znear, camInfo.zfar );
+		
+		mCamera.setPerspective( toDegrees( camInfo.yfov ), camInfo.aspectRatio, 0.01f, 100000.0f );
 	}
 	else {
-		mCamera.setPerspective( 45.0, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
+		mCamera.setPerspective( 45.0f, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
 		mCamera.lookAt( vec3( 0, 10, -5 ), vec3( 0 ) );
 	}
 	
@@ -41,6 +42,14 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	}
 	mStartTime = begin;
 	mDuration = end - begin;
+	
+	for( auto i = 0; i < mTransforms.size(); i++ ) {
+		auto &trans = mTransforms[i];
+		if( trans.parentId != std::numeric_limits<uint32_t>::max() )
+			trans.worldTransform = mTransforms[trans.parentId].worldTransform * trans.localTransform;
+		else
+			trans.worldTransform = trans.localTransform;
+	}
 }
 	
 void Scene::update()
@@ -65,13 +74,28 @@ void Scene::update()
 void Scene::renderScene()
 {
 	gl::ScopedMatrices scopeMat;
-	gl::setMatrices( mCamera );
 	if( ! mCameras.empty() ) {
-		auto &worldTrans = getWorldTransform( mCameras[mCurrentCameraInfoId].node->getTransformIndex() );
-		gl::setViewMatrix( ci::inverse( worldTrans ) );
+//		auto &localTrans = getLocalTransform( node->getTransformIndex() );
+//		cout << "model of cam: " << localTrans << endl;
+//		cout << "inverse of model: " << glm::inverse( localTrans ) << endl;
+//		cout << "world matrix: " << worldTrans << endl;
+//		cout << "inverse of world: " << glm::inverse( worldTrans ) << endl;
+		
+//		auto trans = node->getLocalTranslation();
+//		auto rot = node->getLocalRotation();
+//		mCamera.setEyePoint( trans );
+//		mCamera.setOrientation( rot );
+		
+//		gl::ScopedGlslProg scope( gl::getStockShader( gl::ShaderDef().color() ) );
+//		gl::color( 1, 1, 1 );
+//		gl::drawFrustum( mCamera );
+		
+		auto node = mCameras[mCurrentCameraInfoId].node;
+		auto &worldTrans = getWorldTransform( node->getTransformIndex() );
+		auto parentTrans = getParentWorldTransform( node->getTransformIndex() );
+		gl::setMatrices( mCamera );
+		gl::setViewMatrix( glm::inverse( worldTrans ) );
 	}
-	else
-		gl::setViewMatrix( mCamera.getViewMatrix() );
 
 	for( auto &mesh : mMeshes ) {
 		auto ctx = gl::context();
@@ -80,9 +104,8 @@ void Scene::renderScene()
 			gl::color( 1, 1, 1 );
 			ctx->pushTextureBinding( difTex->getTarget(), difTex->getId(), 0 );
 		}
-		else {
-			gl::color( mesh.mDiffuseColor );
-		}
+		else
+			gl::color( 1, 1, 1, 1 );
 		
 		gl::setModelMatrix( getWorldTransform( mesh.node->getTransformIndex() ) );
 		mesh.mBatch->draw();
@@ -103,6 +126,16 @@ uint32_t Scene::setupTransform( uint32_t parentTransId, ci::mat4 localTransform 
 	mTransforms.emplace_back( trans );
 	return ret;
 }
+	
+void Scene::selectCamera( uint32_t selection )
+{
+	mCurrentCameraInfoId = glm::clamp( selection, (uint32_t)0, numCameras() - 1 );
+}
+	
+void Scene::toggleDebugCamera()
+{
+	
+}
 
 void Scene::updateTransform( uint32_t transId, ci::mat4 localTransform )
 {
@@ -114,6 +147,22 @@ ci::mat4& Scene::getWorldTransform( uint32_t transId )
 {
 	CI_ASSERT( transId < mTransforms.size() );
 	return mTransforms[transId].worldTransform;
+}
+	
+ci::mat4& Scene::getLocalTransform( uint32_t transId )
+{
+	CI_ASSERT( transId < mTransforms.size() );
+	return mTransforms[transId].localTransform;
+}
+	
+ci::mat4 Scene::getParentWorldTransform( uint32_t transId )
+{
+	CI_ASSERT( transId < mTransforms.size() );
+	auto &trans = mTransforms[transId];
+	if( trans.parentId != std::numeric_limits<uint32_t>::max() )
+		return mTransforms[trans.parentId].worldTransform;
+	
+	return ci::mat4();
 }
 
 int32_t	Scene::addTransformClip( TransformClip clip )
@@ -145,6 +194,7 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 : mScene( scene ), mParent( parent ), mAnimationIndex( -1 ), mKey( node->key ), mName( node->name )
 {
 	// Cache current node local model matrix
+	cout << "name: " << node->key << std::endl;
 	ci::mat4 modelMatrix;
 	// if it's a transform matrix
 	if( ! node->transformMatrix.empty() ) {
@@ -154,18 +204,19 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 	// otherwise, it's broken up into components
 	else {
 		// grab the components
-		mTranslation = node->getTranslation();
-		mRotation = node->getRotation();
-		mScale = node->getScale();
+		mOriginalTranslation = node->getTranslation();
+		mOriginalRotation = node->getRotation();
+		mOriginalScale = node->getScale();
 		// create the placeholder matrix
-		modelMatrix *= glm::translate( mTranslation );
-		modelMatrix *= glm::toMat4( mRotation );
-		modelMatrix *= glm::scale( mScale );
+		modelMatrix *= glm::translate( mOriginalTranslation );
+		modelMatrix *= glm::toMat4( mOriginalRotation );
+		modelMatrix *= glm::scale( mOriginalScale );
 		// usually when it's broken up like this that means it's animated
 		auto transformClip = mScene->mFile->collectTransformClipFor( node );
 		if( ! transformClip.empty() )
 			mAnimationIndex = mScene->addTransformClip( move( transformClip ) );
 	}
+	cout << "matrix: " << modelMatrix << endl;
 	
 	// get the parent index if there's a parent
 	uint32_t parentIndex = std::numeric_limits<uint32_t>::max();
@@ -230,16 +281,17 @@ void Node::update( float globalTime )
 		return;
 	
 	// setup the defaults
-	ci::vec3 translation = mTranslation;
-	ci::quat rotation = mRotation;
-	ci::vec3 scale = mScale;
+	mCurrentTrans = mOriginalTranslation;
+	mCurrentRot = mOriginalRotation;
+	mCurrentScale = mOriginalScale;
 	// get the clips animation values, if a certain component isn't animated than it's defaults remain
-	mScene->getClipComponentsAtTime( mAnimationIndex, globalTime, &translation, &rotation, &scale );
+	mScene->getClipComponentsAtTime( mAnimationIndex, globalTime, &mCurrentTrans, &mCurrentRot, &mCurrentScale );
 	// create the modelMatrix
 	ci::mat4 modelMatrix;
-	modelMatrix *= glm::translate( translation );
-	modelMatrix *= glm::toMat4( rotation );
-	modelMatrix *= glm::scale( scale );
+	modelMatrix *= glm::translate( mCurrentTrans );
+	modelMatrix *= glm::toMat4( mCurrentRot );
+	modelMatrix *= glm::scale( mCurrentScale );
+	cout << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
 	// update the scene's modelmatrix
 	mScene->updateTransform( mTransformIndex, modelMatrix );
 }

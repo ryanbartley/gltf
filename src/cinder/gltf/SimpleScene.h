@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "cinder/CameraUi.h"
+
 #include "cinder/gltf/Types.h"
 #include "cinder/gltf/File.h"
 
@@ -20,7 +22,8 @@ public:
 	void update();
 	void renderScene();
 	void toggleAnimation() { mAnimate = !mAnimate; }
-	void selectCamera( uint32_t selection ) { mCurrentCameraInfoId = glm::clamp( selection, (uint32_t)0, numCameras() - 1 ); }
+	void toggleDebugCamera();
+	void selectCamera( uint32_t selection );
 	uint32_t numCameras() const { return mCameras.size(); }
 	
 	
@@ -33,9 +36,9 @@ public:
 		Node* getParent() { return mParent; }
 		void update( float globalTime );
 		
-		const ci::vec3& getLocalTranslation() const { return mTranslation; }
-		const ci::vec3& getLocalScale() const { return mScale; }
-		const ci::quat& getLocalRotation() const { return mRotation; }
+		const ci::vec3& getLocalTranslation() const { return mCurrentTrans; }
+		const ci::vec3& getLocalScale() const { return mCurrentScale; }
+		const ci::quat& getLocalRotation() const { return mCurrentRot; }
 		
 		uint32_t		getTransformIndex() { return mTransformIndex; }
 		int32_t			getAnimationId() { return mAnimationIndex; }
@@ -48,6 +51,9 @@ public:
 		
 		Type getNodeType() const { return mType; }
 		
+		ci::vec3	mCurrentTrans, mCurrentScale;
+		ci::quat	mCurrentRot;
+		
 	private:
 		Scene				*mScene;
 		Node				*mParent;
@@ -59,8 +65,9 @@ public:
 		uint32_t	mTransformIndex;
 		int32_t		mAnimationIndex;
 		
-		ci::vec3	mTranslation, mScale;
-		ci::quat	mRotation;
+		ci::vec3	mOriginalTranslation, mOriginalScale;
+		ci::quat	mOriginalRotation;
+		
 		
 		std::string mKey, mName;
 	};
@@ -71,6 +78,8 @@ private:
 	uint32_t	setupTransform( uint32_t parentTransId, ci::mat4 localTransform );
 	void		updateTransform( uint32_t transId, ci::mat4 localTransform );
 	ci::mat4&	getWorldTransform( uint32_t transId );
+	ci::mat4&	getLocalTransform( uint32_t transId );
+	ci::mat4	getParentWorldTransform( uint32_t transId );
 	
 	int32_t		addTransformClip( TransformClip clip );
 	void		getClipComponentsAtTime( int32_t animationId, float globalTime,
@@ -114,6 +123,9 @@ private:
 	};
 	
 	ci::CameraPersp				mCamera;
+	ci::CameraUi				mDebugCamera;
+	bool						mUsingDebugCamera;
+	
 	uint32_t					mCurrentCameraInfoId;
 	
 	std::vector<Mesh>			mMeshes;
