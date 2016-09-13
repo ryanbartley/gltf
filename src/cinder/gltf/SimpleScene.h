@@ -19,13 +19,10 @@ class Scene {
 public:
 	Scene( const gltf::FileRef &file, const gltf::Scene *scene );
 	
-	void update();
+	void update( double globalTime );
 	void renderScene();
+	void setAnimate( bool animate ) { mAnimate = animate; }
 	void toggleAnimation() { mAnimate = !mAnimate; }
-	void toggleDebugCamera();
-	void selectCamera( uint32_t selection );
-	uint32_t numCameras() const { return mCameras.size(); }
-	
 	
 	class Node {
 	public:
@@ -43,6 +40,10 @@ public:
 		uint32_t		getTransformIndex() { return mTransformIndex; }
 		int32_t			getAnimationId() { return mAnimationIndex; }
 		
+		const ci::mat4& getLocalTransform() const;
+		const ci::mat4& getWorldTransform() const;
+		ci::mat4		getParentWorldTransform() const;
+		
 		enum class Type {
 			NODE,
 			MESH,
@@ -51,12 +52,11 @@ public:
 		
 		Type getNodeType() const { return mType; }
 		
-		ci::vec3	mCurrentTrans, mCurrentScale;
-		ci::quat	mCurrentRot;
+		Node* findNodeByKey( const std::string &key );
 		
 	private:
-		Scene				*mScene;
-		Node				*mParent;
+		Scene	*mScene;
+		Node	*mParent;
 		std::vector<std::unique_ptr<Node>>	mChildren;
 		
 		Type		mType;
@@ -68,8 +68,56 @@ public:
 		ci::vec3	mOriginalTranslation, mOriginalScale;
 		ci::quat	mOriginalRotation;
 		
+		ci::vec3	mCurrentTrans, mCurrentScale;
+		ci::quat	mCurrentRot;
 		
 		std::string mKey, mName;
+	};
+	
+	Node* findNodeByKey( const std::string &key );
+	
+	struct Mesh {
+		Mesh( gl::BatchRef batch, gl::Texture2dRef difTex, ColorA difColor, Node *node );
+		Mesh( const Mesh &mesh );
+		Mesh& operator=( const Mesh &mesh );
+		Mesh( Mesh &&mesh ) noexcept;
+		Mesh& operator=( Mesh &&mesh ) noexcept;
+		
+		gl::BatchRef		mBatch;
+		gl::Texture2dRef	mDiffuseTex;
+		ColorA				mDiffuseColor;
+		Node				*node;
+	};
+	
+	std::vector<Mesh>&			getMeshes() { return mMeshes; }
+	const std::vector<Mesh>&	getMeshes() const { return mMeshes; }
+	
+	struct CameraInfo {
+		CameraInfo( float aspectRatio, float yfov, float znear,
+				    float zfar, Node *node );
+		CameraInfo( const CameraInfo &info );
+		CameraInfo& operator=( const CameraInfo &info );
+		CameraInfo( CameraInfo &&info ) noexcept;
+		CameraInfo& operator=( CameraInfo &&info ) noexcept;
+		
+		float	zfar,
+		znear,
+		yfov,
+		aspectRatio;
+		Node	*node;
+	};
+	
+	void		selectCamera( uint32_t selection );
+	uint32_t	numCameras() const { return mCameras.size(); }
+	std::vector<CameraInfo>&		getCameras() { return mCameras; }
+	const std::vector<CameraInfo>&	getCameras() const { return mCameras; }
+	const ci::CameraPersp&			getCamera() const { return mCamera; }
+	
+	struct Transform {
+		uint32_t	parentId;
+		bool		dirty;
+		ci::mat4	localTransform;
+		ci::mat4	worldTransform;
 	};
 	
 	using UniqueNode = std::unique_ptr<Node>;
@@ -87,41 +135,7 @@ private:
 	
 	gltf::FileRef			mFile;
 	std::vector<UniqueNode>	mNodes;
-	
-	struct Transform {
-		uint32_t	parentId;
-		bool		dirty;
-		ci::mat4	localTransform;
-		ci::mat4	worldTransform;
-	};
-	
-	struct Mesh {
-		Mesh( gl::BatchRef batch, gl::Texture2dRef difTex, ColorA difColor, Node *node );
-		Mesh( const Mesh &mesh );
-		Mesh& operator=( const Mesh &mesh );
-		Mesh( Mesh &&mesh ) noexcept;
-		Mesh& operator=( Mesh &&mesh ) noexcept;
-		
-		gl::BatchRef		mBatch;
-		gl::Texture2dRef	mDiffuseTex;
-		ColorA				mDiffuseColor;
-		Node				*node;
-	};
-	
-	struct CameraInfo {
-		CameraInfo( float aspectRatio, float yfov, float znear, float zfar, Node *node );
-		CameraInfo( const CameraInfo &info );
-		CameraInfo& operator=( const CameraInfo &info );
-		CameraInfo( CameraInfo &&info ) noexcept;
-		CameraInfo& operator=( CameraInfo &&info ) noexcept;
-		
-		float	zfar,
-				znear,
-				yfov,
-				aspectRatio;
-		Node	*node;
-	};
-	
+
 	ci::CameraPersp				mCamera;
 	ci::CameraUi				mDebugCamera;
 	bool						mUsingDebugCamera;

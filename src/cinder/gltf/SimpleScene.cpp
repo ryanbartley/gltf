@@ -52,13 +52,12 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	}
 }
 	
-void Scene::update()
+void Scene::update( double globalTime )
 {
 	if ( mTransformClips.empty() )
 		return;
 	
-	auto time = ci::app::getElapsedSeconds();
-	auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
+	auto cyclicTime = glm::mod( globalTime, mDuration ) + mStartTime;
 	for ( auto &node : mNodes )
 		node->update( cyclicTime );
 	
@@ -131,11 +130,6 @@ void Scene::selectCamera( uint32_t selection )
 {
 	mCurrentCameraInfoId = glm::clamp( selection, (uint32_t)0, numCameras() - 1 );
 }
-	
-void Scene::toggleDebugCamera()
-{
-	
-}
 
 void Scene::updateTransform( uint32_t transId, ci::mat4 localTransform )
 {
@@ -163,6 +157,17 @@ ci::mat4 Scene::getParentWorldTransform( uint32_t transId )
 		return mTransforms[trans.parentId].worldTransform;
 	
 	return ci::mat4();
+}
+	
+Scene::Node* Scene::findNodeByKey( const std::string &key )
+{
+	for ( auto &node : mNodes ) {
+		auto found = node->findNodeByKey( key );
+		if( found )
+			return found;
+	}
+	
+	return nullptr;
 }
 
 int32_t	Scene::addTransformClip( TransformClip clip )
@@ -265,6 +270,35 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 		mTypeId = mScene->mCameras.size();
 		mScene->mCameras.emplace_back( node->camera->aspectRatio, node->camera->yfov, node->camera->znear, node->camera->zfar, this );
 	}
+}
+	
+Node* Node::findNodeByKey( const std::string &key )
+{
+	if( key == mKey )
+		return this;
+	
+	for( auto &child : mChildren ) {
+		auto found = child->findNodeByKey( key );
+		if( found )
+			return found;
+	}
+	
+	return nullptr;
+}
+	
+const ci::mat4& Node::getLocalTransform() const
+{
+	return mScene->getLocalTransform( mTransformIndex );
+}
+	
+const ci::mat4& Node::getWorldTransform() const
+{
+	return mScene->getWorldTransform( mTransformIndex );
+}
+	
+ci::mat4 Node::getParentWorldTransform() const
+{
+	return mScene->getParentWorldTransform( mTransformIndex );
 }
 	
 Scene::UniqueNode Node::create( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
