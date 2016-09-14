@@ -191,6 +191,8 @@ void Scene::getClipComponentsAtTime( int32_t animationId, float globalTime,
 		*rotation = transClip.getRotation( globalTime );
 	if( ! transClip.getScaleClip().empty() )
 		*scale = transClip.getScale( globalTime );
+
+	//ci::app::console() << transClip << std::endl;
 }
 	
 using Node = Scene::Node;
@@ -322,10 +324,12 @@ void Node::update( float globalTime )
 	mScene->getClipComponentsAtTime( mAnimationIndex, globalTime, &mCurrentTrans, &mCurrentRot, &mCurrentScale );
 	// create the modelMatrix
 	ci::mat4 modelMatrix;
+	mCurrentTrans.x = mOriginalTranslation.x;
+	mCurrentTrans.y = mOriginalTranslation.y;
 	modelMatrix *= glm::translate( mCurrentTrans );
 	modelMatrix *= glm::toMat4( mCurrentRot );
 	modelMatrix *= glm::scale( mCurrentScale );
-	ci::app::console() << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
+	//ci::app::console() << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
 	// update the scene's modelmatrix
 	mScene->updateTransform( mTransformIndex, modelMatrix );
 }
