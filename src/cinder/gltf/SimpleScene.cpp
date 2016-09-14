@@ -26,7 +26,7 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	if ( ! mCameras.empty() ) {
 		auto &camInfo = mCameras[mCurrentCameraInfoId];
 		
-		mCamera.setPerspective( toDegrees( camInfo.yfov ), camInfo.aspectRatio, 0.01f, 100000.0f );
+		mCamera.setPerspective( toDegrees( camInfo.yfov ), 2.66667, 0.01f, 100000.0f );
 	}
 	else {
 		mCamera.setPerspective( 45.0f, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
@@ -325,7 +325,7 @@ void Node::update( float globalTime )
 	modelMatrix *= glm::translate( mCurrentTrans );
 	modelMatrix *= glm::toMat4( mCurrentRot );
 	modelMatrix *= glm::scale( mCurrentScale );
-	cout << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
+	ci::app::console() << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
 	// update the scene's modelmatrix
 	mScene->updateTransform( mTransformIndex, modelMatrix );
 }
