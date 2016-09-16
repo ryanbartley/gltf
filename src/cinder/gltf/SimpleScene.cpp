@@ -73,6 +73,7 @@ void Scene::update( double globalTime )
 void Scene::renderScene()
 {
 	gl::ScopedMatrices scopeMat;
+	gl::ScopedDepth scope(true);
 	if( ! mCameras.empty() ) {
 //		auto &localTrans = getLocalTransform( node->getTransformIndex() );
 //		cout << "model of cam: " << localTrans << endl;
@@ -324,8 +325,6 @@ void Node::update( float globalTime )
 	mScene->getClipComponentsAtTime( mAnimationIndex, globalTime, &mCurrentTrans, &mCurrentRot, &mCurrentScale );
 	// create the modelMatrix
 	ci::mat4 modelMatrix;
-	mCurrentTrans.x = mOriginalTranslation.x;
-	mCurrentTrans.y = mOriginalTranslation.y;
 	modelMatrix *= glm::translate( mCurrentTrans );
 	modelMatrix *= glm::toMat4( mCurrentRot );
 	modelMatrix *= glm::scale( mCurrentScale );
