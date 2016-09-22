@@ -26,7 +26,7 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	if ( ! mCameras.empty() ) {
 		auto &camInfo = mCameras[mCurrentCameraInfoId];
 		
-		mCamera.setPerspective( toDegrees( camInfo.yfov ), camInfo.aspectRatio, 0.01f, 100000.0f );
+		mCamera.setPerspective( 45.0f, ci::app::getWindowAspectRatio(), 0.01f, 100000.0f );
 	}
 	else {
 		mCamera.setPerspective( 45.0f, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
@@ -75,28 +75,13 @@ void Scene::renderScene()
 {
 	gl::ScopedMatrices scopeMat;
 	if( ! mCameras.empty() ) {
-//		auto &localTrans = getLocalTransform( node->getTransformIndex() );
-//		cout << "model of cam: " << localTrans << endl;
-//		cout << "inverse of model: " << glm::inverse( localTrans ) << endl;
-//		cout << "world matrix: " << worldTrans << endl;
-//		cout << "inverse of world: " << glm::inverse( worldTrans ) << endl;
-		
-//		auto trans = node->getLocalTranslation();
-//		auto rot = node->getLocalRotation();
-//		mCamera.setEyePoint( trans );
-//		mCamera.setOrientation( rot );
-		
-//		gl::ScopedGlslProg scope( gl::getStockShader( gl::ShaderDef().color() ) );
-//		gl::color( 1, 1, 1 );
-//		gl::drawFrustum( mCamera );
-		
 		auto node = mCameras[mCurrentCameraInfoId].node;
 		auto &worldTrans = getWorldTransform( node->getTransformIndex() );
-		auto parentTrans = getParentWorldTransform( node->getTransformIndex() );
 		gl::setMatrices( mCamera );
 		gl::setViewMatrix( glm::inverse( worldTrans ) );
 	}
 
+	gl::ScopedDepth scopeDepth( true );
 	for( auto &mesh : mMeshes ) {
 		auto ctx = gl::context();
 		auto &difTex = mesh.mDiffuseTex;
@@ -194,7 +179,7 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 : mScene( scene ), mParent( parent ), mAnimationIndex( -1 ), mKey( node->key ), mName( node->name )
 {
 	// Cache current node local model matrix
-	cout << "name: " << node->key << std::endl;
+	//cout << "name: " << node->key << std::endl;
 	ci::mat4 modelMatrix;
 	// if it's a transform matrix
 	if( ! node->transformMatrix.empty() ) {
@@ -216,7 +201,7 @@ Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
 		if( ! transformClip.empty() )
 			mAnimationIndex = mScene->addTransformClip( move( transformClip ) );
 	}
-	cout << "matrix: " << modelMatrix << endl;
+	//cout << "matrix: " << modelMatrix << endl;
 	
 	// get the parent index if there's a parent
 	uint32_t parentIndex = std::numeric_limits<uint32_t>::max();
@@ -291,7 +276,7 @@ void Node::update( float globalTime )
 	modelMatrix *= glm::translate( mCurrentTrans );
 	modelMatrix *= glm::toMat4( mCurrentRot );
 	modelMatrix *= glm::scale( mCurrentScale );
-	cout << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
+	//cout << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
 	// update the scene's modelmatrix
 	mScene->updateTransform( mTransformIndex, modelMatrix );
 }
