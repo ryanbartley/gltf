@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -26,6 +27,9 @@
     </Filter>
     <Filter Include="Blocks\GLTF\src\cinder\gltf">
       <UniqueIdentifier>{2535F82A-2673-4302-A549-3B8814481C03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\GLTF\src\cinder\simple">
+      <UniqueIdentifier>{78224527-cec8-4bb0-b448-28fb38378b70}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -68,10 +72,22 @@
     <ClInclude Include="..\..\..\src\cinder\gltf\Types.h">
       <Filter>Blocks\GLTF\src\cinder\gltf</Filter>
     </ClInclude>
+    <ClCompile Include="..\..\..\src\cinder\simple\Node.cpp">
+      <Filter>Blocks\GLTF\src\cinder\simple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\cinder\simple\Scene.cpp">
+      <Filter>Blocks\GLTF\src\cinder\simple</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\simple\Node.h">
+      <Filter>Blocks\GLTF\src\cinder\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\cinder\simple\Scene.h">
+      <Filter>Blocks\GLTF\src\cinder\simple</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

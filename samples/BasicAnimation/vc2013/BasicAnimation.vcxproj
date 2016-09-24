@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -101,6 +102,8 @@
   <ItemGroup />
   <ItemGroup />
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\cinder\simple\Node.cpp" />
+    <ClCompile Include="..\..\..\src\cinder\simple\Scene.cpp" />
     <ClCompile Include="..\src\BasicAnimationApp.cpp" />
     <ClCompile Include="..\..\..\src\cinder\Skeleton.cpp" />
     <ClCompile Include="..\..\..\src\cinder\gltf\File.cpp" />
@@ -108,6 +111,8 @@
     <ClCompile Include="..\..\..\src\cinder\gltf\Types.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\cinder\simple\Node.h" />
+    <ClInclude Include="..\..\..\src\cinder\simple\Scene.h" />
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\..\..\src\cinder\Animation.h" />
     <ClInclude Include="..\..\..\src\cinder\dqconv.h" />
