@@ -5,7 +5,7 @@
 
 #include "cinder/gltf/File.h"
 #include "cinder/gltf/MeshLoader.h"
-#include "cinder/gltf/SimpleScene.h"
+#include "cinder/simple/Scene.h"
 
 #include "cinder/Animation.h"
 
@@ -63,7 +63,7 @@ void BasicAnimationApp::keyDown( KeyEvent event )
 
 void BasicAnimationApp::update()
 {
-	mScene->update();
+	mScene->update( app::getElapsedSeconds() );
 }
 
 void BasicAnimationApp::draw()

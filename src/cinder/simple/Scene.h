@@ -12,19 +12,72 @@
 
 #include "cinder/gltf/Types.h"
 #include "cinder/gltf/File.h"
+#include "cinder/simple/Node.h"
+
+#if ! defined( _MSC_VER ) || _MSC_VER >= 1900
+#define NOEXCEPT noexcept
+#else 
+#define NOEXCEPT
+#endif
 
 namespace cinder { namespace gltf { namespace simple {
 
 class Scene {
 public:
 	Scene( const gltf::FileRef &file, const gltf::Scene *scene );
+
+	struct Mesh {
+		Mesh( gl::BatchRef batch, gl::Texture2dRef difTex, ColorA difColor, Node *node );
+		Mesh( const Mesh &mesh );
+		Mesh& operator=( const Mesh &mesh );
+		Mesh( Mesh &&mesh ) NOEXCEPT;
+		Mesh& operator=( Mesh &&mesh ) NOEXCEPT;
+
+		gl::BatchRef		mBatch;
+		gl::Texture2dRef	mDiffuseTex;
+		ColorA				mDiffuseColor;
+		Node				*node;
+	};
+
+
+	struct CameraInfo {
+		CameraInfo( float aspectRatio, float yfov, float znear,
+					float zfar, Node *node );
+		CameraInfo( const CameraInfo &info );
+		CameraInfo& operator=( const CameraInfo &info );
+		CameraInfo( CameraInfo &&info ) NOEXCEPT;
+		CameraInfo& operator=( CameraInfo &&info ) NOEXCEPT;
+
+		float	zfar,
+			znear,
+			yfov,
+			aspectRatio;
+		Node	*node;
+	};
+
+	struct Transform {
+		uint32_t	parentId;
+		bool		dirty;
+		ci::mat4	localTransform;
+		ci::mat4	worldTransform;
+	};
 	
-	void update();
+	void update( double globalTime );
 	void renderScene();
+
+	void setAnimate( bool animate ) { mAnimate = animate; }
 	void toggleAnimation() { mAnimate = !mAnimate; }
-	void toggleDebugCamera();
-	void selectCamera( uint32_t selection );
-	uint32_t numCameras() const { return mCameras.size(); }
+
+	simple::Node*				findNodeByKey( const std::string &key );
+
+	std::vector<Mesh>&			getMeshes() { return mMeshes; }
+	const std::vector<Mesh>&	getMeshes() const { return mMeshes; }
+
+	void							selectCamera( uint32_t selection );
+	uint32_t						numCameras() const { return mCameras.size(); }
+	std::vector<CameraInfo>&		getCameras() { return mCameras; }
+	const std::vector<CameraInfo>&	getCameras() const { return mCameras; }
+	const ci::CameraPersp&			getCamera() const { return mCamera; }
 	
 private:
 	uint32_t	setupTransform( uint32_t parentTransId, ci::mat4 localTransform );
@@ -39,41 +92,7 @@ private:
 	
 	gltf::FileRef			mFile;
 	std::vector<UniqueNode>	mNodes;
-	
-	struct Transform {
-		uint32_t	parentId;
-		bool		dirty;
-		ci::mat4	localTransform;
-		ci::mat4	worldTransform;
-	};
-	
-	struct Mesh {
-		Mesh( gl::BatchRef batch, gl::Texture2dRef difTex, ColorA difColor, Node *node );
-		Mesh( const Mesh &mesh );
-		Mesh& operator=( const Mesh &mesh );
-		Mesh( Mesh &&mesh ) noexcept;
-		Mesh& operator=( Mesh &&mesh ) noexcept;
-		
-		gl::BatchRef		mBatch;
-		gl::Texture2dRef	mDiffuseTex;
-		ColorA				mDiffuseColor;
-		Node				*node;
-	};
-	
-	struct CameraInfo {
-		CameraInfo( float aspectRatio, float yfov, float znear, float zfar, Node *node );
-		CameraInfo( const CameraInfo &info );
-		CameraInfo& operator=( const CameraInfo &info );
-		CameraInfo( CameraInfo &&info ) noexcept;
-		CameraInfo& operator=( CameraInfo &&info ) noexcept;
-		
-		float	zfar,
-				znear,
-				yfov,
-				aspectRatio;
-		Node	*node;
-	};
-	
+
 	ci::CameraPersp				mCamera;
 	ci::CameraUi				mDebugCamera;
 	bool						mUsingDebugCamera;

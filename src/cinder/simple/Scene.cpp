@@ -6,7 +6,7 @@
 //
 //
 
-#include "SimpleScene.h"
+#include "Scene.h"
 #include "cinder/gltf/MeshLoader.h"
 #include "cinder/app/App.h"
 
@@ -19,14 +19,14 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 {
 	mMeshes.reserve( 100 );
 	for ( auto &node : scene->nodes ) {
-		mNodes.emplace_back( Scene::Node::create( node, nullptr, this ) );
+		mNodes.emplace_back( Node::create( node, nullptr, this ) );
 	}
 	
 	// setup camera
 	if ( ! mCameras.empty() ) {
 		auto &camInfo = mCameras[mCurrentCameraInfoId];
 		
-		mCamera.setPerspective( 45.0f, ci::app::getWindowAspectRatio(), 0.01f, 100000.0f );
+		mCamera.setPerspective( toDegrees( camInfo.yfov ), camInfo.aspectRatio, 0.01f, 100000.0f );
 	}
 	else {
 		mCamera.setPerspective( 45.0f, ci::app::getWindowAspectRatio(), 0.01f, 10000.0f );
@@ -52,13 +52,12 @@ Scene::Scene( const gltf::FileRef &file, const gltf::Scene *scene )
 	}
 }
 	
-void Scene::update()
+void Scene::update( double globalTime )
 {
 	if ( mTransformClips.empty() )
 		return;
 	
-	auto time = ci::app::getElapsedSeconds();
-	auto cyclicTime = glm::mod( time, mDuration ) + mStartTime;
+	auto cyclicTime = glm::mod( globalTime, mDuration ) + mStartTime;
 	for ( auto &node : mNodes )
 		node->update( cyclicTime );
 	
@@ -74,6 +73,7 @@ void Scene::update()
 void Scene::renderScene()
 {
 	gl::ScopedMatrices scopeMat;
+	gl::ScopedDepth scope(true);
 	if( ! mCameras.empty() ) {
 		auto node = mCameras[mCurrentCameraInfoId].node;
 		auto &worldTrans = getWorldTransform( node->getTransformIndex() );
@@ -116,11 +116,6 @@ void Scene::selectCamera( uint32_t selection )
 {
 	mCurrentCameraInfoId = glm::clamp( selection, (uint32_t)0, numCameras() - 1 );
 }
-	
-void Scene::toggleDebugCamera()
-{
-	
-}
 
 void Scene::updateTransform( uint32_t transId, ci::mat4 localTransform )
 {
@@ -149,6 +144,17 @@ ci::mat4 Scene::getParentWorldTransform( uint32_t transId )
 	
 	return ci::mat4();
 }
+	
+simple::Node* Scene::findNodeByKey( const std::string &key )
+{
+	for ( auto &node : mNodes ) {
+		auto found = node->findNodeByKey( key );
+		if( found )
+			return found;
+	}
+	
+	return nullptr;
+}
 
 int32_t	Scene::addTransformClip( TransformClip clip )
 {
@@ -171,114 +177,8 @@ void Scene::getClipComponentsAtTime( int32_t animationId, float globalTime,
 		*rotation = transClip.getRotation( globalTime );
 	if( ! transClip.getScaleClip().empty() )
 		*scale = transClip.getScale( globalTime );
-}
-	
-using Node = Scene::Node;
 
-Node::Node( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
-: mScene( scene ), mParent( parent ), mAnimationIndex( -1 ), mKey( node->key ), mName( node->name )
-{
-	// Cache current node local model matrix
-	//cout << "name: " << node->key << std::endl;
-	ci::mat4 modelMatrix;
-	// if it's a transform matrix
-	if( ! node->transformMatrix.empty() ) {
-		// grab it
-		modelMatrix = node->getTransformMatrix();
-	}
-	// otherwise, it's broken up into components
-	else {
-		// grab the components
-		mOriginalTranslation = node->getTranslation();
-		mOriginalRotation = node->getRotation();
-		mOriginalScale = node->getScale();
-		// create the placeholder matrix
-		modelMatrix *= glm::translate( mOriginalTranslation );
-		modelMatrix *= glm::toMat4( mOriginalRotation );
-		modelMatrix *= glm::scale( mOriginalScale );
-		// usually when it's broken up like this that means it's animated
-		auto transformClip = mScene->mFile->collectTransformClipFor( node );
-		if( ! transformClip.empty() )
-			mAnimationIndex = mScene->addTransformClip( move( transformClip ) );
-	}
-	//cout << "matrix: " << modelMatrix << endl;
-	
-	// get the parent index if there's a parent
-	uint32_t parentIndex = std::numeric_limits<uint32_t>::max();
-	if ( mParent )
-		parentIndex = mParent->getTransformIndex();
-	// cache the transform
-	mTransformIndex = mScene->setupTransform( parentIndex, modelMatrix );
-	
-	// cache the children
-	for ( auto &children : node->children )
-		mChildren.emplace_back( Node::create( children, this, scene ) );
-	
-	// check if there's meshes
-	if( node->hasMeshes() ) {
-		geom::SourceMods meshCombo;
-		// there may be multiple meshes, so combine them for now
-		gl::Texture2dRef diffuseTex;
-		ci::ColorA diffuseCol;
-		for( auto mesh : node->meshes ) {
-			meshCombo &= gltf::MeshLoader( mesh );
-			// this is rough.
-			auto &sources = mesh->primitives[0].material->sources;
-			if( ! sources.empty() ) {
-				if( sources[0].texture ) {
-					auto image = sources[0].texture->image->getImage();
-					diffuseTex = gl::Texture2d::create( image, gl::Texture2d::Format().loadTopDown() );
-				}
-				else
-					diffuseCol = sources[0].color;
-			}
-		}
-		// quick rendering decision
-		gl::GlslProgRef glsl;
-		if( diffuseTex )
-			glsl = gl::getStockShader( gl::ShaderDef().lambert().texture() );
-		else
-			glsl = gl::getStockShader( gl::ShaderDef().color().lambert() );
-		// finally create the batch
-		auto batch = gl::Batch::create( meshCombo, glsl );
-		mType = Type::MESH;
-		mTypeId = mScene->mMeshes.size();
-		mScene->mMeshes.emplace_back( move( batch ), move( diffuseTex ), diffuseCol, this );
-	}
-	else if( node->isCamera() ) {
-		mType = Type::CAMERA;
-		mTypeId = mScene->mCameras.size();
-		mScene->mCameras.emplace_back( node->camera->aspectRatio, node->camera->yfov, node->camera->znear, node->camera->zfar, this );
-	}
-}
-	
-Scene::UniqueNode Node::create( const gltf::Node *node, simple::Scene::Node *parent, Scene *scene )
-{
-	return std::unique_ptr<simple::Scene::Node>( new Node( node, parent, scene ) );
-}
-	
-void Node::update( float globalTime )
-{
-	for( auto &child : mChildren )
-		child->update( globalTime );
-	
-	if ( mAnimationIndex < 0 )
-		return;
-	
-	// setup the defaults
-	mCurrentTrans = mOriginalTranslation;
-	mCurrentRot = mOriginalRotation;
-	mCurrentScale = mOriginalScale;
-	// get the clips animation values, if a certain component isn't animated than it's defaults remain
-	mScene->getClipComponentsAtTime( mAnimationIndex, globalTime, &mCurrentTrans, &mCurrentRot, &mCurrentScale );
-	// create the modelMatrix
-	ci::mat4 modelMatrix;
-	modelMatrix *= glm::translate( mCurrentTrans );
-	modelMatrix *= glm::toMat4( mCurrentRot );
-	modelMatrix *= glm::scale( mCurrentScale );
-	//cout << "trans: " << mCurrentTrans << " rot: " << mCurrentRot << " scale: " << mCurrentScale << std::endl;
-	// update the scene's modelmatrix
-	mScene->updateTransform( mTransformIndex, modelMatrix );
+	//ci::app::console() << transClip << std::endl;
 }
 	
 Scene::Mesh::Mesh( gl::BatchRef batch, gl::Texture2dRef difTex, ColorA difColor, Node *node )
@@ -304,13 +204,13 @@ Scene::Mesh& Scene::Mesh::operator=( const Mesh & mesh )
 	return *this;
 }
 
-Scene::Mesh::Mesh( Mesh &&mesh ) noexcept
+Scene::Mesh::Mesh( Mesh &&mesh ) NOEXCEPT
 : mBatch( move( mesh.mBatch ) ), mDiffuseTex( move(mesh.mDiffuseTex ) ),
 mDiffuseColor( move(mesh.mDiffuseColor) ), node( mesh.node )
 {
 }
 
-Scene::Mesh& Scene::Mesh::operator=( Mesh &&mesh ) noexcept
+Scene::Mesh& Scene::Mesh::operator=( Mesh &&mesh ) NOEXCEPT
 {
 	if( this != &mesh ) {
 		mBatch = move(mesh.mBatch);
@@ -344,13 +244,13 @@ Scene::CameraInfo& Scene::CameraInfo::operator=( const CameraInfo &info )
 	return *this;
 }
 
-Scene::CameraInfo::CameraInfo( CameraInfo &&info ) noexcept
+Scene::CameraInfo::CameraInfo( CameraInfo &&info ) NOEXCEPT
 : aspectRatio( info.aspectRatio ), yfov( info.yfov ), znear( info.znear ),
 	zfar( info.zfar ), node( info.node )
 {
 }
 
-Scene::CameraInfo& Scene::CameraInfo::operator=( CameraInfo &&info ) noexcept
+Scene::CameraInfo& Scene::CameraInfo::operator=( CameraInfo &&info ) NOEXCEPT
 {
 	if( this != &info ) {
 		aspectRatio = info.aspectRatio;

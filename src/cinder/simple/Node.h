@@ -2,6 +2,7 @@
 
 #include "cinder/Vector.h"
 #include "cinder/Quaternion.h"
+#include "cinder/Matrix.h"
 #include <vector>
 #include <memory>
 
@@ -15,6 +16,9 @@ class Scene;
 class Node {
 public:
 	Node( const gltf::Node *node, simple::Node *parent, Scene *scene );
+	static std::unique_ptr<Node> create( const gltf::Node *node,
+										 simple::Node *parent,
+										 simple::Scene *scene );
 	Node* getParent() { return mParent; }
 	void update( float globalTime );
 
@@ -25,6 +29,10 @@ public:
 	uint32_t		getTransformIndex() { return mTransformIndex; }
 	int32_t			getAnimationId() { return mAnimationIndex; }
 
+	const ci::mat4& getLocalTransform() const;
+	const ci::mat4& getWorldTransform() const;
+	ci::mat4		getParentWorldTransform() const;
+
 	enum class Type {
 		NODE,
 		MESH,
@@ -33,12 +41,11 @@ public:
 
 	Type getNodeType() const { return mType; }
 
-	ci::vec3	mCurrentTrans, mCurrentScale;
-	ci::quat	mCurrentRot;
+	Node* findNodeByKey( const std::string &key );
 
 private:
-	Scene				*mScene;
-	Node				*mParent;
+	Scene	*mScene;
+	Node	*mParent;
 	std::vector<std::unique_ptr<Node>>	mChildren;
 
 	Type		mType;
@@ -49,6 +56,9 @@ private:
 
 	ci::vec3	mOriginalTranslation, mOriginalScale;
 	ci::quat	mOriginalRotation;
+
+	ci::vec3	mCurrentTrans, mCurrentScale;
+	ci::quat	mCurrentRot;
 
 	std::string mKey, mName;
 };
